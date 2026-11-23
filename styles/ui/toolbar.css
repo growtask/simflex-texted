@@ -1,0 +1,77 @@
+/* ==========================================================================
+   Панель инструментов и кнопки
+   Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
+   ========================================================================== */
+
+/* ==========================================================================
+   Тулбар (editor-toolbar): p 8, gap 2, по центру, линия снизу 1 px
+   ========================================================================== */
+.ted-ui-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: safe center;
+  gap: 2px;
+  padding: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: var(--ui-bar);
+  border-bottom: 1px solid var(--ui-line);
+}
+
+/* панель шире экрана: тонкая полоса 4 px (Scrollbar, #919599 / 60 %) внутри нижнего отступа; высота панели та же, что без полосы —
+   содержимое под панелью не сдвигается, когда кнопки перестают помещаться или снова помещаются (смена блока под курсором) */
+.ted-ui-toolbar:not(.is-scroll) { overflow-x: hidden; }   /* кнопки помещаются: при плавном переезде кнопок (смена набора) полоса не мелькает */
+.ted-ui-toolbar.is-scroll { padding-bottom: 4px; }   /* 8 + 40 + 4 + полоса 4 + линия 1 = 57, как 8 + 40 + 8 + 1 */
+@container ted (width < 480px) {
+  .ted-ui-toolbar { padding-top: 7.5px; padding-bottom: 7.5px; }   /* editor-toolbar mobile: 7,5 + 40 + 7,5 + 1 = 56 */
+  .ted-ui-toolbar.is-scroll { padding-bottom: 3.5px; }   /* 7,5 + 40 + 3,5 + полоса 4 + линия 1 = 56 */
+}
+
+/* как editor-toolbar mobile: кнопки на y = 7,5; 7,5 + 40 + 3,5 + полоса 4 + линия 1 = 56 */
+.ted-ui-divider {
+  flex: none;
+  width: 1px;
+  height: 24px;
+  background: var(--ui-line);
+}
+
+/* B7: иконка кнопки режима — primary */
+/* «Сохранить» и «Редактировать» — Tabs/main filled: постоянный фон (#EDF3FA / #4D4D4D), значок как у всех кнопок;
+   hover — синий, press — фон #D2E2F7 (тёмная #262626 с рамкой) */
+.ted-ui-btn[data-act="mode"],
+.ted-ui-btn[data-act="save"] {
+  background: var(--ui-hover);
+  box-shadow: none;
+  color: var(--ui-icon);
+}
+
+.ted-ui-btn[data-act="mode"]:hover,
+.ted-ui-btn[data-act="save"]:hover { background: var(--ui-hover); color: var(--ui-accent); }
+
+.ted-ui-btn[data-act="mode"]:active,
+.ted-ui-btn[data-act="save"]:active {
+  background: var(--ui-press);
+  box-shadow: inset 0 0 0 2px var(--ui-press-ring);
+  color: var(--ui-color-text-icon-color1-dark);
+}
+
+/* Режим просмотра: слева сводка (слов · чтение · блоков), справа кнопка «Редактировать» */
+.ted-ui-toolbar[data-variant="view"] { justify-content: space-between; }
+
+.ted-ui-toolbar[data-variant="viewRo"] { justify-content: flex-start; }
+
+.ted-ui-stats {
+  min-width: 0;
+  padding: 0 12px;
+  overflow: hidden;
+  font: 400 13px/1.5 var(--ui-font);   /* text/t3 */
+  color: var(--ui-muted, var(--ui-color-text-icon-gray-medium));     /* text-icon/gray/medium */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* кнопка недоступна (например, «Цветной фон» у шагов и чек-листа) */
+.ted-ui-btn:disabled { opacity: 0.4; cursor: default; pointer-events: none; }

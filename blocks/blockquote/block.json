@@ -1,0 +1,40 @@
+{
+  "type": "blockquote",
+  "title": "Цитата",
+  "jsonExample": "{ \"type\": \"quote\", \"text\": \"Цитата\", \"author\": { \"name\": \"Имя\", \"role\": \"Должность\" } }",
+  "aliases": [
+    "quote"
+  ],
+  "jsonType": "quote",
+  "figma": "block-quote (Text/quote; type=author — с автором)",
+  "text": true,
+  "menu": {
+    "group": "Текст",
+    "order": 40,
+    "icon": "quote",
+    "words": "цитата quote",
+    "sample": "<blockquote><p>Лучший способ предсказать будущее — создавать его, шаг за шагом.</p></blockquote>"
+  },
+  "style": {
+    "label": "Цитата",
+    "icon": "quote",
+    "keys": "Mod+Shift+9",
+    "order": 100
+  },
+  "hotkey": {
+    "code": "Mod+Shift+Digit9",
+    "keys": "Mod+Shift+9",
+    "label": "Цитата",
+    "convert": true,
+    "after": "block:ul"
+  },
+  "placeholder": "Цитата",
+  "selector": "blockquote:not(.ted-callout)",
+  "html": {
+    "blockquote": [],
+    "p": [
+      "data-initials",
+      "data-author-id"
+    ]
+  }
+}

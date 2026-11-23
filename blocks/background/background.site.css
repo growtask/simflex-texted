@@ -1,0 +1,47 @@
+/* Блок «Цветной фон» — вид на сайте и в редакторе (макет block-background): подложка r24, поля 20, палитры сайта
+   (светлая и тёмная тема). Классы ted-bg-gray / ted-bg-color1 / ted-bg-color2 — на абзаце, заголовке, списке, цитате;
+   у выноски и карточек цифр — в их блоках. */
+
+/* ---------- Цветной фон (подложка): палитры сайта, светлая и тёмная тема ---------- */
+
+.ted-content {
+  --ted-bg-gray: var(--color-main-gray-lighter, #edf3fa);
+  --ted-bg-color1: var(--color-main-color1-lighter, #d2e2f7);
+  --ted-bg-color2: var(--color-main-color2-lighter, #e5e5ff);
+}
+
+/* Тёмная тема: версии «dark» тех же палитр (на сайте задаются теми же переменными) */
+[data-ted-theme="dark"] .ted-content,
+.ted-content[data-ted-theme="dark"] {
+  --ted-bg-gray: var(--color-main-gray-dark, #4d4d4d);
+  --ted-bg-color1: var(--color-main-color1-darker, #104fa6);
+  --ted-bg-color2: var(--color-main-color2-darker, #38388c);
+}
+
+.ted-content .ted-bg-gray { background: var(--ted-bg-gray); }
+.ted-content .ted-bg-color1 { background: var(--ted-bg-color1); }
+.ted-content .ted-bg-color2 { background: var(--ted-bg-color2); }
+
+/* Блок с подложкой (макет block-background): r24, внутренние отступы 20, расстояние до соседей — снаружи, чтобы подложка его не захватывала */
+:is(.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-columns__col) > [class*="ted-bg-"] {
+  padding: calc(20 * var(--ted-u));
+  margin-bottom: calc(var(--ted-gap) * var(--ted-u));
+  border-radius: var(--ted-r-l);
+}
+:is(.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-columns__col) > :is(ul, ol)[class*="ted-bg-"] { padding-left: calc((var(--ted-list-pad) + 20) * var(--ted-u)); }
+:is(.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-columns__col) > :is(ul, ol)[class*="ted-bg-"]:is(.ted-align-center, .ted-align-right) { padding-left: calc(20 * var(--ted-u)); }
+
+/* Цитата с цветным фоном: линия вписана внутрь плашки (отступ 20 от краёв плашки, как у текста), а не прижата к её краю */
+:is(.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-columns__col) > blockquote[class*="ted-bg-"]:not(.ted-callout) { padding-left: calc((20 + var(--ted-quote-line) + var(--ted-quote-pad)) * var(--ted-u)); }
+:is(.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-columns__col) > blockquote[class*="ted-bg-"]:not(.ted-callout)::before {
+  top: calc(20 * var(--ted-u));
+  bottom: calc(20 * var(--ted-u));
+  left: calc(20 * var(--ted-u));
+}
+
+/* Подложка под фрагментом текста — как у кода */
+.ted-content mark[class*="ted-bg-"] {
+  padding: 0 calc(4 * var(--ted-u));
+  border-radius: calc(4 * var(--ted-u));
+  color: inherit;
+}

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TextEd — демо</title>
+<link rel="stylesheet" href="demo.css">
+</head>
+<body>
+<div class="demo-app">
+  <nav class="demo-side" data-demo-nav aria-label="Режимы демо"></nav>
+  <main class="demo-main">
+    <div class="demo-head"><h1>TextEd 0.1 — этап 1</h1></div>
+    <p class="demo-hint" style="margin:0 0 20px">Блочный редактор SimflexCMS: каркас, текстовые блоки, форматирование, горячие клавиши, режимы «Редактор / Просмотр». Выберите, как посмотреть:</p>
+    <div class="demo-cards">
+      <a class="demo-card" href="admin.html">
+        <div class="demo-card__img" aria-hidden="true" data-icon="edit"></div>
+        <div class="demo-card__info">
+          <div class="demo-card__text">
+            <div class="demo-card__head"><span>Пример в админке</span></div>
+            <p class="demo-card__desc">Textarea превращается в редактор вместо TinyMCE. Кнопка «Сохранить», предпросмотр экранов отключён.</p>
+          </div>
+          <span class="demo-btn">Открыть</span>
+        </div>
+      </a>
+      <a class="demo-card" href="docs.html">
+        <div class="demo-card__img" aria-hidden="true" data-icon="text"></div>
+        <div class="demo-card__info">
+          <div class="demo-card__text">
+            <div class="demo-card__head"><span>Пример документации</span></div>
+            <p class="demo-card__desc">Просмотр и правка на одной странице, как в Notion. Три страницы, каждая сохраняется отдельно.</p>
+          </div>
+          <span class="demo-btn">Открыть</span>
+        </div>
+      </a>
+      <a class="demo-card" href="site.html">
+        <div class="demo-card__img" aria-hidden="true" data-icon="eye"></div>
+        <div class="demo-card__info">
+          <div class="demo-card__text">
+            <div class="demo-card__head"><span>Как выглядит на сайте</span></div>
+            <p class="demo-card__desc">Как сохранённый текст выглядит на сайте: reset-стили и vw-миксины.</p>
+          </div>
+          <span class="demo-btn">Открыть</span>
+        </div>
+      </a>
+    </div>
+  </main>
+</div>
+<script src="demo-icons.js"></script><script src="demo-logo.js"></script>
+<script src="demo.js"></script>
+<script>document.querySelectorAll('[data-icon]').forEach(function (e) { e.innerHTML = DEMO_ICONS[e.dataset.icon]; });</script>
+</body>
+</html>

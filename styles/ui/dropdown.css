@@ -1,0 +1,151 @@
+/* ==========================================================================
+   Dropdown/main — выпадающие панели и пункты меню
+   Общий элемент интерфейса (этап 4): уголок 8×4, контейнер r 24, p 12, тень m.
+   ========================================================================== */
+
+.ted-ui-pop {
+  position: absolute;
+  max-width: min(calc(100% - 16px), calc(100vw - 16px));
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  filter: drop-shadow(0 0 12.5px rgba(13, 13, 13, 0.07));
+  font-family: var(--ui-font);
+  color: var(--ui-text);
+  transform-origin: 28px 0;
+  animation: ted-ui-pop-in 0.16s var(--ui-ease);
+}
+
+.ted-ui-pop.is-closing { animation: ted-ui-pop-out 0.1s ease forwards; }
+
+/* Уголок продолжает обводку окна (--ui-pop-ring): внешний слой — цвет обводки, внутренний — цвет окна,
+   сдвинут на толщину обводки (2 px) и заходит на верх окна, где у окна та же обводка */
+.ted-ui-pop__corner {
+  position: relative;
+  z-index: 1;
+  width: 8px;
+  height: 6px;
+  margin-bottom: -2px;
+  margin-left: var(--corner-x, 24px);
+  background: var(--ui-pop-ring);
+  clip-path: path("M0 6V4L3.2 0.444C3.733 -0.148 4.267 -0.148 4.8 0.444L8 4V6H0Z");
+}
+
+/* светлая тема (обводки нет): уголок — целиком цветом окна, 8 × 4 над окном (иначе от него оставалось 2 px, проверка 22.11) */
+.ted-ui-pop__corner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--ui-pop);
+  clip-path: path("M0 6V4L3.2 0.444C3.733 -0.148 4.267 -0.148 4.8 0.444L8 4V6H0Z");
+}
+
+/* тёмная тема: внутренний слой сдвинут на толщину обводки — уголок продолжает обводку окна */
+.ted-ui[data-ted-theme="dark"] .ted-ui-pop__corner::after {
+  clip-path: path("M0 6L3.2 2.444C3.733 1.852 4.267 1.852 4.8 2.444L8 6H0Z");
+}
+
+.ted-ui-pop__box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  overflow: hidden;
+  border-radius: var(--ui-radius-xlarge);
+  background: var(--ui-pop);
+  box-shadow: inset 0 0 0 2px var(--ui-pop-ring);
+}
+
+/* Ширины по макету */
+.ted-ui-pop--text { width: 300px; }
+
+/* editor-dropdown style=text */
+.ted-ui-pop--align { width: 240px; }
+
+/* style=align */
+.ted-ui-pop--block { width: 260px; }
+
+/* editor-block-menu */
+.ted-ui-pop--menu { width: 340px; }
+
+/* editor-menu: в тёмной теме по макету 14 (высота 504 против 500) */
+.ted-ui[data-ted-theme="dark"] .ted-ui-pop--menu .ted-ui-pop__box {
+  padding: 14px;
+}
+
+.ted-ui-pop--link { width: 320px; }
+
+/* «Как показать ссылку?»: окно по ширине кнопок (подписи не обрезаются), в узкой колонке кнопки встают друг под другом */
+.ted-ui-pop--link.ted-ui-pop--choice { width: max-content; max-width: calc(100cqw - 32px); }
+.ted-ui-pop--choice .ted-ui-form__footer { flex-wrap: wrap; }
+.ted-ui-pop--choice .ted-ui-form__footer .ted-ui-action { flex: 1 0 auto; white-space: nowrap; }
+
+/* editor-popover kind=link */
+.ted-ui-pop--help { width: 360px; }
+
+@container ted (width < 480px) {
+  .ted-ui-pop--menu { width: min(382px, calc(100cqw - 32px)); }    /* editor-menu device=mobile */
+}
+
+/* Пункт меню: p 8, gap 4, r 12; иконка 24; текст ui/s 14 Semi Bold */
+.ted-ui-item {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  padding: 8px;
+  border: 0;
+  border-radius: var(--ui-radius-medium);
+  background: transparent;
+  color: var(--ui-text);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.ted-ui-item > svg { color: var(--ui-icon); }
+
+.ted-ui-item__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 4px;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 24px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ted-ui-item:hover,
+.ted-ui-item.is-focus { background: var(--ui-hover); }
+/* меню «/»: подсветка одна — выбранный пункт (мышь его и переставляет), наведение второй подсветки не даёт (проверка 22.11) */
+.ted-ui-menu__list .ted-ui-item:hover:not(.is-active) { background: transparent; }
+
+.ted-ui-item:active,
+.ted-ui-item.is-active {
+  background: var(--ui-press);
+  box-shadow: inset 0 0 0 2px var(--ui-press-ring);
+}
+
+.ted-ui-item.is-soon {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ted-ui-item.is-soon:hover { background: transparent; }
+
+.ted-ui-item--danger > svg { color: var(--ui-danger); }
+
+.ted-ui-pop__line {
+  flex: none;
+  width: 100%;
+  height: 1px;
+  background: var(--ui-line);
+}
+
+/* подменю открылось слева (не хватило места справа) — стрелка пункта смотрит влево (22.11) */
+.ted-ui-item.is-sub-left > svg:last-child { transform: scaleX(-1); }

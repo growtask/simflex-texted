@@ -1,0 +1,211 @@
+/* ==========================================================================
+   Ручки блоков, «Добавить блок», перетаскивание
+   Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
+   ========================================================================== */
+
+
+/* ==========================================================================
+   Ручка при наведении (editor-row handle): «+» и ⠿, 24 × 24, gap 4, pt 4,
+   в 8 px слева от колонки, по центру строки
+   ========================================================================== */
+.ted-ui-gutter {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  gap: 0;   /* «+» и ⠿ вплотную (заказчик 19.11; в макете 4) */
+  padding-top: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease, top 0.1s var(--ui-ease);
+}
+
+.ted-ui-gutter.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ted-ui-gutter .ted-ui-small { background: transparent; }
+
+.ted-ui-gutter .ted-ui-small:hover { background: var(--ui-hover); }
+
+.ted-ui-gutter [data-act="grip"] { cursor: grab; }
+
+/* Кнопки блока в режиме правки (block-controls): left −42 (в макете −34; снаружи рамки блока + 8 — решение 19.11), top 0 */
+.ted-ui-controls {
+  position: absolute;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--ui-controls-border);
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-small-bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.ted-ui-controls.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ted-ui-controls .ted-ui-small { background: transparent; border-radius: 6px; }
+
+.ted-ui-controls .ted-ui-small:hover { background: var(--ui-hover); }
+
+.ted-ui-controls [data-act="grip"] { cursor: grab; }
+
+/* узкий редактор (< 480): кнопки блока строкой над блоком справа — поверх, без отступа (блок не сдвигается),
+   выше шапки редактора; пока автор работает с шапкой, кнопки скрыты (MODULAR_PLAN.md, этап 0) */
+@container ted (width < 480px) {
+  .ted-ui-controls { flex-direction: row; width: max-content; z-index: 21; }
+  .ted-ui:has(.ted-ui-toolbar:hover, .ted-ui-toolbar [aria-expanded="true"]) .ted-ui-controls { opacity: 0; pointer-events: none; }
+  .ted-ui-gutter { display: none; }
+}
+
+.ted-ui.is-dragging,
+.ted-ui.is-dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+.ted-ui.is-dragging [data-act="grip"] { color: var(--ui-drag-ring); }
+
+.ted-ui-drop {
+  position: absolute;
+  z-index: 6;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ui-accent);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Добавить блок (editor-add-block): py 16, gap 8, линии 1 px, «+» 24 (иконка 16)
+   ========================================================================== */
+.ted-ui-addblock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-height: 56px;
+  padding: 16px 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: max-height 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), padding 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.18s ease;
+}
+
+.ted-ui-addblock.is-hidden { max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; pointer-events: none; }
+
+.ted-ui-addblock::before,
+.ted-ui-addblock::after {
+  content: "";
+  flex: 1 1 0;
+  height: 1px;
+  background: var(--ui-line);
+  transition: background-color 0.12s ease;
+}
+
+.ted-ui-addblock__btn {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-small-bg);
+  color: var(--ui-icon);
+  transition: background-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.ted-ui-addblock:hover::before,
+.ted-ui-addblock:hover::after,
+.ted-ui-addblock:active::before,
+.ted-ui-addblock:active::after { background: var(--ui-accent); }
+
+.ted-ui-addblock:hover .ted-ui-addblock__btn { background: var(--ui-hover); }
+
+.ted-ui-addblock:active .ted-ui-addblock__btn { background: var(--ui-press); box-shadow: inset 0 0 0 2px var(--ui-press-ring); }
+
+/* ---- раунд 3 ---- */
+/* B1: в кнопках строки (24 × 24) иконка 16 × 16 — больше воздуха */
+.ted-ui-gutter .ted-ui-small svg,
+.ted-ui-controls .ted-ui-small svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Рамка выделения и перетаскивания — одна для всех блоков (MODULAR_PLAN.md, этап 0): прямоугольник блока + 8 со всех сторон,
+   скругление 12; выбранный блок (открыто меню) — подложка --ui-selected, перетаскиваемый — подложка и обводка 2 main/color1/light.
+   Прямоугольник блока = его содержимое (отступы между блоками снаружи), поэтому подгонки по видам блоков нет.
+   У кода (::after занят колонкой номеров) и блоков с outline в block.json (линия: data-tedui-frame="outline", ставит слой
+   взаимодействия) та же рамка рисуется тенью и обводкой. */
+:is(.ted-ui-editable, .ted-ui-editable .ted-ui-host) > :not(pre, [data-tedui-frame="outline"]):is([data-tedui-selected], [data-tedui-drag])::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -8px;
+  border-radius: var(--ui-radius-medium);
+  pointer-events: none;
+}
+
+:is(.ted-ui-editable, .ted-ui-editable .ted-ui-host) > :not(pre, [data-tedui-frame="outline"])[data-tedui-selected]::after { background: var(--ui-selected); }
+
+/* обводка рамки мягче (заказчик 19.11): цвет main/color1/light с прозрачностью 50 % и свечение — эффект дизайн-системы shadows/primary/xs */
+.ted-ui-editable > * {
+  --ui-ring-line: color-mix(in srgb, var(--ui-drag-ring) 50%, transparent);
+}
+
+:is(.ted-ui-editable, .ted-ui-editable .ted-ui-host) > :not(pre, [data-tedui-frame="outline"])[data-tedui-drag]::after {
+  background: var(--ui-drag-bg);
+  box-shadow: inset 0 0 0 2px var(--ui-ring-line), var(--ui-shadow-primary-xs);
+}
+
+/* у кода рамка — тень, она повторяет скругление блока: 4 + 8 = 12, как у всех (блок кода прозрачный, своё скругление не видно) */
+.ted-ui-editable > pre { border-radius: var(--ui-radius-xsmall); }
+
+:is(.ted-ui-editable, .ted-ui-editable .ted-ui-host) > :is(pre, [data-tedui-frame="outline"])[data-tedui-selected] { box-shadow: 0 0 0 8px var(--ui-selected); }
+
+:is(.ted-ui-editable, .ted-ui-editable .ted-ui-host) > :is(pre, [data-tedui-frame="outline"])[data-tedui-drag] {
+  box-shadow: 0 0 0 6px var(--ui-drag-bg), 0 0 0 8px var(--ui-ring-line), 0 0 4px 9px rgba(20, 75, 153, 0.14);   /* shadows/primary/xs снаружи обводки (8 + 1) */
+}
+
+/* ==========================================================================
+   Перетаскивание: блок идёт за курсором, соседние плавно сдвигаются
+   ========================================================================== */
+.ted-ui.is-dragging :is(.ted-ui-editable, .ted-ui-editable .ted-ui-host) > * {
+  transition: transform 0.22s var(--ui-ease);
+}
+
+.ted-ui.is-dragging :is(.ted-ui-editable, .ted-ui-editable .ted-ui-host) > [data-tedui-drag] {
+  z-index: 3;
+  transition: none;
+}
+
+/* блок из тела контейнера едет поверх соседей документа и не обрезается телом контейнера (решение 22.11) */
+.ted-ui.is-dragging .ted-ui-editable > :has([data-tedui-drag]) { z-index: 3; }
+.ted-ui.is-dragging .ted-ui-editable :is(.ted-ui-host, .ted-ui-host *):has([data-tedui-drag]) { overflow: visible; }
+
+/* при отпускании сдвиги снимаются без анимации — блок встаёт на место без скачка */
+.ted-ui.is-dropping :is(.ted-ui-editable, .ted-ui-editable .ted-ui-host) > * { transition: none !important; }
+
+
+.ted-ui-controls .ted-ui-small[hidden] { display: none; }
+
+/* Перетаскивание на сенсорных экранах: без touch-action браузер забирает жест под прокрутку (pointercancel),
+   и перетаскивание «не держится»; ещё отключаем выделение и контекстное меню при удержании */
+.ted-ui :is([data-act="grip"], [data-act="item-grip"]) {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.ted-ui-editable > [data-tedui-in] { animation: ted-block-in 0.24s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+.ted-ui-controls.is-visible { transition: opacity 0.12s ease, top 0.14s cubic-bezier(0.2, 0.8, 0.2, 1), left 0.14s cubic-bezier(0.2, 0.8, 0.2, 1); }

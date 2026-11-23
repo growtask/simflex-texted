@@ -1,0 +1,8 @@
+/* Блок «Цветной фон» — только отличия в редакторе: заглушка «Текст на цветном фоне» с полями 20 и цветом,
+   читаемым на любой подложке (text-icon/gray/medium). */
+
+/* Цветной фон: заглушка с учётом внутренних отступов 20 */
+.ted-ui-editable p[class*="ted-bg-"][data-tedui-ph]::before { inset-inline: calc(20 * var(--ted-u)); }
+
+.ted-ui-editable p[class*="ted-bg-"][data-tedui-ph]::before { color: var(--ui-color-text-icon-gray-medium); }
+.ted-ui-editable p[class*="ted-bg-"][data-tedui-phline]::before { color: var(--ui-color-text-icon-gray-medium); }

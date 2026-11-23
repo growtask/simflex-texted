@@ -1,0 +1,40 @@
+/* Блок «Выноска» — вид на сайте и в редакторе (макет block-callout): плашка r16, поля 12 / 12 / 12 / 44, значок «информация» 24,
+   заголовок 16 / 700, текст 13 / 1.5. Токены --ted-c-callout-bg и --ted-icon-info — в content.css (тема блоков). */
+
+/* ---------- Выноска: blockquote.ted-callout — плашка r16, p12, значок 24, заголовок 16 / 700, текст 13 / 1.5 ---------- */
+
+.ted-content blockquote.ted-callout {
+  margin-top: 0;
+  padding: calc(12 * var(--ted-u)) calc(12 * var(--ted-u)) calc(12 * var(--ted-u)) calc(44 * var(--ted-u));
+  border-radius: calc(16 * var(--ted-u));
+  background: var(--ted-c-callout-bg);
+  font-size: calc(13 * var(--ted-u));
+  color: var(--ted-c-text);
+}
+
+:is(.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-columns__col) > blockquote.ted-callout { margin-bottom: calc(var(--ted-gap) * var(--ted-u)); }
+
+/* значок «информация» вместо акцентной линии цитаты */
+.ted-content blockquote.ted-callout::before {
+  top: calc(12 * var(--ted-u));
+  bottom: auto;
+  left: calc(12 * var(--ted-u));
+  width: calc(24 * var(--ted-u));
+  height: calc(24 * var(--ted-u));
+  background: var(--ted-c-heading);
+  -webkit-mask: var(--ted-icon-info) center / 100% 100% no-repeat;
+  mask: var(--ted-icon-info) center / 100% 100% no-repeat;
+}
+
+.ted-content blockquote.ted-callout > p:first-child {
+  color: var(--ted-c-heading);
+  font-size: calc(16 * var(--ted-u));
+  font-weight: 700;
+}
+
+.ted-content blockquote.ted-callout > * + * { margin-top: calc(4 * var(--ted-u)); }
+
+/* «Цветной фон» перекрашивает плашку выноски */
+.ted-content blockquote.ted-callout.ted-bg-gray { background: var(--ted-bg-gray); }
+.ted-content blockquote.ted-callout.ted-bg-color1 { background: var(--ted-bg-color1); }
+.ted-content blockquote.ted-callout.ted-bg-color2 { background: var(--ted-bg-color2); }

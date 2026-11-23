@@ -1,0 +1,8 @@
+/* Блок «Текст» — вид на сайте и в редакторе (макет block-body, Text/body type main): шрифт, размер и цвет текста —
+   у .ted-content (styles/content.css, токены — styles/theme.default.css), абзац их наследует поверх сброса сайта.
+   Отступ под абзацем — общий ритм блоков (content.css). */
+
+.ted-content p {
+  font: inherit;
+  color: inherit;
+}

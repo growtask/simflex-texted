@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TextEd — документация «как Notion»</title>
+<!-- Собранная версия: один CSS и один JS, без модулей и сборщиков -->
+<link rel="stylesheet" href="site-theme.css">
+<link rel="preload" href="../fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../dist/ted.css">
+<link rel="stylesheet" href="demo.css">
+<style>
+  .doc-tree .demo-tab[aria-current="page"] { background: var(--d-press); }
+  body.dark .doc-tree .demo-tab[aria-current="page"] { background: #0d0d0d; }
+</style>
+</head>
+<body>
+<div class="demo-app">
+  <nav class="demo-side" data-demo-nav aria-label="Режимы демо"></nav>
+  <main class="demo-main">
+    <div class="demo-head">
+      <h1>Документация</h1>
+      <div class="demo-tabs doc-tree" id="tree" aria-label="Страницы документации"></div>
+      <div class="demo-tabs" id="access" role="group" aria-label="Доступ"></div>
+    </div>
+    <p class="demo-hint" style="margin:0 0 12px">Дерево страниц — на стороне CMS. Ted отвечает за страницу: просмотр ↔ правка без перезагрузки; двойной клик по тексту тоже открывает правку. Каждая страница сохраняется отдельно (localStorage). Переключатель «Доступ» показывает режим только чтения (`readOnly: true`): правки нет, кнопки «Редактировать» нет — так выдают доступ без редактирования.</p>
+    <div id="doc" class="ted-editor"></div><script>if(localStorage.getItem('ted-demo-dark')==='1')document.currentScript.previousElementSibling.dataset.tedTheme='dark'</script>
+  </main>
+</div>
+
+<script src="demo-icons.js"></script><script src="demo-logo.js"></script>
+<script src="demo.js"></script>
+<script src="../dist/ted.js"></script>
+<script src="../content.js"></script>
+<script>
+  var DOCS = {
+    start: ['Быстрый старт', '<h2>Быстрый старт</h2><p>Это страница документации. Нажмите кнопку с карандашом вверху или дважды кликните по тексту — откроется правка прямо здесь, без перезагрузки.</p><ul><li>Выделите текст — появятся кнопки форматирования</li><li><code>Ctrl+/</code> — список горячих клавиш</li></ul><p>При возврате в просмотр срабатывает <code>onSave</code> — здесь он сохраняет в localStorage.</p>'],
+    modes: ['Режимы', '<h2>Режимы редактора</h2><p><b>Правка</b> — блоки с кнопками «+», ⠿ и панелью. <b>Просмотр</b> — страница как на сайте, без интерфейса.</p><blockquote><p>Переключение — кнопка справа в панели.</p></blockquote><p>Режим docs (эта страница): открывается просмотр, правка — по кнопке или двойному клику.</p>'],
+    keys: ['Горячие клавиши', '<h2>Горячие клавиши</h2><ul><li><code>/</code> — меню блоков</li><li><code>Ctrl+B</code>, <code>Ctrl+I</code>, <code>Ctrl+U</code> — жирный, курсив, подчёркнутый</li><li><code>Ctrl+K</code> — ссылка</li><li><code>Tab</code> / <code>Shift+Tab</code> — вложить или вынести пункт списка</li></ul><p>Полный список — кнопка «Помощь» в панели.</p>'],
+  };
+  var el = document.getElementById('doc');
+  var current = 'start';
+  var ed = Ted.create(el, {
+    preset: 'docs',        // набор «документация» (этап 2): открывается просмотр на странице, «Редактировать» включает правку там же; в CMS набор задаёт сервер
+    startWithHeading: true,
+    readOnly: /[?&]readonly/.test(location.search),   // доступ без права редактирования
+    onSave: function (html) {
+      // в CMS здесь будет fetch('/admin/api/docs/save', { method: 'POST', body: html })
+      localStorage.setItem('ted-demo-doc-' + current, html);
+    }
+  });
+
+  function open(id) {
+    if (!DOCS[id]) id = 'start';
+    if (ed.mode === 'edit') ed.setMode('view');   // сохранить текущую страницу
+    current = id;
+    ed.setHTML(localStorage.getItem('ted-demo-doc-' + id) || DOCS[id][1], { silent: true });
+    ed.options.autosave = 'ted-draft:doc-' + id;   // у каждой страницы свой черновик
+    ed.baseHTML = ed.lastHTML;
+    ed.restoreDraft();
+    document.title = 'TextEd — ' + DOCS[id][0];
+    document.querySelectorAll('#tree .demo-tab').forEach(function (b) {
+      if (b.dataset.id === id) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+  }
+
+  var tree = document.getElementById('tree');
+  Object.keys(DOCS).forEach(function (id) {
+    var a = document.createElement('a');
+    a.className = 'demo-tab'; a.href = '#' + id; a.dataset.id = id; a.innerHTML = '<span>' + DOCS[id][0] + '</span>';
+    tree.appendChild(a);
+  });
+
+  // доступ: правка / только чтение (Ted: readOnly и editor.setReadOnly)
+  var access = document.getElementById('access');
+  [['edit', 'Редактирование'], ['ro', 'Только чтение']].forEach(function (a) {
+    var b = document.createElement('button');
+    b.className = 'demo-tab'; b.type = 'button'; b.dataset.access = a[0]; b.innerHTML = '<span>' + a[1] + '</span>';
+    b.onclick = function () { ed.setReadOnly(a[0] === 'ro'); sync(); };
+    access.appendChild(b);
+  });
+  function sync() {
+    access.querySelectorAll('.demo-tab').forEach(function (b) {
+      var on = (b.dataset.access === 'ro') === !!ed.options.readOnly;
+      if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+  }
+  sync();
+  addEventListener('hashchange', function () { open(location.hash.slice(1)); });
+  open(location.hash.slice(1));
+</script>
+</body>
+</html>

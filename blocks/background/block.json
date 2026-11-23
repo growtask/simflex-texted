@@ -1,0 +1,10 @@
+{
+  "type": "background",
+  "title": "Цветной фон",
+  "aliases": ["bg", "color"],
+  "figma": "block-background",
+  "text": true,
+  "menu": { "group": "Акцент", "order": 10, "icon": "color", "words": "цветной фон плашка подложка background" },
+  "inContainers": false,
+  "html": {}
+}

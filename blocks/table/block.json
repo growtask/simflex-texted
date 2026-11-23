@@ -1,0 +1,13 @@
+{
+  "type": "table",
+  "title": "Таблица",
+  "figma": "block-table (Table/table)",
+  "menu": { "group": "Файлы и таблицы", "picker": "Таблицы", "order": 10, "icon": "table", "words": "таблица строки столбцы ячейки table excel", "convert": false, "sample": "<figure class=\"ted-table\"><div class=\"ted-table__wrap\"><table data-cols=\"3\"><thead><tr><th>Тариф</th><th>Цена</th><th>Срок</th></tr></thead><tbody><tr><td>Базовый</td><td>990 ₽</td><td>1 мес</td></tr><tr><td>Про</td><td>2 490 ₽</td><td>3 мес</td></tr></tbody></table></div></figure>" },
+  "selector": "figure.ted-table",
+  "html": {},
+  "inNarrow": false,
+  "toolbar": { "bg": false, "align": false, "style": false },
+  "compound": true,
+  "neverEmpty": true,
+  "lineAfter": true
+}

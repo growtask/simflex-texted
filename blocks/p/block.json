@@ -1,0 +1,31 @@
+{
+  "type": "p",
+  "title": "Текст",
+  "jsonExample": "{ \"type\": \"p\", \"text\": \"Абзац\" }",
+  "figma": "block-body (Text/body, type main)",
+  "text": true,
+  "menu": {
+    "group": "Текст",
+    "order": 30,
+    "icon": "text",
+    "words": "текст абзац параграф text"
+  },
+  "style": {
+    "label": "Обычный текст",
+    "icon": "text",
+    "keys": "Mod+Shift+0",
+    "order": 0
+  },
+  "hotkey": {
+    "code": "Mod+Shift+Digit0",
+    "keys": "Mod+Shift+0",
+    "label": "Обычный текст",
+    "convert": true,
+    "after": "link"
+  },
+  "placeholder": "Введите «/» для вызова меню или начните писать…",
+  "selector": "p",
+  "html": {
+    "p": []
+  }
+}

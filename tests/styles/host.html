@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>texted — страница сайта и админки вокруг редактора</title>
+<!-- Набор styles (этап 4): ?reset=1 — со сбросом стилей сайта (host-reset.css), ?ted=1 — с ted.css, редактором и выводом блоков,
+     ?theme=dark — тёмный интерфейс. Подписи вычисленных стилей — в window.__tedHost (host-probe.js). -->
+<style>html { overflow-y: scroll; } body { margin: 0; }</style><!-- полоса прокрутки всегда, у body нет полей: ширина редактора не зависит от высоты страницы и от сброса -->
+
+<script src="host-probe.js"></script>
+</head>
+<body>
+<div id="outside">
+  <h1>Страница сайта</h1>
+  <h2>Подзаголовок</h2>
+  <p>Абзац с <a href="/x">ссылкой</a>, <strong>жирным</strong> и <code>кодом</code>.</p>
+  <ul><li>Пункт</li><li>Пункт два</li></ul>
+  <ol><li>Раз</li></ol>
+  <blockquote><p>Цитата страницы</p></blockquote>
+  <table><tr><th>А</th><td>Б</td></tr></table>
+  <button type="button">Кнопка страницы</button>
+  <input type="text" value="Поле">
+  <hr>
+</div>
+<div id="ed"></div>
+<div id="site"></div>
+</body>
+</html>

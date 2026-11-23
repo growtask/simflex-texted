@@ -1,0 +1,68 @@
+{
+  "type": "list",
+  "title": "Список",
+  "jsonExample": "{ \"type\": \"ul\", \"items\": [\"пункт\", \"пункт\"] } — нумерованный: \"ol\"",
+  "figma": "Text/body (type list / list-numb)",
+  "text": true,
+  "html": {
+    "ul": [],
+    "ol": [
+      "start",
+      "reversed",
+      "type"
+    ],
+    "li": []
+  },
+  "variants": [
+    {
+      "type": "ol",
+      "title": "Нумерованный список",
+      "selector": "ol:not(.ted-steps)",
+      "menu": {
+        "group": "Списки",
+        "order": 10,
+        "icon": "numbered",
+        "words": "нумерованный список номера цифры numbered ol",
+        "sample": "<ol><li>Подготовьте материалы</li><li>Отправьте заявку</li><li>Получите ответ</li></ol>"
+      },
+      "style": {
+        "label": "Нумерованный список",
+        "icon": "numbered",
+        "keys": "Mod+Shift+7",
+        "order": 70
+      },
+      "hotkey": {
+        "code": "Mod+Shift+Digit7",
+        "keys": "Mod+Shift+7",
+        "label": "Нумерованный список",
+        "convert": true,
+        "after": "block:h6"
+      }
+    },
+    {
+      "type": "ul",
+      "title": "Список",
+      "selector": "ul:not(.ted-checklist):not(.ted-facts):not(.ted-proscons)",
+      "menu": {
+        "group": "Списки",
+        "order": 0,
+        "icon": "list",
+        "words": "список маркированный list bullet ul",
+        "sample": "<ul><li>Первый пункт</li><li>Второй пункт</li><li>Третий пункт</li></ul>"
+      },
+      "style": {
+        "label": "Список",
+        "icon": "list",
+        "keys": "Mod+Shift+8",
+        "order": 60
+      },
+      "hotkey": {
+        "code": "Mod+Shift+Digit8",
+        "keys": "Mod+Shift+8",
+        "label": "Список",
+        "convert": true,
+        "after": "block:ol"
+      }
+    }
+  ]
+}

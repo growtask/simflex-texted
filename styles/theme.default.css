@@ -1,0 +1,47 @@
+/* ==========================================================================
+   Ted — тема контента по умолчанию (макет TextEd, библиотека «Симфлекс АИ»).
+   Шрифты, цвета и скругления берутся из CSS-переменных сайта (имена как в
+   дизайн-системе Simflex: --font-family-body, --color-text-icon-gray-dark, --color-main-color1-main…, этап 4).
+   Нет переменной на сайте — значение из макета.
+   ========================================================================== */
+
+.ted-content {
+  /* Шрифты: Inter и Roboto Mono лежат в проекте (fonts.css) */
+  --ted-font-body: var(--font-family-body, "Ted Inter", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif);
+  --ted-font-heading: var(--font-family-heading, var(--ted-font-body));
+  --ted-font-code: var(--font-mono, "Ted Roboto Mono", "Roboto Mono", ui-monospace, Consolas, monospace);
+
+  /* Текст — text-icon/gray/dark, заголовки и цитата — text-icon/gray/darker */
+  --ted-c-text: var(--color-text-icon-gray-dark, #4d4d4d);
+  --ted-c-heading: var(--color-text-icon-gray-darker, #262626);
+  --ted-c-quote: var(--color-text-icon-gray-darker, #262626);
+  --ted-c-muted: var(--color-text-icon-gray-medium, #919599);
+  --ted-c-link: var(--color-text-icon-color1-main, #1975f7);
+  --ted-c-link-hover: var(--color-text-icon-color1-dark, #1461cc);
+  --ted-c-marker: var(--ted-c-text);              /* маркеры и номера — цветом текста */
+
+  /* Акцент и поверхности */
+  --ted-c-accent: var(--color-main-color1-main, #1975f7);
+  --ted-c-line: var(--color-main-gray-lighter, #edf3fa);       /* Layout/line: main/gray/lighter */
+  --ted-c-code-bg: var(--color-main-gray-lighter, #edf3fa);    /* Highlight/background */
+  --ted-c-code-text: var(--color-text-icon-gray-dark, #4d4d4d);
+
+  /* Скругления (у сайтов пока нет переменных — дефолт макета) */
+  --ted-r-s: var(--radius-ui-small, calc(8 * var(--ted-u)));
+  --ted-r-m: var(--radius-ui-medium, calc(12 * var(--ted-u)));
+  --ted-r-l: var(--radius-ui-xlarge, calc(24 * var(--ted-u)));
+
+  /* Движение (решение 22.11, как в UI-ките rpm): fast — цвет и нажатие, base — шевроны, slow — раскрытие и появление.
+     Открытие — ease-out, закрытие — ease-in и быстрее. Переменные сайта --motion-* главнее */
+  --ted-motion-fast: var(--motion-fast, 120ms);
+  --ted-motion-base: var(--motion-base, 180ms);
+  --ted-motion-slow: var(--motion-slow, 240ms);
+  --ted-ease-out: var(--ease-out, cubic-bezier(0.2, 0, 0, 1));
+  --ted-ease-in: var(--ease-in, cubic-bezier(0.4, 0, 1, 1));
+}
+/* Переход по якорю (глава содержания, ссылка на раздел): заголовок не уходит под липкую шапку сайта.
+   Высоту шапки сайт задаёт переменной --ted-sticky-top (по умолчанию 0); её же учитывает полоса прогресса чтения. Проверка 22.11 */
+.ted-content :is(h2, h3, h4, h5, h6, [id]) { scroll-margin-top: calc(var(--ted-sticky-top, 0px) + 24px); }
+@media (prefers-reduced-motion: reduce) {
+  .ted-content { --ted-motion-fast: 1ms; --ted-motion-base: 1ms; --ted-motion-slow: 1ms; }
+}

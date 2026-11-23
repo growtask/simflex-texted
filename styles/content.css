@@ -1,0 +1,164 @@
+/* ==========================================================================
+   Ted — стили контента (макет TextEd: block-heading, block-body, block-quote,
+   block-code, block-line; библиотека: Text/heading, Text/body, Layout/line).
+
+   Все размеры — «пиксели макета» × --ted-u (1px по умолчанию, vw — в ted.vw.css).
+   Ритм как в макете: у каждого блока свой отступ снизу (20 / моб. 16),
+   у заголовка ещё и сверху (20 / моб. 16); блоки стоят вплотную (gap 0).
+   Стили восстанавливают списки, жирный, ссылки поверх reset-стилей сайта.
+   ========================================================================== */
+
+.ted-content {
+  --ted-u: 1px;
+
+  /* fullhd / hd (колонка 700 / 628) */
+  --ted-h2: 42;
+  --ted-h3: 28;
+  --ted-h4: 24;
+  --ted-h5: 20;
+  --ted-h6: 16;
+  --ted-text: 16;     /* text/t2 */
+  --ted-quote: 20;    /* text/t1 */
+  --ted-code: 16;     /* uniq/code */
+  --ted-gap: 20;      /* отступ под блоком */
+  --ted-gap-h: 20;    /* отступ над заголовком */
+  --ted-gap-quote: 0; /* отступ над цитатой */
+  --ted-gap-li: 8;
+  --ted-list-pad: 24;
+  --ted-quote-line: 3;
+  --ted-quote-pad: 20;
+  --ted-code-pad: 8;
+  --ted-line: 2;      /* Layout/line */
+}
+
+/* tablet / mobile (колонка 480 / 382): мобильные заголовки и отступы */
+@media (width <= 811px) {
+  .ted-content {
+    --ted-h2: 28;
+    --ted-h3: 24;
+    --ted-h4: 20;
+    --ted-h5: 20;
+    --ted-h6: 16;
+    --ted-gap: 16;
+    --ted-gap-h: 16;
+    --ted-gap-quote: 16;
+  }
+}
+
+/* ---------- База ---------- */
+
+.ted-content {
+  font-family: var(--ted-font-body);
+  font-size: calc(var(--ted-text) * var(--ted-u));
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--ted-c-text);
+  font-feature-settings: "lnum" 1, "pnum" 1;
+  overflow-wrap: break-word;
+  text-align: start;
+}
+
+/* Защита от сброса стилей сайта (этап 4, решение 21.11 — без @layer): то, что сбросы обычно меняют у всех элементов
+   (Simflex: li{list-style:none}, p{text-wrap:pretty}, img/svg/audio{max-width:100%;display:block},
+   html{text-size-adjust:100%}, body{letter-spacing…}), у блоков задано явно — значениями браузера, на которых сверены макеты.
+   Специфичность .ted-content выше, чем у сброса по тегу и *; свои правила блоков (классы) — выше этих. Тест — набор styles. */
+.ted-content {
+  letter-spacing: normal; word-spacing: normal; text-transform: none; text-indent: 0; font-style: normal; font-variant: normal;
+  text-shadow: none; text-wrap: wrap; white-space-collapse: collapse; hyphens: manual; -webkit-text-size-adjust: auto; text-size-adjust: auto;
+}
+/* border-box — как у блоков в редакторе (.ted-ui *), по которому сверен макет, и как на сайтах Simflex (их сброс ставит border-box всем) */
+.ted-content, .ted-content :where(*), .ted-content ::before, .ted-content ::after { box-sizing: border-box; }   /* псевдоэлементы внутри :where() не работают */
+.ted-content :where(li) { list-style: inherit; }
+.ted-content :where(p, li, figcaption, dd, dt, blockquote, h2, h3, h4, h5, h6) { text-wrap-mode: inherit; text-wrap-style: inherit; }
+.ted-content :where(img, svg, video, audio, iframe, canvas, picture) { max-width: none; }
+.ted-content :where(audio, canvas, picture, svg, img, video, iframe) { display: inline; }
+.ted-content :where(audio) { height: revert; }   /* высота плеера браузера (без content.js); сброс audio{height:auto} схлопывал его */
+
+/* Сброс без веса (:where) — правила ниже всегда побеждают */
+.ted-content :where(p, h2, h3, h4, h5, h6, ul, ol, li, blockquote, pre, figure, table) {
+  margin: 0;
+  padding: 0;
+}
+
+/* Ритм содержимого — одно правило для всех блоков (MODULAR_PLAN.md, этап 0): под любым блоком один отступ снаружи блока.
+   Прямоугольник блока = его содержимое, поэтому рамка и кнопки редактора одинаковы для всех блоков.
+   У заголовка и цитаты сверху свой дополнительный отступ (как в макете). Соседние внешние отступы не складываются,
+   а берётся больший, поэтому отступ над ними = обычный + свой. Внутри контейнера отступы не выходят наружу (flow-root). */
+.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-tabs__body, .ted-columns__col { display: flow-root; }
+:is(.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-tabs__body, .ted-columns__col) > * { margin-bottom: calc(var(--ted-gap) * var(--ted-u)); }
+:is(.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-tabs__body, .ted-columns__col) > :is(h2, h3, h4, h5, h6) { margin-top: calc((var(--ted-gap) + var(--ted-gap-h)) * var(--ted-u)); }
+:is(.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-tabs__body, .ted-columns__col) > :is(h2, h3, h4, h5, h6):first-child { margin-top: calc(var(--ted-gap-h) * var(--ted-u)); }
+:is(.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-tabs__body, .ted-columns__col) > blockquote { margin-top: calc((var(--ted-gap) + var(--ted-gap-quote)) * var(--ted-u)); }
+:is(.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-tabs__body, .ted-columns__col) > blockquote:first-child { margin-top: calc(var(--ted-gap-quote) * var(--ted-u)); }
+/* заголовок на цветном фоне: отступ снаружи плашки — только обычный промежуток (фон не растягивается вверх) */
+:is(.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-tabs__body, .ted-columns__col) > :is(h2, h3, h4, h5, h6)[class*="ted-bg-"] { margin-top: calc(var(--ted-gap-h) * var(--ted-u)); }
+
+
+/* ---------- Строчное форматирование ---------- */
+
+.ted-content :is(strong, b) { font-weight: 700; }
+.ted-content :is(em, i) { font-style: italic; }
+
+.ted-content u {
+  text-decoration: underline;
+  text-decoration-thickness: max(calc(1 * var(--ted-u)), 1px);
+  text-underline-offset: 0.15em;
+}
+
+.ted-content :is(s, strike, del) { text-decoration: line-through; }
+.ted-content :is(u s, s u) { text-decoration: underline line-through; }
+
+.ted-content :is(sub, sup) {
+  position: relative;
+  font-size: 0.75em;
+  line-height: 0;
+}
+.ted-content sup { vertical-align: super; }
+.ted-content sub { vertical-align: sub; }
+
+.ted-content a {
+  color: var(--ted-c-link);
+  text-decoration: underline;
+  text-decoration-thickness: max(calc(1 * var(--ted-u)), 1px);
+  text-underline-offset: 0.15em;
+  transition: color 0.15s ease;
+}
+
+.ted-content a:hover { color: var(--ted-c-link-hover); }
+
+.ted-content code {
+  padding: 0 calc(4 * var(--ted-u));
+  border-radius: calc(4 * var(--ted-u));
+  background: var(--ted-c-code-bg);
+  color: var(--ted-c-code-text);
+  font-family: var(--ted-font-code);
+  font-size: 0.875em;
+}
+
+/* ---------- Выравнивание ---------- */
+
+.ted-content .ted-align-center { text-align: center; }
+.ted-content .ted-align-right { text-align: right; }
+
+.ted-content :is(ul, ol):is(.ted-align-center, .ted-align-right) {
+  padding-left: 0;
+  list-style-position: inside;
+}
+
+/* ==========================================================================
+   Блоки этапа 4: выноска, ключевые цифры, плюсы и минусы (макеты block-callout / block-facts / block-proscons)
+   ========================================================================== */
+
+.ted-content {
+  --ted-c-callout-bg: var(--color-main-gray-lighter, #edf3fa);
+  --ted-c-fact-bg: var(--color-main-gray-lighter, #edf3fa);
+  --ted-c-pros-bg: var(--color-states-success-light, #c3e5c3);
+  --ted-c-cons-bg: var(--color-states-error-light, #ffcccc);
+  --ted-c-pros: var(--color-states-success-dark, #0e8c0e);
+  --ted-c-cons: var(--color-states-error-dark, #cc2929);
+  --ted-icon-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M17.2929 9.29289C17.6834 8.90237 18.3164 8.90237 18.707 9.29289C19.0975 9.68342 19.0975 10.3164 18.707 10.707L12.707 16.707C12.3164 17.0975 11.6834 17.0975 11.2929 16.707L5.29289 10.707C4.90237 10.3164 4.90237 9.68342 5.29289 9.29289C5.68342 8.90237 6.31643 8.90237 6.70696 9.29289L11.9999 14.5859L17.2929 9.29289Z'/%3E%3C/svg%3E");   /* chevron size=m style=down (дизайн-система) */
+  --ted-icon-info: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 12C3 16.9706 7.02944 21 12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12ZM11.9902 9C11.4379 9 10.9902 8.55229 10.9902 8C10.9902 7.44771 11.4379 7 11.9902 7H12C12.5523 7 13 7.44771 13 8C13 8.55229 12.5523 9 12 9H11.9902ZM13 12V16C13 16.5523 12.5523 17 12 17C11.4477 17 11 16.5523 11 16V12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM1 12C0.999999 5.92487 5.92487 1 12 1C18.0751 0.999999 23 5.92487 23 12C23 18.0751 18.0751 23 12 23C5.92487 23 1 18.0751 1 12Z'/%3E%3C/svg%3E");
+  --ted-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19.293 5.293C19.6835 4.9025 20.3165 4.9025 20.707 5.293C21.0976 5.6835 21.0976 6.3166 20.707 6.7071L9.707 17.7071C9.3165 18.0976 8.6835 18.0976 8.293 17.7071L3.293 12.7071C2.9025 12.3166 2.9025 11.6835 3.293 11.293C3.6835 10.9025 4.3165 10.9025 4.707 11.293L9 15.586L19.293 5.293Z'/%3E%3C/svg%3E");
+  --ted-icon-close: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M17.293 5.293C17.6835 4.9025 18.3165 4.9025 18.707 5.293C19.0975 5.6835 19.0975 6.3166 18.707 6.7071L13.414 12L18.707 17.293C19.0975 17.6835 19.0975 18.3166 18.707 18.7071C18.3165 19.0976 17.6835 19.0976 17.293 18.7071L12 13.4141L6.707 18.7071C6.3165 19.0976 5.6835 19.0976 5.293 18.7071C4.9024 18.3166 4.9024 17.6835 5.293 17.293L10.5859 12L5.293 6.7071C4.9024 6.3166 4.9024 5.6835 5.293 5.293C5.6835 4.9025 6.3165 4.9025 6.707 5.293L12 10.586L17.293 5.293Z'/%3E%3C/svg%3E");
+}
+

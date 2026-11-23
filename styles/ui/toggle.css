@@ -1,0 +1,42 @@
+/* ==========================================================================
+   Switches/toggle size s — переключатель
+   Общий элемент интерфейса (этап 4): дорожка 44 × 24, p 4, ползунок 16, подпись text/t3.
+   ========================================================================== */
+
+/* Switches/toggle size s: дорожка 44 × 24, p 4, ползунок 16; подпись text/t3 (13 / 1.5) */
+.ted-ui-toggle { display: flex; align-items: center; gap: 8px; width: 100%; margin: 4px 0 0; cursor: pointer; user-select: none; }
+
+.ted-ui-toggle__input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; pointer-events: none; }
+
+.ted-ui-toggle__track { position: relative; flex: none; width: 44px; height: 24px; padding: 4px; box-sizing: border-box; border-radius: 9999px; background: var(--ui-color-main-gray-light); transition: background-color 0.12s ease; }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-toggle__track { background: var(--ui-color-main-gray-dark); }
+
+.ted-ui-toggle__knob { display: block; width: 16px; height: 16px; border-radius: 9999px; background: var(--ui-color-main-gray-white); transition: transform 0.12s ease; }
+
+.ted-ui-toggle__input:checked + .ted-ui-toggle__track { background: var(--ui-color-main-color1-main); }
+
+.ted-ui-toggle__input:checked + .ted-ui-toggle__track .ted-ui-toggle__knob { transform: translateX(20px); }
+
+.ted-ui-toggle:hover .ted-ui-toggle__track { background: var(--ui-color-main-gray-medium); }
+
+.ted-ui-toggle:hover .ted-ui-toggle__input:checked + .ted-ui-toggle__track { background: var(--ui-color-main-color1-light); }
+
+.ted-ui-toggle:active .ted-ui-toggle__track { background: var(--ui-color-main-gray-dark); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-toggle:active .ted-ui-toggle__track { background: var(--ui-color-main-gray-darker); }
+
+.ted-ui-toggle:active .ted-ui-toggle__input:checked + .ted-ui-toggle__track { background: var(--ui-color-main-color1-dark); }
+
+.ted-ui-toggle__input:focus-visible + .ted-ui-toggle__track { outline: 2px solid var(--ui-color-main-color1-light); outline-offset: 2px; }
+
+.ted-ui-toggle__text { color: var(--ui-color-text-icon-gray-dark); font: 400 13px/1.5 var(--ui-font); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-toggle__text { color: var(--ui-color-text-icon-gray-lighter); }
+
+/* галочка в ползунке (check 16 px, #1975F7) — видна во включённом состоянии, как в Switches/toggle */
+.ted-ui-toggle__knob { display: grid; place-items: center; color: var(--ui-color-text-icon-color1-main); }
+
+.ted-ui-toggle__knob svg { width: 16px; height: 16px; opacity: 0; transition: opacity 0.12s ease; }
+
+.ted-ui-toggle__input:checked + .ted-ui-toggle__track .ted-ui-toggle__knob svg { opacity: 1; }

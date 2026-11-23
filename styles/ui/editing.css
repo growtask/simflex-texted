@@ -1,0 +1,71 @@
+/* ==========================================================================
+   Правка: выделение, заглушки, сырые блоки
+   Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
+   ========================================================================== */
+
+/* подсветка блоков (::after, z −1) рисуется под всеми блоками, но над фоном редактора */
+.ted-ui-editable {
+  isolation: isolate;
+  min-height: 24px;
+  outline: none;
+  caret-color: var(--ui-accent);
+}
+
+.ted-ui-editable > *,
+.ted-ui-editable blockquote > p,
+.ted-ui-editable li { position: relative; }
+
+.ted-ui-editable > * { transition: background-color 0.12s ease, box-shadow 0.12s ease; }
+
+.ted-ui-editable ::selection { background: rgba(25, 117, 247, 0.2); }
+
+/* Пустой блок: подсказка text-icon/gray/light */
+.ted-ui-editable [data-tedui-ph]::before {
+  content: attr(data-tedui-ph);
+  position: absolute;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  color: var(--ui-placeholder);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+/* Состояния строки (editor-row): selected / dragging */
+/* Старый контент, который пока не редактируется */
+.ted-ui-editable .ted-ui-raw {
+  margin-bottom: 20px;
+  padding: 12px;
+  border: 1px dashed var(--ui-line);
+  border-radius: var(--ui-radius-medium);
+  cursor: default;
+  user-select: none;
+}
+
+.ted-ui-editable .ted-ui-raw::after {
+  content: "HTML-блок из старого контента";
+  display: block;
+  margin-top: 8px;
+  color: var(--ui-muted);
+  font: 600 11px/1.4 var(--ui-font);
+}
+
+.ted-ui-editable { --ted-tok-kw: #cf222e; --ted-tok-str: #0a3069; --ted-tok-num: #0550ae; --ted-tok-com: #6e7781; --ted-tok-fn: #8250df; --ted-tok-tag: #116329; --ted-tok-attr: #0550ae; --ted-tok-prop: #0550ae; --ted-tok-var: #953800; }
+
+.ted-ui[data-ted-theme="dark"] .ted-content, .ted-ui[data-ted-theme="dark"] .ted-ui-editable {
+  --ted-tok-kw: #ff7b72; --ted-tok-str: #a5d6ff; --ted-tok-num: #79c0ff; --ted-tok-com: #8b949e; --ted-tok-fn: #d2a8ff; --ted-tok-tag: #7ee787; --ted-tok-attr: #79c0ff; --ted-tok-prop: #79c0ff; --ted-tok-var: #ffa657;
+}
+
+/* Пустая строка внутри непустого абзаца или кода, где стоит курсор (решение 22.11): заглушка блока в начале этой строки.
+   Место — от курсора (--ted-ph-x / --ted-ph-y на поле правки ставит editor.lineHolder) */
+.ted-ui-editable pre > code[data-tedui-phline] { position: relative; display: block; }
+.ted-ui-editable [data-tedui-phline]::before {
+  content: attr(data-tedui-phline);
+  position: absolute;
+  left: var(--ted-ph-x, 0);
+  top: var(--ted-ph-y, 0);
+  color: var(--ui-placeholder);
+  white-space: nowrap;
+  pointer-events: none;
+}

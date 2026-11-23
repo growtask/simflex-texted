@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>texted — примеры наборов (vectors.json)</title>
+<link rel="stylesheet" href="../../dist/ted.css">
+</head>
+<body>
+<p>Собирает <code>tests/presets/vectors.json</code>: сохранённый HTML всех блоков (как его отдаёт редактор) → что остаётся в каждом наборе.
+  Ожидаемый результат — из браузера (src/core/blocks.js → restrictBlocks); тот же файл проверяют набор <code>presets</code> и <code>php/test-presets.php</code>.
+  Пересобрать: <code>pwsh -File tools/make-preset-vectors.ps1</code>.</p>
+<pre id="out">…</pre>
+<script type="module">
+  import Ted from '../../src/index.js';
+  import { blockSamples } from '../interaction/samples.js';
+
+  const samples = await blockSamples();
+  // цветной фон, вложенный список, пустые ячейки, ссылки и строчное оформление
+  samples.push(
+    '<p class="ted-bg-gray">Абзац на сером фоне</p>',
+    '<h2 class="ted-bg-color1" id="razdel">Заголовок на фоне</h2>',
+    '<p>Текст <strong>жирный</strong>, <em>курсив</em>, <a href="https://example.com/" target="_blank" rel="noopener noreferrer">ссылка</a>, <code>код</code>, <mark>метка</mark>.</p>',
+    '<h5>Заголовок 5</h5>',
+    '<pre data-lang="js"><code>const a = 1;\nconst b = 2;</code></pre>',
+    '<figure class="ted-media ted-media--audio"><audio src="/uf/audio/a.mp3" controls title="Запись"></audio></figure>',
+    '<blockquote><p>Цитата</p><p class="ted-author">Автор</p></blockquote>',
+    // заполненные составные блоки (в образцах меню они почти пустые)
+    '<ul class="ted-facts"><li><strong>120</strong><br>магазинов по стране</li><li><strong>24/7</strong><br>поддержка</li></ul>',
+    '<ol class="ted-steps"><li><strong>Скачайте</strong><br>Файл по ссылке</li><li><strong>Установите</strong></li></ol>',
+    '<ul class="ted-proscons"><li class="ted-pros"><strong>Плюсы</strong><ul><li>Быстро</li><li><br></li></ul></li><li class="ted-cons"><strong>Минусы</strong><ul><li>Дорого</li></ul></li></ul>',
+    '<ul class="ted-checklist"><li class="is-done">Готово</li><li>Не готово</li></ul>',
+    '<figure class="ted-table"><div class="ted-table__wrap"><table data-cols="2"><thead><tr><th>Город</th><th>Цена</th></tr></thead><tbody><tr><td>Москва</td><td>100 ₽</td></tr><tr><td><br></td><td></td></tr></tbody></table></div><figcaption>Цены</figcaption></figure>',
+    '<div class="ted-accordion"><details class="ted-accordion__item"><summary class="ted-accordion__q">Вопрос?</summary><div class="ted-accordion__a"><div class="ted-accordion__body"><p>Ответ первый.</p><p>Ответ <strong>второй</strong>.</p></div></div></details><details class="ted-accordion__item"><summary class="ted-accordion__q">Второй вопрос</summary><div class="ted-accordion__a"><div class="ted-accordion__body"><ul><li>Пункт</li></ul></div></div></details></div>',
+    '<div class="ted-tabs"><div class="ted-tabs__panel"><p class="ted-tabs__title">Первая</p><div class="ted-tabs__body"><p>Текст первой</p></div></div><div class="ted-tabs__panel"><p class="ted-tabs__title">Вторая</p><div class="ted-tabs__body"><h3>Заголовок</h3><p>Текст второй</p></div></div></div>',
+    '<nav class="ted-toc"><div class="ted-toc__panel"><p class="ted-toc__title">Содержание</p><ul class="ted-toc__list"><li><a href="#one">Первая глава</a></li><li><a href="#two">Вторая глава</a></li></ul></div></nav>',
+    '<div class="ted-button ted-button--banner"><div class="ted-button__text"><p class="ted-button__title">Скидка 10%</p><p class="ted-button__desc">До конца месяца</p></div><a class="ted-button__btn" href="/sale">Купить</a></div>',
+    '<div class="ted-columns ted-columns--2"><div class="ted-columns__col"><h3>Слева</h3><p>Текст слева</p></div><div class="ted-columns__col"><p>Текст справа</p></div></div>',
+    // вложенные блоки (проверка 22.11): запрещённый блок внутри разрешённого не должен сохраниться
+    '<p>x<figure class="ted-iframe"><iframe src="https://evil.example/"></iframe></figure></p>',
+    '<ul><li>Пункт<figure class="ted-table"><div class="ted-table__wrap"><table data-cols="1"><tbody><tr><td>Ячейка</td></tr></tbody></table></div></figure></li></ul>',
+    '<p>Текст<video src="/uf/video/a.mp4" controls></video></p>',
+    '<ul><li>Пункт<details class="ted-accordion__item"><summary class="ted-accordion__q">Вопрос</summary><div class="ted-accordion__body"><p>Ответ</p></div></details></li></ul>',
+    '<div><figure class="ted-iframe"><iframe src="https://evil.example/"></iframe></figure></div>',
+    '<blockquote class="ted-callout"><p>Выноска</p><figure class="ted-iframe"><iframe src="https://evil.example/"></iframe></figure></blockquote>',
+    '<div class="ted-accordion"><details class="ted-accordion__item"><summary class="ted-accordion__q">Вопрос</summary><div class="ted-accordion__a"><div class="ted-accordion__body"><figure class="ted-iframe"><iframe src="https://evil.example/"></iframe></figure><h2>Глава</h2></div></div></details></div>',
+  );
+  // наборы: базовые с ограничением блоков и свой (как в ted.config.php → presets)
+  const presets = {
+    mini: 'mini',
+    text: 'text',
+    custom: ['h2', 'callout', 'table', 'background'],
+  };
+  const vectors = [];
+  for (const html of samples) {
+    const expect = {};
+    for (const [name, p] of Object.entries(presets)) expect[name] = Ted.clean(html, { blocks: p });
+    vectors.push({ html: Ted.clean(html), expect });
+  }
+  document.getElementById('out').textContent = JSON.stringify({ custom: presets.custom, vectors }, null, 1);
+  document.title = 'готово';
+</script>
+</body>
+</html>

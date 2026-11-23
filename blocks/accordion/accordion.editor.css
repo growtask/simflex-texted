@@ -1,0 +1,24 @@
+/* Блок «Аккордеон» — только отличия в редакторе. */
+
+.ted-ui-editable .ted-accordion__q { cursor: text; }
+.ted-ui-editable .ted-accordion__item[data-tedui-open] > .ted-accordion__q::after { transform: rotate(180deg); }
+/* раскрытие: ответ виден сразу (курсор и набор попадают в него), сворачивание: скрывается после анимации */
+.ted-ui-editable .ted-accordion__body { overflow: clip; transition: height 0.25s var(--ui-ease), padding-bottom 0.25s var(--ui-ease), visibility 0s; }
+/* у открытого ответа обрезка с запасом 8: подложка выбранной кнопки и блока (8 px) не срезается краем ответа (заказчик 23.11) */
+.ted-ui-editable .ted-accordion__item[data-tedui-open] > .ted-accordion__body { overflow-clip-margin: 8px; }
+.ted-ui-editable .ted-accordion__item:not([data-tedui-open]) > .ted-accordion__body { height: 0; padding-bottom: 0; visibility: hidden; transition: height 0.25s var(--ui-ease), padding-bottom 0.25s var(--ui-ease), visibility 0s linear 0.25s; }
+.ted-ui-editable .ted-accordion[data-tedui-addbtn] { margin-bottom: calc(var(--ted-gap) * var(--ted-u) + 60px); }
+.ted-ui-editable .ted-accordion__q[data-tedui-ph]::before { top: calc(20 * var(--ted-u)); right: calc(44 * var(--ted-u)); }
+@media (prefers-reduced-motion: reduce) { .ted-ui-editable .ted-accordion__body { transition: none; } }
+
+/* пункт при перетаскивании — рамка, как у шагов и пунктов (общие правила — styles/ui/blocks.css) */
+.ted-ui-editable div.ted-accordion > .ted-accordion__item[data-tedui-drag] {
+  border-radius: var(--ui-radius-medium);
+  z-index: 2;
+  outline: 2px solid var(--ui-drag-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--ui-drag-bg);
+}
+.ted-ui.is-dragging .ted-ui-editable div.ted-accordion > .ted-accordion__item { transition: transform 0.22s var(--ui-ease); }
+.ted-ui.is-dragging .ted-ui-editable div.ted-accordion > .ted-accordion__item[data-tedui-drag] { transition: none; }
+.ted-ui.is-dropping .ted-ui-editable div.ted-accordion > .ted-accordion__item { transition: none !important; }

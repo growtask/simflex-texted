@@ -1,0 +1,18 @@
+/* Блок «Колонки» — вид на сайте и в редакторе (макет block-columns). */
+
+/* Колонки (этап 6.2, block-columns). 2–4 колонки сеткой, между колонками 16; внутри колонки блоки через 12:
+   картинка 204 r12, заголовок heading/h6 16 main/gray/darker, текст text/t3 13 / 1.5. Колонка — любые блоки.
+   Планшет (≤ 811, в редакторе — колонка ≤ 812): не больше двух в ряд, между колонками 12. Телефон (≤ 480): одна под другой, через 20. */
+.ted-content .ted-columns { display: grid; grid-template-columns: repeat(var(--ted-cols, 2), minmax(0, 1fr)); gap: calc(16 * var(--ted-u)); align-items: start; margin: 0 0 calc(var(--ted-gap) * var(--ted-u)); --ted-media-radius: calc(12 * var(--ted-u)); }
+.ted-content .ted-columns--3 { --ted-cols: 3; }
+.ted-content .ted-columns--4 { --ted-cols: 4; }
+.ted-content .ted-columns__col { display: flow-root; min-width: 0; }
+/* внутри колонки — те же отступы между блоками, что в статье (styles/content.css; решение заказчика 22.11: в колонке любые блоки) */
+.ted-content .ted-columns__col > :last-child { margin-bottom: 0; }
+.ted-content .ted-columns__col > p { font-size: calc(13 * var(--ted-u)); line-height: 1.5; }
+.ted-content .ted-columns__col > .ted-media--image > img,
+.ted-content .ted-columns__col > .ted-ui-media > .ted-media--image > img { height: calc(204 * var(--ted-u)); object-fit: cover; }
+@media (width <= 811px) { .ted-content .ted-columns { gap: calc(12 * var(--ted-u)); --ted-cols: 2; } }
+@media (width <= 480px) { .ted-content .ted-columns { gap: calc(20 * var(--ted-u)); --ted-cols: 1; } }
+@container ted (width <= 812px) { .ted-content .ted-columns { gap: calc(12 * var(--ted-u)); --ted-cols: 2; } }
+@container ted (width <= 480px) { .ted-content .ted-columns { gap: calc(20 * var(--ted-u)); --ted-cols: 1; } }

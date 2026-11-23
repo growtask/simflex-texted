@@ -1,0 +1,25 @@
+{
+  "type": "facts",
+  "title": "Ключевые цифры",
+  "jsonExample": "{ \"type\": \"facts\", \"items\": [{ \"value\": \"120+\", \"label\": \"клиентов\" }] }",
+  "figma": "block-facts",
+  "text": true,
+  "toolbar": {
+    "align": false,
+    "style": false
+  },
+  "menu": {
+    "convert": false,
+    "group": "Акцент",
+    "order": 20,
+    "icon": "facts",
+    "words": "цифры факты показатели числа facts",
+    "sample": "<ul class=\"ted-facts\"><li><strong>120+</strong><br>стран</li><li><strong>4.8</strong><br>средняя оценка</li><li><strong>24/7</strong><br>поддержка</li><li><strong>1M</strong><br>заказов</li></ul>"
+  },
+  "selector": "ul.ted-facts",
+  "html": {
+    "ul": [],
+    "li": [],
+    "strong": []
+  }
+}

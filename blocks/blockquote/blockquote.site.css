@@ -1,0 +1,81 @@
+/* Блок «Цитата» — вид на сайте и в редакторе (макет block-quote): линия 3 main/color1/main, отступ 20, текст t1 (20 / 1.5)
+   цвет text-icon/gray/darker; автор — аватар 40 с инициалами, имя 16 / 600, должность 11. Отступы снаружи — общий ритм. */
+
+/* ---------- Цитата (Text/quote): линия 3, отступ 20, текст t1 ---------- */
+
+.ted-content blockquote {
+  position: relative;
+  padding-left: calc((var(--ted-quote-line) + var(--ted-quote-pad)) * var(--ted-u));
+  border: 0;
+  font-size: calc(var(--ted-quote) * var(--ted-u));
+  line-height: 1.5;
+  font-style: normal;
+  color: var(--ted-c-quote);
+  quotes: none;
+}
+
+/* линия 3 px (main/color1/main) на всю высоту текста */
+.ted-content blockquote::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: max(calc(var(--ted-quote-line) * var(--ted-u)), 2px);
+  background: var(--ted-c-accent);
+}
+
+.ted-content blockquote::after { content: none; }
+
+.ted-content blockquote > * + * {
+  margin-top: calc(var(--ted-gap) * var(--ted-u));
+}
+
+/* ---------- Цитата с автором (макет block-quote, type=author): отступ 20, аватар 40 (инициалы 18 / 600), имя 16 / 600, должность 9 ---------- */
+
+.ted-content blockquote > p.ted-author {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: calc(40 * var(--ted-u));
+  margin-top: calc(20 * var(--ted-u));
+  padding-left: calc(52 * var(--ted-u));
+  font-size: calc(11 * var(--ted-u));
+  line-height: 1.45;
+  color: var(--ted-c-text);
+}
+
+.ted-content blockquote > p.ted-author::before {
+  content: attr(data-initials);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(40 * var(--ted-u));
+  height: calc(40 * var(--ted-u));
+  border-radius: 50%;
+  background: var(--ted-c-line);
+  color: var(--ted-c-text);
+  font-size: calc(18 * var(--ted-u));
+  font-weight: 600;
+  line-height: 1;
+}
+
+.ted-content blockquote > p.ted-author > strong {
+  display: block;
+  /* в Figma имя — блок 12 с буквами 16: верх заглавных вровень с блоком, зазор до должности 8.
+     Межстрочный 140 % сохраняем для переноса длинного имени; поля -5.2 / +2.8 дают те же 12 + 8. */
+  margin: calc(-5.2 * var(--ted-u)) 0 calc(2.8 * var(--ted-u));
+  font-size: calc(16 * var(--ted-u));
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ted-c-heading);
+  overflow-wrap: anywhere;
+}
+.ted-content blockquote > p.ted-author > strong:first-child + br { display: none; }
+.ted-content blockquote > p.ted-author > strong:last-child { margin-bottom: 0; }

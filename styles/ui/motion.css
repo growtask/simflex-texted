@@ -1,0 +1,149 @@
+/* ==========================================================================
+   Анимации и полосы прокрутки
+   Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
+   ========================================================================== */
+
+/* ==========================================================================
+   Анимации
+   ========================================================================== */
+@keyframes ted-ui-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ted-ui-pop-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes ted-ui-pop-out {
+  to { opacity: 0; transform: translateY(-2px) scale(0.99); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ted-ui *,
+  .ted-ui *::before,
+  .ted-ui *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+.ted-ui :is(.ted-ui-toolbar, .ted-ui-menu__list, .ted-ui-picker__scroll, .ted-ui-pop__box, .ted-ui-editable pre)::-webkit-scrollbar { width: 4px; height: 4px; }
+
+.ted-ui .ted-ui-editable pre::-webkit-scrollbar { height: 8px; }
+/* полоса таблицы — из content.css, как у кода (ползунок 40 %, зона захвата 20 px) */
+
+/* код: size m */
+.ted-ui :is(.ted-ui-toolbar, .ted-ui-menu__list, .ted-ui-picker__scroll, .ted-ui-pop__box, .ted-ui-editable pre)::-webkit-scrollbar-button { display: none; }
+
+.ted-ui :is(.ted-ui-toolbar, .ted-ui-menu__list, .ted-ui-picker__scroll, .ted-ui-pop__box, .ted-ui-editable pre)::-webkit-scrollbar-track { border-radius: 9999px; background: var(--sb-track); }
+
+.ted-ui :is(.ted-ui-toolbar, .ted-ui-menu__list, .ted-ui-picker__scroll, .ted-ui-pop__box, .ted-ui-editable pre)::-webkit-scrollbar-track:hover { background: var(--sb-track-active); }
+
+.ted-ui :is(.ted-ui-toolbar, .ted-ui-menu__list, .ted-ui-picker__scroll, .ted-ui-pop__box, .ted-ui-editable pre)::-webkit-scrollbar-thumb { border-radius: 9999px; background: var(--sb-thumb); }
+
+.ted-ui :is(.ted-ui-toolbar, .ted-ui-menu__list, .ted-ui-picker__scroll, .ted-ui-pop__box, .ted-ui-editable pre)::-webkit-scrollbar-thumb:hover { background: var(--sb-thumb-hover); }
+
+.ted-ui :is(.ted-ui-toolbar, .ted-ui-menu__list, .ted-ui-picker__scroll, .ted-ui-pop__box, .ted-ui-editable pre)::-webkit-scrollbar-thumb:active { background: var(--sb-thumb-press); }
+
+/* Firefox: только static-цвета (hover/press браузер не поддерживает) */
+@supports not selector(::-webkit-scrollbar) {
+  .ted-ui :is(.ted-ui-toolbar, .ted-ui-menu__list, .ted-ui-picker__scroll, .ted-ui-pop__box, .ted-ui-editable pre) {
+    scrollbar-width: thin;
+    scrollbar-color: var(--sb-thumb) var(--sb-track);
+  }
+}
+
+@keyframes ted-ui-toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes ted-ui-toast-timer {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ted-ui-toast, .ted-ui-toast.is-closing { animation-duration: 1ms; transition-duration: 1ms; }
+}
+
+@keyframes ted-picker-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+@keyframes ted-picker-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-6px); } }
+
+@media (prefers-reduced-motion: reduce) { .ted-ui-picker, .ted-ui-picker.is-closing { animation-duration: 1ms; } }
+
+@media (prefers-reduced-motion: reduce) { .ted-ui { transition: none; } }
+
+/* Плавность: новые блоки появляются, смена правка ↔ просмотр, кнопки блока переезжают, смена темы */
+@keyframes ted-block-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+@keyframes ted-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ted-ui-editable > [data-tedui-in], .ted-ui-canvas:not([hidden]), .ted-ui-view:not([hidden]) { animation: none; }
+  .ted-ui-addblock, .ted-ui-controls.is-visible { transition: none; }
+}
+
+/* ==========================================================================
+   Движение из UI-кита rpm (решение 22.11): токены --ui-motion-* и --ui-ease-* (shell.css)
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .ted-ui { --ui-motion-fast: 1ms; --ui-motion-base: 1ms; --ui-motion-slow: 1ms; }
+}
+
+/* каскад: пункты выпадающего списка появляются друг за другом с шагом 18 мс — только при открытии (не при фильтре «/») */
+@keyframes ted-ui-item-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.ted-ui-pop.is-opening .ted-ui-item { animation: ted-ui-item-in var(--ui-motion-base) var(--ui-ease-out) backwards; }
+.ted-ui-pop.is-opening .ted-ui-item:nth-child(2) { animation-delay: 18ms; }
+.ted-ui-pop.is-opening .ted-ui-item:nth-child(3) { animation-delay: 36ms; }
+.ted-ui-pop.is-opening .ted-ui-item:nth-child(4) { animation-delay: 54ms; }
+.ted-ui-pop.is-opening .ted-ui-item:nth-child(5) { animation-delay: 72ms; }
+.ted-ui-pop.is-opening .ted-ui-item:nth-child(6) { animation-delay: 90ms; }
+.ted-ui-pop.is-opening .ted-ui-item:nth-child(7) { animation-delay: 108ms; }
+.ted-ui-pop.is-opening .ted-ui-item:nth-child(8) { animation-delay: 126ms; }
+.ted-ui-pop.is-opening .ted-ui-item:nth-child(9) { animation-delay: 144ms; }
+.ted-ui-pop.is-opening .ted-ui-item:nth-child(10) { animation-delay: 162ms; }
+.ted-ui-pop.is-opening .ted-ui-item:nth-child(11) { animation-delay: 180ms; }
+.ted-ui-pop.is-opening .ted-ui-item:nth-child(12) { animation-delay: 198ms; }
+.ted-ui-pop.is-opening .ted-ui-item:nth-child(n + 13) { animation-delay: 216ms; }
+
+/* пружина: бегунок переключателя доезжает с лёгким перелётом */
+.ted-ui-toggle__knob { transition: transform var(--ui-motion-base) var(--ui-ease-spring); }
+.ted-ui-toggle__track { transition: background-color var(--ui-motion-fast) ease; }
+
+/* нажатие: мягкое вдавливание кнопок окна и панели */
+.ted-ui :is(.ted-ui-action, .ted-ui-btn) { transition: background-color var(--ui-motion-fast) ease, color var(--ui-motion-fast) ease, box-shadow var(--ui-motion-fast) ease, transform var(--ui-motion-fast) var(--ui-ease-out); }
+.ted-ui :is(.ted-ui-action, .ted-ui-btn):active { transform: scale(0.97); }
+
+/* смена темы: цвета перетекают за --ui-motion-slow (класс на время смены ставит editor.setTheme) */
+.ted-ui.is-theming,
+.ted-ui.is-theming *,
+.ted-ui.is-theming *::before,
+.ted-ui.is-theming *::after {
+  transition: background-color var(--ui-motion-slow) var(--ui-ease-out), color var(--ui-motion-slow) var(--ui-ease-out), border-color var(--ui-motion-slow) var(--ui-ease-out), fill var(--ui-motion-slow) var(--ui-ease-out), stroke var(--ui-motion-slow) var(--ui-ease-out), box-shadow var(--ui-motion-slow) var(--ui-ease-out) !important;
+}
+
+/* поэтапное появление при открытии: панель, затем блоки сверху вниз (шаг 30 мс, первые 16), без сдвигов раскладки */
+@keyframes ted-appear { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.ted-ui.is-appearing .ted-ui-toolbar { animation: ted-fade-in var(--ui-motion-slow) var(--ui-ease-out) backwards; }
+.ted-ui.is-appearing .ted-ui-editable > * { animation: ted-appear var(--ui-motion-slow) var(--ui-ease-out) backwards; animation-delay: 480ms; }
+.ted-ui.is-appearing .ted-ui-editable > :nth-child(1) { animation-delay: 60ms; }
+.ted-ui.is-appearing .ted-ui-editable > :nth-child(2) { animation-delay: 90ms; }
+.ted-ui.is-appearing .ted-ui-editable > :nth-child(3) { animation-delay: 120ms; }
+.ted-ui.is-appearing .ted-ui-editable > :nth-child(4) { animation-delay: 150ms; }
+.ted-ui.is-appearing .ted-ui-editable > :nth-child(5) { animation-delay: 180ms; }
+.ted-ui.is-appearing .ted-ui-editable > :nth-child(6) { animation-delay: 210ms; }
+.ted-ui.is-appearing .ted-ui-editable > :nth-child(7) { animation-delay: 240ms; }
+.ted-ui.is-appearing .ted-ui-editable > :nth-child(8) { animation-delay: 270ms; }
+.ted-ui.is-appearing .ted-ui-editable > :nth-child(9) { animation-delay: 300ms; }
+.ted-ui.is-appearing .ted-ui-editable > :nth-child(10) { animation-delay: 330ms; }
+.ted-ui.is-appearing .ted-ui-editable > :nth-child(11) { animation-delay: 360ms; }
+.ted-ui.is-appearing .ted-ui-editable > :nth-child(12) { animation-delay: 390ms; }
+.ted-ui.is-appearing .ted-ui-editable > :nth-child(13) { animation-delay: 420ms; }
+.ted-ui.is-appearing .ted-ui-editable > :nth-child(14) { animation-delay: 450ms; }
+.ted-ui.is-appearing .ted-ui-editable > :nth-child(15) { animation-delay: 480ms; }
+.ted-ui.is-appearing .ted-ui-editable > :nth-child(16) { animation-delay: 510ms; }
+@media (prefers-reduced-motion: reduce) { .ted-ui.is-appearing .ted-ui-editable > *, .ted-ui.is-appearing .ted-ui-toolbar { animation: none; } }

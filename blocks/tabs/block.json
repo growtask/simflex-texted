@@ -1,0 +1,12 @@
+{
+  "type": "tabs",
+  "title": "Вкладки",
+  "figma": "block-tabs (Tabs/main underline m)",
+  "menu": { "group": "Интерактив", "order": 20, "icon": "tabs", "words": "вкладки табы разделы переключатель tabs", "convert": false, "sample": "<div class=\"ted-tabs\" data-ted-tabs><div class=\"ted-tabs__bar\"><span class=\"ted-tabs__tab\" aria-selected=\"true\">Описание</span><span class=\"ted-tabs__tab\">Доставка</span></div><div class=\"ted-tabs__panel\"><div class=\"ted-tabs__body\"><p>Первая вкладка объясняет идею.</p></div></div></div>" },
+  "selector": ".ted-tabs",
+  "html": {},
+  "toolbar": { "bg": false, "align": false, "style": false },
+  "inContainers": false,
+  "container": true,
+  "noBold": ".ted-tabs__title"
+}

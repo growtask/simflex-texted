@@ -1,0 +1,19 @@
+/* Пример переменных сайта — имена как в ядре Simflex (Layout/assetsGlobal/styles/abstract/_colors.scss; этап 4).
+   Ted берёт отсюда цвета автоматически. Шрифты здесь не заданы —
+   используется Inter из проекта (как в макете). Чтобы проверить подмену
+   шрифта сайтом, раскомментируйте две строки ниже. */
+:root {
+  /* --font-family-heading: Georgia, "Times New Roman", serif; */
+  /* --font-family-body: "Segoe UI", system-ui, sans-serif; */
+  --color-main-gray-black: #0d0d0d;
+  --color-main-gray-darker: #262626;
+  --color-main-gray-light: #dadfe5;
+  --color-main-gray-lighter: #edf3fa;
+  --color-text-icon-gray-black: #0d0d0d;
+  --color-text-icon-gray-darker: #262626;
+  --color-text-icon-gray-dark: #4d4d4d;
+  --color-text-icon-gray-medium: #919599;
+  --color-text-icon-color1-main: #1975f7;
+  --color-text-icon-color1-dark: #1461cc;
+  --color-main-color1-main: #1975f7;
+}

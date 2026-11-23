@@ -1,0 +1,35 @@
+{
+  "name": "simflex/texted",
+  "description": "texted — блочный редактор статей для сайтов и CMS: textarea → блоки → чистый HTML",
+  "type": "library",
+  "license": "MIT",
+  "homepage": "https://github.com/growtask/simflex-texted",
+  "keywords": [
+    "editor",
+    "wysiwyg",
+    "block-editor",
+    "simflex"
+  ],
+  "require": {
+    "php": "^8.4",
+    "ext-dom": "*",
+    "ext-libxml": "*"
+  },
+  "suggest": {
+    "ext-gd": "Сжатие загруженных изображений в WebP",
+    "ext-fileinfo": "Тип загруженного файла по содержимому",
+    "ext-mbstring": "Обработка текста",
+    "ext-openssl": "Карточка и картинка по ссылке (https)"
+  },
+  "autoload": {
+    "classmap": [
+      "php/blocks.php",
+      "php/config.php",
+      "php/opengraph.php",
+      "php/presets.php",
+      "php/ratelimit.php",
+      "php/sanitize.php",
+      "php/upload.php"
+    ]
+  }
+}

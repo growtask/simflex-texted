@@ -1,0 +1,37 @@
+/* Блок «Содержание» — вид на сайте и в редакторе (макет block-navigation). */
+
+/* Содержание (этап 6.3, block-navigation). Над панелью — полоса прогресса чтения (Scrollbar classic m: 8, дорожка main/gray/lighter 20 %,
+   ползунок main/color1/light 20 %), через 12 — панель main/gray/lighter, r24, поля 20 / 20 / 12, между частями 8:
+   заголовок heading/h4 24 / 700 main/gray/darker, главы — ссылки text/t2 16 / 1.5 text-icon/color1/dark через 4, «Скрыть» ui/s 14 / 600 по центру (40).
+   ≤ 811: поля 12 / 12 / 8, r12, между частями 4, заголовок 20. Тёмная: панель main/gray/dark, заголовок #FFF, ссылки color1/light, «Скрыть» gray/lighter.
+   На сайте (content.js): полоса идёт за читателем — прилипает к верху окна, само содержание остаётся на месте; список свёрнут. */
+.ted-content .ted-toc { display: block; margin: 0 0 calc(var(--ted-gap) * var(--ted-u)); --ted-toc-bg: var(--color-main-gray-lighter, #edf3fa); --ted-toc-title: var(--ted-c-heading); --ted-toc-link: var(--color-text-icon-color1-dark, #1461cc); --ted-toc-toggle: var(--ted-c-heading); --ted-toc-track: rgba(237, 243, 250, 0.2); --ted-toc-thumb: rgba(99, 161, 247, 0.2); }
+[data-ted-theme='dark'] .ted-content .ted-toc { --ted-toc-bg: var(--color-main-gray-dark, #4d4d4d); --ted-toc-title: var(--color-main-gray-white, #ffffff); --ted-toc-link: var(--color-text-icon-color1-light, #63a1f7); --ted-toc-toggle: var(--color-main-gray-lighter, #edf3fa); --ted-toc-track: rgba(77, 77, 77, 0.2); --ted-toc-thumb: rgba(25, 117, 247, 0.2); }
+.ted-content .ted-toc__progress { height: calc(8 * var(--ted-u)); margin: 0 0 calc(12 * var(--ted-u)); overflow: hidden; border-radius: 9999px; background: var(--ted-toc-track); }
+.ted-content .ted-toc__bar { width: 0; height: 100%; border-radius: inherit; background: var(--ted-toc-thumb); transition: width 0.1s linear; }
+.ted-content .ted-toc[data-ted-stuck] { padding-top: calc(20 * var(--ted-u)); }
+.ted-content .ted-toc[data-ted-stuck] .ted-toc__progress { position: fixed; z-index: 10; top: 8px; margin: 0; }
+.ted-content .ted-toc__panel { --ted-toc-gap: calc(8 * var(--ted-u)); display: grid; gap: var(--ted-toc-gap); padding: calc(20 * var(--ted-u)) calc(20 * var(--ted-u)) calc(12 * var(--ted-u)); border-radius: calc(24 * var(--ted-u)); background: var(--ted-toc-bg); }
+.ted-content .ted-toc__title { margin: 0; padding: 0 0 calc(8 * var(--ted-u)); font-family: var(--ted-font-heading); font-size: calc(24 * var(--ted-u)); font-weight: 700; line-height: 1; color: var(--ted-toc-title); }
+.ted-content .ted-toc__list { display: grid; gap: calc(4 * var(--ted-u)); margin: 0; padding: 0 0 calc(8 * var(--ted-u)); list-style: none; }
+.ted-content .ted-toc__list > li { margin: 0; padding: 0; }
+.ted-content .ted-toc__list > li::before { content: none; }
+.ted-content .ted-toc__list a { font-size: calc(16 * var(--ted-u)); line-height: 1.5; color: var(--ted-toc-link); text-decoration: none; }
+.ted-content .ted-toc__list a:hover { text-decoration: underline; }
+.ted-content .ted-toc__toggle { display: flex; align-items: center; justify-content: center; gap: calc(4 * var(--ted-u)); width: 100%; min-height: calc(40 * var(--ted-u)); margin: 0; padding: 0; border: 0; background: none; color: var(--ted-toc-toggle); font-family: inherit; font-size: calc(14 * var(--ted-u)); font-weight: 600; line-height: 1.4; cursor: pointer; }
+.ted-content .ted-toc__toggle::after { content: ''; flex: none; width: calc(24 * var(--ted-u)); height: calc(24 * var(--ted-u)); background: currentColor; -webkit-mask: var(--ted-icon-chevron) center / 71% no-repeat; mask: var(--ted-icon-chevron) center / 71% no-repeat; transform: rotate(180deg); transition: transform var(--ted-motion-base, 180ms) var(--ted-ease-out, ease); }
+.ted-content .ted-toc[data-ted-collapsed] .ted-toc__toggle::after { transform: none; }
+/* «Скрыть» / «Показать» — плавно (заказчик 22.11): список сворачивается по высоте и гаснет, как ответ аккордеона; закрытие быстрее.
+   Свёрнутый список — высота 0 и минус промежуток панели, поэтому панель такая же, как без списка. В браузере без interpolate-size — сразу */
+.ted-content .ted-toc { interpolate-size: allow-keywords; }
+.ted-content .ted-toc__list { overflow: clip; }
+:is(.ted-ui-editable .ted-toc, .ted-content .ted-toc[data-ted-anim]) .ted-toc__list { transition: height var(--ted-motion-slow, 240ms) var(--ted-ease-out, ease), opacity var(--ted-motion-slow, 240ms) var(--ted-ease-out, ease), margin var(--ted-motion-slow, 240ms) var(--ted-ease-out, ease), padding var(--ted-motion-slow, 240ms) var(--ted-ease-out, ease), visibility 0s; }
+:is(.ted-content .ted-toc[data-ted-collapsed], .ted-ui-editable .ted-toc[data-tedui-collapsed]) .ted-toc__list { height: 0; opacity: 0; padding-bottom: 0; margin-bottom: calc(-1 * var(--ted-toc-gap)); visibility: hidden; }
+:is(.ted-content .ted-toc[data-ted-anim][data-ted-collapsed], .ted-ui-editable .ted-toc[data-tedui-collapsed]) .ted-toc__list { transition-duration: var(--ted-motion-fast, 120ms); transition-timing-function: var(--ted-ease-in, ease); transition-delay: 0s, 0s, 0s, 0s, var(--ted-motion-fast, 120ms); }
+@media (width <= 811px) {
+  .ted-content .ted-toc__panel { --ted-toc-gap: calc(4 * var(--ted-u)); padding: calc(12 * var(--ted-u)) calc(12 * var(--ted-u)) calc(8 * var(--ted-u)); border-radius: calc(12 * var(--ted-u)); }
+  .ted-content .ted-toc__title { font-size: calc(20 * var(--ted-u)); }
+}
+
+/* печать и PDF: полосы прогресса чтения нет, список глав раскрыт (22.11) */
+@media print { .ted-content .ted-toc__progress { display: none; } .ted-content .ted-toc .ted-toc__list { display: grid; height: auto; opacity: 1; visibility: visible; margin-bottom: 0; } }

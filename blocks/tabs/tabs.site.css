@@ -1,0 +1,33 @@
+/* Блок «Вкладки» — вид на сайте и в редакторе (макет block-tabs (Tabs/main underline m)). */
+
+/* Вкладки (этап 6.3, block-tabs: tabs / Tabs/main underline m). Ряд вкладок: равной ширины, не уже названия (иначе ряд прокручивается вбок),
+   высота 48 (поля 12), название ui/m 16 / 600 по центру, подчёркивание 2: обычная — прозрачное, наведение main/color1/lighter,
+   нажатие main/color1/light, активная main/color1/main (тёмная: main/gray/medium, main/gray/dark, main/color1/main; текст gray/lighter, у активной #FFF).
+   Под рядом через 20 (на планшете и телефоне 16) — содержимое вкладки (обычные блоки).
+   Без скрипта — разделы подряд, у каждого название; content.js строит ряд вкладок и показывает одну панель (data-ted-tabs). */
+.ted-content .ted-tabs { margin: 0 0 calc(var(--ted-gap) * var(--ted-u)); --ted-tab-text: var(--ted-c-heading); --ted-tab-active-text: var(--ted-c-heading); --ted-tab-hover: var(--color-main-color1-lighter, #d2e2f7); --ted-tab-press: var(--color-main-color1-light, #63a1f7); --ted-tab-active: var(--color-main-color1-main, #1975f7); }
+[data-ted-theme='dark'] .ted-content .ted-tabs { --ted-tab-text: var(--color-text-icon-gray-lighter, #edf3fa); --ted-tab-active-text: var(--color-text-icon-gray-white, #ffffff); --ted-tab-hover: var(--color-main-gray-medium, #919599); --ted-tab-press: var(--color-main-gray-dark, #4d4d4d); }
+.ted-content .ted-tabs__bar { display: flex; margin: 0 0 calc(var(--ted-gap) * var(--ted-u)); overflow-x: auto; scrollbar-width: none; }
+.ted-content .ted-tabs__bar::-webkit-scrollbar { display: none; }
+.ted-content :is(.ted-tabs__tab, .ted-tabs__bar > .ted-tabs__title) { flex: 1 1 0; min-width: max-content; box-sizing: border-box; margin: 0; padding: calc(12 * var(--ted-u)) calc(8 * var(--ted-u)); border: 0; border-bottom: calc(2 * var(--ted-u)) solid transparent; background: none; color: var(--ted-tab-text); font-size: calc(16 * var(--ted-u)); font-weight: 600; line-height: calc(24 * var(--ted-u)); font-family: inherit; text-align: center; white-space: nowrap; cursor: pointer; transition: border-color var(--ted-motion-fast, 120ms) ease, color var(--ted-motion-fast, 120ms) ease; }
+.ted-content .ted-tabs__tab:hover { border-bottom-color: var(--ted-tab-hover); }
+.ted-content .ted-tabs__tab:active { border-bottom-color: var(--ted-tab-press); color: var(--ted-tab-active-text); }
+.ted-content :is(.ted-tabs__tab[aria-selected="true"], .ted-tabs__bar > .ted-tabs__title[data-tedui-active]) { border-bottom-color: var(--ted-tab-active); color: var(--ted-tab-active-text); }
+.ted-content .ted-tabs__tab:focus-visible { outline: 2px solid var(--ted-tab-press); outline-offset: -2px; }
+/* без скрипта: название раздела — подчёркнутой вкладкой над содержимым */
+.ted-content .ted-tabs__panel > .ted-tabs__title { display: inline-block; margin: 0 0 calc(var(--ted-gap) * var(--ted-u)); padding: calc(12 * var(--ted-u)) 0; border-bottom: calc(2 * var(--ted-u)) solid var(--ted-tab-active); color: var(--ted-tab-active-text); font-size: calc(16 * var(--ted-u)); font-weight: 600; line-height: calc(24 * var(--ted-u)); font-family: inherit; }
+.ted-content .ted-tabs__panel + .ted-tabs__panel { margin-top: calc(var(--ted-gap) * var(--ted-u)); }
+.ted-content .ted-tabs__body > :last-child { margin-bottom: 0; }
+/* со скриптом: названия — в ряду вкладок, видна одна панель (плавно появляется) */
+.ted-content .ted-tabs[data-ted-tabs] .ted-tabs__panel > .ted-tabs__title { display: none; }
+.ted-content .ted-tabs[data-ted-tabs] .ted-tabs__panel + .ted-tabs__panel { margin-top: 0; }
+.ted-content .ted-tabs[data-ted-tabs] .ted-tabs__panel[hidden] { display: none; }
+.ted-content .ted-tabs[data-ted-tabs] .ted-tabs__panel:not([hidden]) { animation: ted-tab-in var(--ted-motion-slow, 240ms) var(--ted-ease-out, ease); }
+@keyframes ted-tab-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+/* скользящее подчёркивание (как glide у Tab в UI-ките): одна полоса цвета активной вкладки переезжает к новой с лёгким перелётом;
+   место и ширину задаёт tabs.site.js (--ted-ink-x, --ted-ink-w), пружину — --ted-ease-spring. Своё подчёркивание активной скрыто под полосой */
+.ted-content .ted-tabs[data-ted-tabs] .ted-tabs__bar { position: relative; }
+.ted-content .ted-tabs__ink { position: absolute; left: 0; bottom: 0; width: 1px; height: calc(2 * var(--ted-u)); background: var(--ted-tab-active); transform: translateX(var(--ted-ink-x, 0px)) scaleX(var(--ted-ink-w, 0)); transform-origin: 0 0; pointer-events: none; }
+.ted-content .ted-tabs__bar[data-ted-glide] > .ted-tabs__ink { transition: transform 560ms var(--ted-ease-spring, var(--ted-ease-out, ease)); }
+.ted-content .ted-tabs__bar:has(> .ted-tabs__ink) > .ted-tabs__tab[aria-selected="true"] { border-bottom-color: transparent; }
+@media (prefers-reduced-motion: reduce) { .ted-content .ted-tabs__panel:not([hidden]) { animation: none; } .ted-content .ted-tabs__bar[data-ted-glide] > .ted-tabs__ink { transition: none; } }

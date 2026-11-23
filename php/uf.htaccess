@@ -1,0 +1,25 @@
+# texted: каталог загруженных файлов (uf/) — только данные, ничего исполняемого.
+# Скопируйте как uf/.htaccess (Apache). Для nginx эквивалент — в README, раздел «Безопасность».
+
+# запретить выполнение скриптов и листинг каталога
+Options -ExecCGI -Indexes
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+<FilesMatch "(?i)\.(php\d?|phtml|phar|pl|py|cgi|sh|asp|aspx|jsp)$">
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  # браузер не должен угадывать тип по содержимому
+  Header always set X-Content-Type-Options "nosniff"
+  # даже если файл окажется HTML — скриптов в нём не выполнить
+  Header always set Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+  # документы скачиваются, а не открываются на сайте
+  <FilesMatch "(?i)\.(pdf|zip|docx|xlsx)$">
+    Header always set Content-Disposition "attachment"
+  </FilesMatch>
+</IfModule>

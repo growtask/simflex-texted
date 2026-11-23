@@ -1,0 +1,120 @@
+/* ==========================================================================
+   Предпросмотр
+   Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
+   ========================================================================== */
+
+/* mobile 414 → 382: колонка = ширина − 2 × 16 */
+/* В редакторе размеры всегда в px (даже если на странице подключён ted.vw.css) */
+.ted-ui .ted-ui-editable.ted-content,
+.ted-ui .ted-ui-view .ted-content { --ted-u: 1px; }
+
+/* tablet / mobile колонка — мобильные заголовки и отступы (как в макете) */
+@container ted (width < 840px) {
+  .ted-ui-canvas { padding-top: 16px; }
+  .ted-ui .ted-ui-editable.ted-content,
+  .ted-ui .ted-ui-view .ted-content {
+    --ted-h2: 28;
+    --ted-h3: 24;
+    --ted-h4: 20;
+    --ted-h5: 20;
+    --ted-h6: 16;
+    --ted-gap: 16;
+    --ted-gap-h: 16;
+    --ted-gap-quote: 16;
+  }
+}
+
+/* Тёмная тема контента в редакторе (цвета блоков theme=dark) */
+.ted-ui[data-ted-theme="dark"] :is(.ted-ui-editable, .ted-ui-view .ted-content) {
+  --ted-c-text: var(--ui-color-text-icon-gray-lighter);
+  --ted-c-heading: var(--ui-color-text-icon-gray-white);
+  --ted-c-quote: var(--ui-color-text-icon-gray-white);
+  --ted-c-line: var(--ui-color-main-gray-dark);
+  --ted-c-step-line: var(--ui-color-main-gray-dark);
+  --ted-c-callout-bg: var(--ui-color-main-gray-darker);
+  --ted-c-fact-bg: var(--ui-color-main-gray-dark);
+  --ted-c-fact-num: var(--ui-color-main-color1-light);
+  --ted-c-pros-bg: var(--ui-color-main-gray-dark);
+  --ted-c-cons-bg: var(--ui-color-main-gray-dark);
+  --ted-c-code-bg: var(--ui-color-main-gray-darker);
+  --ted-c-code-head: var(--ui-color-main-gray-dark);
+  --ted-c-code-text: var(--ui-color-text-icon-gray-lighter);
+}
+
+/* ==========================================================================
+   Предпросмотр
+   ========================================================================== */
+.ted-ui-preview {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  background: var(--ui-page);
+  animation: ted-ui-fade 0.2s var(--ui-ease);
+}
+
+.ted-ui-preview__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--ui-line);
+  background: var(--ui-bar);
+}
+
+.ted-ui-preview__bar .ted-ui-btn {
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.ted-ui-preview__info {
+  margin-left: 8px;
+  color: var(--ui-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ted-ui-preview__stage {
+  position: relative;
+  flex: 1 1 auto;
+  padding: 16px;
+  overflow: hidden;
+  background: var(--ui-preview-bg);
+}
+
+.ted-ui-preview__viewport {
+  position: relative;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: var(--ui-radius-medium);
+  background: var(--ui-color-main-gray-white);
+  outline: 1px solid var(--ui-line);
+  transition: width 0.25s var(--ui-ease), height 0.25s var(--ui-ease);
+}
+
+.ted-ui-preview__frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 0;
+  background: var(--ui-color-main-gray-white);
+  transform-origin: 0 0;
+}
+
+/* Просмотр на странице (документация): та же колонка, что в редакторе */
+.ted-ui-view {
+  flex: 1 1 auto;
+  padding: 24px 0 48px;
+  animation: ted-ui-fade 0.16s var(--ui-ease);
+}
+
+.ted-ui-view > .ted-ui-column > .ted-content > :last-child { padding-bottom: 0; margin-bottom: 0; }
+
+@container ted (width < 840px) {
+  .ted-ui-preview > .ted-ui-view { padding-top: 16px; }
+}
+
+.ted-ui-canvas:not([hidden]), .ted-ui-view:not([hidden]) { animation: ted-fade-in 0.18s ease; }

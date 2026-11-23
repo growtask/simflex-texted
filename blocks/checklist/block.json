@@ -1,0 +1,29 @@
+{
+  "type": "checklist",
+  "title": "Чек-лист",
+  "jsonExample": "{ \"type\": \"checklist\", \"items\": [\"задача\", { \"text\": \"сделано\", \"checked\": true }] }",
+  "figma": "block-checklist (check-box size=s)",
+  "text": true,
+  "toolbar": {
+    "bg": false,
+    "align": false
+  },
+  "menu": {
+    "group": "Списки",
+    "order": 20,
+    "icon": "checklist",
+    "words": "чек-лист чеклист задачи галочки checklist todo",
+    "sample": "<ul class=\"ted-checklist\"><li class=\"ted-checked\">Подготовьте материалы</li><li class=\"ted-checked\">Отправьте заявку</li><li>Получите ответ</li><li>Оплатите заказ</li></ul>"
+  },
+  "style": {
+    "label": "Чек-лист",
+    "icon": "checklist",
+    "keys": "",
+    "order": 80
+  },
+  "selector": "ul.ted-checklist",
+  "html": {
+    "ul": [],
+    "li": []
+  }
+}

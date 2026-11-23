@@ -1,0 +1,241 @@
+/* Медиа — правка в редакторе (бывш. styles/ui/media.css). */
+
+.ted-ui-media {
+  --ted-media-image-height: 452px;
+    --ted-media-drop-border: var(--ui-drag-ring);
+  --ted-media-drop-bg: var(--ui-selected);
+  --ted-media-drop-static: var(--ui-input-border);
+  --ted-media-link: var(--ui-color-text-icon-color1-dark);
+  --ted-media-link-hover: var(--ui-color-text-icon-color1-main);   /* Buttons/main flat l: hover, press */
+  --ted-media-link-press: var(--ui-color-text-icon-color1-darker);
+  --ted-media-paperclip: url('../icons/media-paperclip.svg');
+  --ted-media-info: url('../icons/media-info.svg');
+  position: relative;
+  margin-bottom: calc(var(--ted-gap) * var(--ted-u));
+}
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-media {
+  --ted-media-drop-border: var(--ui-color-main-color1-darker);
+  --ted-media-drop-bg: var(--ui-pop);
+  --ted-media-drop-static: var(--ui-muted);
+  --ted-media-link: var(--ui-color-text-icon-color1-light);
+  --ted-media-link-hover: var(--ui-color-text-icon-color1-lighter);
+  --ted-media-link-press: var(--ui-color-text-icon-color1-main);
+  --ted-media-paperclip: url('../icons/media-paperclip-dark.svg');
+  --ted-media-info: url('../icons/media-info-dark.svg');
+}
+
+.ted-ui-media[data-media-ready="false"] > .ted-media { display: none; }
+.ted-ui-media[data-tedui-media-replacing] > .ted-media { display: none; }
+.ted-ui-media__panel:empty { display: none; }
+.ted-ui-media__panel { display: grid; gap: 12px; }
+@container ted (width <= 812px) { .ted-ui-media__panel { gap: 8px; } }
+
+.ted-ui-media[data-media-ready="true"] .ted-ui-media__drop { margin-top: 16px; }
+.ted-ui-media__drop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-content: center;   /* в узкой колонке строки «Выбрать …» и «или перетащите сюда» рядом, а не по краям зоны */
+  gap: 4px;
+  width: 100%;
+  min-height: 64px;
+  padding: 8px 12px;
+  text-align: center;
+  border: 2px dashed var(--ted-media-drop-static);
+  border-radius: var(--ui-radius-small);
+  font: 400 16px/1.5 var(--ui-font);
+  background: var(--ui-field);
+  color: var(--ted-media-link);
+  cursor: pointer;
+}
+.ted-ui-media__paperclip { display: inline-block; width: 24px; height: 24px; margin-right: 4px; vertical-align: -6px; background: center / contain no-repeat var(--ted-media-paperclip); }
+.ted-ui-media__drop-hint { color: var(--ui-text); }
+.ted-ui-media__hint { display: flex; align-items: center; min-height: 38px; padding: 11px 12px; border-radius: var(--ui-radius-medium); font: 400 11px/1.45 var(--ui-font); color: var(--ui-muted); background: var(--ui-field); }
+.ted-ui-media__hint::before { content: ''; flex: none; width: 16px; height: 16px; margin-right: 8px; background: center / contain no-repeat var(--ted-media-info); }
+.ted-ui-media__drop-active,
+.ted-ui-media.is-drop-target :is(.ted-ui-media__drop-label, .ted-ui-media__drop-hint) { display: none; }
+.ted-ui-media.is-drop-target .ted-ui-media__drop-active { display: inline; color: var(--ui-text); }
+.ted-ui-media__drop:hover,
+.ted-ui-media.is-drop-target .ted-ui-media__drop { border-color: var(--ted-media-drop-border); background: var(--ted-media-drop-bg); }
+.ted-ui-media.is-drop-target > .ted-media { outline: 2px dashed var(--ted-media-drop-border); outline-offset: 4px; }
+/* Зона со ссылкой библиотеки (Uploader/drop, library=true): «Выбрать … или перетащите сюда · Из библиотеки»; ссылки — Buttons/main flat l */
+.ted-ui-media__drop-link { margin: 0; padding: 0; border: 0; border-radius: var(--ui-radius-small); background: none; font: inherit; color: var(--ted-media-link); cursor: pointer; }
+.ted-ui-media__drop-link[data-act="media-library"]:hover { color: var(--ted-media-link-hover); }
+.ted-ui-media__drop-link[data-act="media-library"]:active { color: var(--ted-media-link-press); }
+.ted-ui-media__drop-link:focus-visible { outline: 2px solid var(--ui-drag-ring); outline-offset: 2px; }
+.ted-ui-media__drop-more { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.ted-ui-media__drop-dot { color: var(--ui-text); }
+.ted-ui-media.is-drop-target .ted-ui-media__drop-more { display: none; }
+
+.ted-ui-media__tools { position: absolute; z-index: 2; inset: 8px 8px auto auto; display: flex; gap: 4px; opacity: 0; transition: opacity 0.12s ease; }
+.ted-ui-media:hover .ted-ui-media__tools,
+.ted-ui-media:focus-within .ted-ui-media__tools { opacity: 1; }
+.ted-ui-media__refresh-icon { display: block; width: 16px; height: 16px; background: center / contain no-repeat url('../icons/media-refresh.svg'); }
+/* Кнопки плитки галереи: правый верхний угол плитки (поле 4), между кнопками 2, значки 16 — как item-controls у шагов и плиток цифр */
+.ted-ui-media__tile-tools {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 3;
+  display: flex;
+  gap: 2px;
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-small-bg);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.ted-ui-media__tile-tools .ted-ui-small { background: transparent; border-radius: var(--ui-radius-small); color: var(--ui-icon); }   /* у файла плитка синяя (ссылка): значки кнопок не наследуют её цвет */
+.ted-ui-media__tile-tools .ted-ui-small:hover { background: var(--ui-hover); }
+.ted-ui-media__tile-tools .ted-ui-small svg { width: 16px; height: 16px; }
+.ted-ui-media__tile-tools [data-act="media-grip"] { cursor: grab; touch-action: none; }
+.ted-media--gallery > figure:hover > .ted-ui-media__tile-tools,
+.ted-media--gallery > figure:focus-within > .ted-ui-media__tile-tools,
+.ted-media--gallery > figure[data-tedui-drag] > .ted-ui-media__tile-tools { opacity: 1; }
+/* рамки при наведении и фокусе нет: она только при перетаскивании — 2 px main/color1/light, поле 2, подложка 4 (как у шагов, чек-листа, плиток цифр) */
+.ted-ui-media .ted-media--gallery > figure[data-tedui-drag] {
+  position: relative;
+  z-index: 2;
+  border-radius: var(--ui-radius-medium);
+  outline: 2px solid var(--ui-drag-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--ui-drag-bg);
+}
+.ted-ui.is-dragging .ted-ui-media .ted-media--gallery > figure { transition: transform 0.22s var(--ui-ease); }
+.ted-ui.is-dragging .ted-ui-media .ted-media--gallery > figure[data-tedui-drag],
+.ted-ui.is-dropping .ted-ui-media .ted-media--gallery > figure { transition: none !important; }
+
+.ted-ui-media__drop:focus-visible { outline: 2px solid var(--ui-drag-ring); outline-offset: 2px; }
+
+@container ted (width <= 920px) { .ted-ui-media { --ted-media-image-height: 392px; } }
+@container ted (width <= 812px) { .ted-ui-media { --ted-media-image-height: 292px; } }
+@container ted (width <= 480px) { .ted-ui-media { --ted-media-image-height: 228px; } }
+@container ted (width < 480px) { .ted-ui-media .ted-media--file { grid-template-columns: minmax(0, 1fr); } }
+@media (hover: none) { .ted-ui-media__tools, .ted-ui-media__tile-tools { opacity: 1; } }
+
+/* Выделение текста при выборе блока не заливает подписи плашки; поля ввода остаются выделяемыми */
+.ted-ui-media { -webkit-user-select: none; user-select: none; }
+.ted-ui-media :is(input, textarea, select) { -webkit-user-select: text; user-select: text; }
+.ted-ui-media ::selection { background: transparent; }
+
+/* Пустая плашка изображения выше: сразу видно, что здесь будет картинка (высота как у загрузки и готового изображения) */
+.ted-ui-media[data-media-kind="image"][data-media-ready="false"] .ted-ui-media__drop { flex-direction: column; min-height: min(var(--ted-media-image-height), 100cqi); border-radius: var(--ted-media-radius, 24px); }
+.ted-ui-media[data-media-kind="video"][data-media-ready="false"] .ted-ui-media__drop { min-height: 160px; border-radius: var(--ui-radius-xlarge); }
+.ted-ui-media[data-media-kind="gallery"][data-media-ready="false"] .ted-ui-media__drop { min-height: 160px; border-radius: var(--ui-radius-medium); }
+
+
+/* Подписи в блоке правятся полем под медиа, поэтому настоящие figcaption в редакторе скрыты (в HTML остаются) */
+.ted-ui-media figcaption { display: none; }
+.ted-ui-media__caption {
+  display: block; box-sizing: border-box; width: 100%; height: 20px; margin: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none;
+  background: transparent; color: var(--ui-muted); font: 400 13px/1.5 var(--ui-font); outline: none;
+}
+.ted-ui[data-ted-theme="dark"] .ted-ui-media__caption { color: var(--ui-color-text-icon-gray-light); }
+/* первая в панели (под изображением и видео) стоит в 12 px от медиа, на планшете и телефоне в 8 */
+.ted-ui-media__panel > .ted-ui-media__tools + .ted-ui-media__caption { margin-top: 12px; }
+@container ted (width <= 812px) { .ted-ui-media__panel > .ted-ui-media__tools + .ted-ui-media__caption { margin-top: 8px; } }
+.ted-ui-media__caption::placeholder { color: var(--ui-muted); opacity: 0.8; }
+.ted-ui-media__caption:focus { color: var(--ui-text); }
+.ted-ui-media__info { margin-top: -8px; font: 400 11px/16px var(--ui-font); color: var(--ui-muted); }   /* text/t4 */
+.ted-media--gallery > figure > .ted-ui-media__caption { margin-top: 8px; }
+
+/* Ссылка на видео под зоной drop */
+.ted-ui-media__link { margin-top: 8px; }
+
+/* Загрузка (Uploader/drop, state=start → finish): зона остаётся на месте и заливается цветом слева направо, поверх — спиннер, «Загрузка 15%» и «Отменить» */
+.ted-ui-media__job {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 64px;
+  overflow: hidden;
+  border: 2px dashed var(--ted-media-drop-static);
+  border-radius: var(--ui-radius-small);
+  background: transparent;
+  box-sizing: border-box;
+}
+.ted-ui-media__job--image { min-height: min(var(--ted-media-image-height), 100cqi); border-radius: var(--ted-media-radius, 24px); }
+.ted-ui-media__job--video { min-height: 160px; border-radius: var(--ted-media-radius, 24px); }
+.ted-ui-media__job--gallery { min-height: 160px; border-radius: var(--ui-radius-medium); }
+.ted-ui-media__job--audio { border-radius: var(--ui-radius-small); }
+.ted-ui-media__job--file { min-height: 96px; border-radius: var(--ui-radius-medium); }
+.ted-ui-media__fill { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--ted-media-drop-bg); transition: width 0.2s linear; }
+/* процент неизвестен (картинка по ссылке, сервер без прогресса): зона всё равно наполняется слева направо — быстро вначале,
+   медленнее к 90 %; при перерисовке продолжает с того же места (animation-delay), готово — 100 % (заказчик 17.11: не «туда-сюда») */
+.ted-ui-media__fill.is-pending { width: 90%; animation: ted-media-pending 12s cubic-bezier(0.1, 0.7, 0.3, 1) both; }
+@keyframes ted-media-pending { from { width: 3%; } to { width: 90%; } }
+@media (prefers-reduced-motion: reduce) { .ted-ui-media__fill { transition: none; } .ted-ui-media__fill.is-pending { animation: none; width: 50%; } }
+.ted-ui-media__status { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; max-width: 100%; padding: 12px 16px; color: var(--ui-text); }
+.ted-ui-media__job--image .ted-ui-media__status, .ted-ui-media__job--video .ted-ui-media__status, .ted-ui-media__job--gallery .ted-ui-media__status { flex-direction: column; text-align: center; }
+.ted-ui-media__spinner { flex: none; width: 24px; height: 24px; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0, var(--ui-accent) 100%); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); animation: ted-media-spin 0.8s linear infinite; }
+@keyframes ted-media-spin { to { transform: rotate(1turn); } }
+@media (prefers-reduced-motion: reduce) { .ted-ui-media__spinner { animation: none; } }
+.ted-ui-media__file { display: grid; gap: 2px; min-width: 0; font: 400 11px/1.45 var(--ui-font); }   /* text/t4; заголовок строки — ui/s */
+.ted-ui-media__file strong { font: 600 14px/1.4 var(--ui-font); }
+.ted-ui-media__file span { color: var(--ui-muted); overflow-wrap: anywhere; }
+.ted-ui-media__job.is-error { border-style: solid; border-color: var(--ui-color-states-error-dark); }   /* states/error/dark */
+.ted-ui-media__job.is-error .ted-ui-media__status { flex-direction: column; }
+
+/* Файлы: кнопки перетаскивания, переименования и удаления, рамка при переносе — как у плиток галереи */
+.ted-ui-media .ted-media--file > a { position: relative; }
+.ted-media--file > a:hover > .ted-ui-media__tile-tools,
+.ted-media--file > a:focus-within > .ted-ui-media__tile-tools,
+.ted-media--file > a[data-tedui-drag] > .ted-ui-media__tile-tools { opacity: 1; }
+.ted-ui-media .ted-media--file > a[data-tedui-drag] { z-index: 2; border-radius: var(--ui-radius-medium); outline: 2px solid var(--ui-drag-ring); outline-offset: 2px; box-shadow: 0 0 0 4px var(--ui-drag-bg); }
+.ted-ui.is-dragging .ted-ui-media .ted-media--file > a { transition: transform 0.22s var(--ui-ease); }
+.ted-ui.is-dragging .ted-ui-media .ted-media--file > a[data-tedui-drag],
+.ted-ui.is-dropping .ted-ui-media .ted-media--file > a { transition: none !important; }
+
+
+/* Кнопки блока: значки 16 px, как у «Заменить файл» */
+.ted-ui-media__tools .ted-ui-small svg { width: 16px; height: 16px; }
+/* Отмена загрузки — крестик Buttons/icon-small в углу зоны */
+.ted-ui-media__cancel { position: absolute; z-index: 2; top: 8px; right: 8px; }
+.ted-ui-media__cancel svg { width: 16px; height: 16px; }
+.ted-ui-media__job.is-error .ted-ui-media__status { flex-direction: column; gap: 8px; padding-inline: 40px; text-align: center; }   /* текст ошибки по центру, крестик в углу его не закрывает */
+.ted-ui-media__job.is-error .ted-ui-media__file { justify-items: center; }
+.ted-ui-media__job.is-error .ted-ui-action { flex: none; margin-top: 8px; }   /* «Повторить» (Buttons/main secondary xs): от текста 16 */
+/* Ссылка на видео — размер s (решение заказчика 16.11): поле Inputs/main outline s (40, r12, текст text/t2 16 / 24), кнопка Buttons/main primary s (40, поля 16, r12, ui/s) */
+.ted-ui-media__link .ted-ui-media__url { flex: 1 1 auto; min-width: 0; height: 40px; border-radius: var(--ui-radius-medium); font-size: 16px; line-height: 24px; }
+.ted-ui-media__link .ted-ui-media__link-go { flex: none; }   /* размер — .ted-ui-action--s */
+/* телефон: кнопка под полем на всю ширину (видео, изображение, iFrame, встраивание — заказчик 17.11) */
+@container ted (width < 480px) {
+  .ted-ui-media__link { flex-direction: column; align-items: stretch; }
+  .ted-ui-media__link .ted-ui-media__url, .ted-ui-media__link .ted-ui-media__link-go { flex: none; width: 100%; }
+}
+.ted-ui-pop--link .ted-ui-form__head { margin-bottom: 8px; }
+
+/* Превью видео с площадки: тот же плеер, что на сайте; пока блок не выбран, первый щелчок выбирает блок, а не запускает видео */
+.ted-ui-media .ted-media--video > a[data-ted-video] { display: none; }
+.ted-ui-media__embed { position: relative; container-type: inline-size; }
+.ted-ui-media__embed > iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: var(--ted-media-radius, 24px); background: var(--ui-color-main-gray-black); }
+@supports (height: round(down, 1px, 1px)) { .ted-ui-media__embed > iframe { aspect-ratio: auto; height: round(down, calc(100cqi * 9 / 16), 1px); } }
+.ted-ui-media__embed::after { content: ''; position: absolute; inset: 0; }
+.ted-ui-media:is([data-tedui-selected], [data-tedui-focus]) .ted-ui-media__embed::after { display: none; }
+.ted-ui-media__panel > .ted-media__source { justify-self: start; margin-top: 0; }
+
+/* Аудио: родной плеер скрыт, вместо него плеер из макета (в панели блока) */
+.ted-ui-media .ted-media--audio > audio { display: none; }
+.ted-ui-media .ted-audio { margin-top: 0; }
+
+/* Выбранный медиа-блок — та же подложка --ui-selected на 8 px вокруг, что у всех блоков; маски поверх картинки нет (решение 22.11) */
+
+/* Пока открыто окно у кнопки-карандаша, кнопки плитки и блока остаются видны, а нажатая подсвечена (как ⠿ у блока при открытом меню) */
+.ted-ui-media__tile-tools:has([aria-expanded="true"]),
+.ted-ui-media__tools:has([aria-expanded="true"]) { opacity: 1; }
+.ted-ui-media__tile-tools .ted-ui-small[aria-expanded="true"],
+.ted-ui-media__tools .ted-ui-small[aria-expanded="true"] { background: var(--ui-selected); }
+
+/* Загрузка закончена: зона остаётся зелёной (states/success/light), галочка states/success/dark, отступ от содержимого сверху и снизу 20 px */
+.ted-ui-media { --ted-media-success-bg: var(--ui-color-states-success-light); --ted-media-success-icon: var(--ui-color-states-success-dark); --ted-media-success-text: var(--ui-color-text-icon-gray-darker); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-media { --ted-media-success-bg: rgba(14, 140, 14, 0.3); --ted-media-success-icon: var(--ui-color-states-success-medium); --ted-media-success-text: var(--ui-color-text-icon-gray-lighter); }
+.ted-ui-media__job--done { min-height: 0; margin-block: 8px; border: 0; border-radius: var(--ui-radius-medium); background: var(--ted-media-success-bg); color: var(--ted-media-success-text); }
+@container ted (width <= 812px) { .ted-ui-media__job--done { margin-block: 12px; } }
+.ted-ui-media__job--done .ted-ui-media__status { justify-content: flex-start; padding: 12px 16px; text-align: left; flex-direction: row; width: 100%; box-sizing: border-box; }
+.ted-ui-media__job--done .ted-ui-media__file span { color: var(--ted-media-success-text); opacity: 0.7; }
+.ted-ui-media__done-icon { flex: none; display: grid; place-items: center; width: 24px; height: 24px; color: var(--ted-media-success-icon); }
+.ted-ui-media__done-icon svg { width: 24px; height: 24px; }
+

@@ -1,0 +1,121 @@
+/* Блок «Код» — вид на сайте и в редакторе (макет block-code): шапка 36 с языком, зазор 8, код r12 p8, колонка номеров,
+   подсветка ted-tok-*; на сайте — кнопка «Копировать код» в шапке справа (как editor-icon-small). */
+
+/* ---------- Код (макет block-code): шапка 36 с языком, зазор 8, код r12 p8 с колонкой номеров 26; подсветка ted-tok-* ---------- */
+
+.ted-content pre {
+  position: relative;
+  padding: 0;
+  overflow: visible;
+  border-radius: 0;
+  background: none;
+  color: var(--ted-c-code-text);
+  font-family: var(--ted-font-code);
+  font-size: calc(var(--ted-code) * var(--ted-u));
+  line-height: 1.5;
+  white-space: pre;
+  tab-size: 4;
+}
+
+/* шапка: язык 14 / 600 (data-lang), отдельная плашка r12 */
+.ted-content pre::before {
+  content: attr(data-lang);
+  display: block;
+  height: calc(36 * var(--ted-u));
+  margin-bottom: calc(8 * var(--ted-u));
+  padding: 0 calc(16 * var(--ted-u));
+  border-radius: calc(12 * var(--ted-u));
+  background: var(--ted-c-code-head, var(--color-main-gray-light, #dadfe5));
+  color: var(--ted-c-code-text);
+  font-family: var(--ted-font, inherit);
+  font-size: calc(14 * var(--ted-u));
+  font-weight: 600;
+  line-height: calc(36 * var(--ted-u));
+}
+
+/* тело: фон, радиус 12, отступы 8, горизонтальная прокрутка */
+.ted-content pre > code {
+  display: block;
+  position: relative;
+  padding: calc(var(--ted-code-pad) * var(--ted-u));
+  overflow-x: auto;
+  border-radius: calc(12 * var(--ted-u));
+  background: var(--ted-c-code-bg);
+  font: inherit;
+  white-space: pre;
+}
+
+/* колонка номеров строк (pre[data-nums]): 26 со своим фоном и отступом 8, под шапкой слева; при прокрутке кода остаётся на месте */
+/* колонка растягивается по самому длинному номеру: data-nums-d — число цифр (2…7); отступы по бокам 8, как в макете */
+.ted-content pre[data-nums-d="2"] { --ted-nd: 1; }
+.ted-content pre[data-nums-d="3"] { --ted-nd: 2; }
+.ted-content pre[data-nums-d="4"] { --ted-nd: 3; }
+.ted-content pre[data-nums-d="5"] { --ted-nd: 4; }
+.ted-content pre[data-nums-d="6"] { --ted-nd: 5; }
+.ted-content pre[data-nums-d="7"] { --ted-nd: 6; }
+.ted-content pre[data-nums] > code { padding-left: calc((26 + 8) * var(--ted-u) + var(--ted-nd, 0) * 1ch); }
+.ted-content pre[data-nums]::after {
+  content: attr(data-nums);
+  position: absolute;
+  top: calc(44 * var(--ted-u));
+  bottom: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: calc(26 * var(--ted-u) + var(--ted-nd, 0) * 1ch);
+  padding: calc(var(--ted-code-pad) * var(--ted-u)) calc(8 * var(--ted-u));
+  overflow: hidden;
+  border-radius: calc(12 * var(--ted-u)) 0 0 calc(12 * var(--ted-u));
+  background: var(--ted-c-code-head, var(--color-main-gray-light, #dadfe5));
+  color: var(--ted-c-muted);
+  text-align: right;
+  white-space: pre;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* полоса прокрутки кода — Scrollbar/scrollbar classic m */
+.ted-content pre > code::-webkit-scrollbar { height: 8px; }
+.ted-content pre > code::-webkit-scrollbar-button { display: none; }
+.ted-content pre > code::-webkit-scrollbar-track { border-radius: 9999px; background: rgba(237, 243, 250, 0.2); }
+.ted-content pre > code::-webkit-scrollbar-thumb { border-radius: 9999px; background: rgba(99, 161, 247, 0.4); }
+.ted-content pre > code::-webkit-scrollbar-thumb:hover { background: rgba(25, 117, 247, 0.5); }
+
+/* подсветка синтаксиса: цвета токенов (светлая и тёмная тема), одни и те же для сайта и правки */
+.ted-content {
+  --ted-tok-kw: #cf222e;
+  --ted-tok-str: #0a3069;
+  --ted-tok-num: #0550ae;
+  --ted-tok-com: #6e7781;
+  --ted-tok-fn: #8250df;
+  --ted-tok-tag: #116329;
+  --ted-tok-attr: #0550ae;
+  --ted-tok-prop: #0550ae;
+  --ted-tok-var: #953800;
+}
+.ted-content .ted-tok-kw, .ted-content .ted-k { color: var(--ted-tok-kw); }
+.ted-content .ted-tok-str, .ted-content .ted-s { color: var(--ted-tok-str); }
+.ted-content .ted-tok-num, .ted-content .ted-n { color: var(--ted-tok-num); }
+.ted-content .ted-tok-com, .ted-content .ted-c { color: var(--ted-tok-com); font-style: italic; }
+.ted-content .ted-tok-fn, .ted-content .ted-f { color: var(--ted-tok-fn); }
+.ted-content .ted-tok-tag, .ted-content .ted-t { color: var(--ted-tok-tag); }
+.ted-content .ted-tok-attr, .ted-content .ted-a { color: var(--ted-tok-attr); }
+.ted-content .ted-tok-prop, .ted-content .ted-p { color: var(--ted-tok-prop); }
+.ted-content .ted-tok-var, .ted-content .ted-v { color: var(--ted-tok-var); }
+
+/* Кнопка «Копировать код» (сайт, content.js → pre.site.js) */
+/* Кнопка «Копировать код» на сайте (ставит content.js): справа в шапке блока кода, как в редакторе (24, поле 6) */
+.ted-content pre > .ted-code-copy {
+  position: absolute; z-index: 1; top: calc(6 * var(--ted-u, 1px)); right: calc(6 * var(--ted-u, 1px));
+  display: grid; place-items: center; width: calc(24 * var(--ted-u, 1px)); height: calc(24 * var(--ted-u, 1px)); margin: 0; padding: 0;
+  border: 0; border-radius: calc(8 * var(--ted-u, 1px)); background: var(--color-main-gray-white, #ffffff); color: var(--color-text-icon-gray-darker, #262626); cursor: pointer;
+}
+.ted-content pre > .ted-code-copy:hover { background: var(--color-main-gray-lighter, #edf3fa); }
+.ted-content pre > .ted-code-copy:focus-visible { outline: 2px solid var(--color-main-color1-light, #63a1f7); outline-offset: 2px; }
+.ted-content pre > .ted-code-copy.is-copied { color: var(--color-states-success-dark, #0e8c0e); }
+.ted-content pre > .ted-code-copy.is-failed { color: var(--color-states-error-dark, #cc2929); }   /* states/error/dark */
+.ted-content pre > .ted-code-copy svg { display: block; width: calc(16 * var(--ted-u, 1px)); height: calc(16 * var(--ted-u, 1px)); }
+[data-ted-theme='dark'] .ted-content pre > .ted-code-copy { background: var(--color-main-gray-darker, #262626); color: var(--color-text-icon-gray-white, #ffffff); }
+[data-ted-theme='dark'] .ted-content pre > .ted-code-copy:hover { background: var(--color-main-gray-dark, #4d4d4d); }
+/* нажатие как у editor-icon-small: main/color1/lighter (тёмная gray/darker с кольцом gray/dark) */
+.ted-content pre > .ted-code-copy:active { background: var(--color-main-color1-lighter, #d2e2f7); }
+[data-ted-theme='dark'] .ted-content pre > .ted-code-copy:active { background: var(--color-main-gray-darker, #262626); box-shadow: inset 0 0 0 2px var(--color-main-gray-dark, #4d4d4d); }

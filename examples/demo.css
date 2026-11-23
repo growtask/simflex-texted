@@ -1,0 +1,117 @@
+/* Оболочка демо-страниц Ted — только компоненты дизайн-системы «Симфлекс АИ» (значения: LAYOUT.md §10).
+   Buttons/menu (horizontal, l, flat), Tabs/main (soft, s), Buttons/main (primary), Cards/main (fullhd → mobile).
+   Тёмные состояния меню в библиотеке ещё не сняты — используются токены темы (см. LAYOUT.md §10). */
+:root {
+  --d-page: #ffffff; --d-card: #edf3fa; --d-line: #edf3fa; --d-text: #262626; --d-muted: #919599; --d-text2: #4d4d4d;
+  --d-hover: #edf3fa; --d-press: #d2e2f7; --d-active: #edf3fa; --d-active-text: #104fa6; --d-link: #1975f7;
+  --d-chip: #d2e2f7; --d-chip-text: #4d4d4d;
+  --d-font: "Ted Inter", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+body.dark {
+  --d-page: #262626; --d-card: #4d4d4d; --d-line: #4d4d4d; --d-text: #edf3fa; --d-muted: #919599; --d-text2: #edf3fa;
+  --d-hover: #4d4d4d; --d-press: #0d0d0d; --d-active: #4d4d4d; --d-active-text: #63a1f7; --d-link: #63a1f7;
+}
+body.demo { margin: 0; background: var(--d-page); color: var(--d-text); font-family: var(--d-font); }
+.demo * { box-sizing: border-box; }
+
+/* ---- оболочка: боковое меню + контент ---- */
+.demo-app { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: 100vh; }
+.demo-side { position: sticky; top: 0; align-self: start; height: 100vh; padding: 16px; display: flex; flex-direction: column; gap: 4px; border-right: 1px solid var(--d-line); background: var(--d-page); overflow: auto; }
+.demo-brand { display: block; margin: 0 0 12px; padding: 0 12px; color: var(--d-text); text-decoration: none; }
+.demo-logo { display: block; width: 112px; color: #1975f7; }
+body.dark .demo-logo { color: #fff; }
+.demo-logo svg { display: block; width: 100%; height: auto; }
+.demo-brand b { display: block; margin-top: 4px; font: 700 24px/1 var(--d-font); }
+.demo-brand small { display: block; margin-top: 6px; font-weight: 400; font-size: 13px; line-height: 1.4; color: var(--d-muted); }
+.demo-main { min-width: 0; padding: 24px; }
+.demo-spacer { flex: 1; }
+
+/* Buttons/menu: direction=horizontal, size=l, style=flat */
+.demo-menu { display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 12px; border-radius: 12px; color: var(--d-text); background: transparent; font: 600 16px/1.4 var(--d-font); text-decoration: none; cursor: pointer; border: 0; text-align: left; width: 100%; }
+.demo-menu svg { flex: none; width: 24px; height: 24px; }
+
+.demo-menu:hover { background: var(--d-hover); }
+.demo-menu:active { background: var(--d-press); color: var(--d-active-text); }
+.demo-menu[aria-current="page"] { background: var(--d-active); color: var(--d-active-text); }
+.demo-menu:focus-visible, .demo-tab:focus-visible, .demo-btn:focus-visible, .demo-card:focus-visible { outline: 2px solid #63a1f7; outline-offset: 2px; }
+
+/* Tabs/main: style=soft, size=s */
+.demo-tabs { display: flex; flex-wrap: wrap; gap: 4px; }
+.demo-tab { display: inline-flex; align-items: center; gap: 4px; padding: 8px; border-radius: 12px; border: 0; background: transparent; color: var(--d-text); font: 600 14px/1.4 var(--d-font); text-decoration: none; cursor: pointer; }
+.demo-tab > span { padding: 7px 4px; }
+.demo-tab svg { width: 24px; height: 24px; flex: none; }
+.demo-tab:hover { background: var(--d-hover); color: var(--d-link); }
+.demo-tab:active { background: var(--d-press); color: var(--d-active-text); }
+.demo-tab[aria-selected="true"], .demo-tab[aria-current="page"] { background: var(--d-press); color: var(--d-text); }
+body.dark .demo-tab[aria-selected="true"], body.dark .demo-tab[aria-current="page"] { background: #0d0d0d; }
+
+/* Buttons/main: primary, size s */
+.demo-btn { display: inline-flex; align-items: center; justify-content: center; padding: 11px 12px; border-radius: 8px; border: 0; background: #1975f7; color: #fff; font: 600 14px/1.4 var(--d-font); text-decoration: none; cursor: pointer; }
+.demo-btn:hover { background: #1461cc; }
+.demo-btn:active { background: #104fa6; }
+
+.demo-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin: 0 0 20px; }
+.demo-head h1 { margin: 0 auto 0 0; font: 700 24px/1 var(--d-font); }
+.demo-panel { padding: 24px; margin: 0 0 20px; border-radius: 24px; background: var(--d-card); }
+.demo-label { display: block; margin: 0 0 8px; font: 600 14px/1.4 var(--d-font); color: var(--d-text2); }
+.demo-hint { color: var(--d-muted); font: 400 14px/1.4 var(--d-font); }
+.demo-out { margin: 0; padding: 16px; max-height: 360px; overflow: auto; border-radius: 12px; background: #0d0d0d; color: #dadfe5; font: 12px/1.5 "Ted Roboto Mono", ui-monospace, Consolas, monospace; white-space: pre-wrap; }
+
+/* ---- Cards/main: layout=card ---- */
+.demo-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 412px), 1fr)); gap: 20px; }
+.demo-card { display: flex; gap: 20px; align-items: flex-start; padding: 24px; border-radius: 24px; background: var(--d-card); color: var(--d-text); text-decoration: none; overflow: clip; cursor: pointer; }
+.demo-card:active { background: var(--d-press); }
+body.dark .demo-card:active { background: #0d0d0d; }
+.demo-card__img { flex: none; width: 120px; height: 120px; border-radius: 12px; display: grid; place-items: center; background: var(--d-chip); color: #1975f7; }
+.demo-card__img svg { width: 48px; height: 48px; }
+.demo-card__info { display: flex; flex-direction: column; gap: 20px; align-items: flex-start; min-width: 0; flex: 1; }
+.demo-card__text { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; width: 100%; }
+.demo-label-chip { display: inline-flex; padding: 4px 5px; border-radius: 9999px; background: #63a1f7; color: #262626; font: 600 11px/1.4 var(--d-font); }
+.demo-card__head { overflow-wrap: anywhere; display: flex; align-items: center; gap: 4px; width: 100%; font: 700 24px/1 var(--d-font); }
+.demo-card:hover .demo-card__head { color: var(--d-link); }
+.demo-card:active .demo-card__head { color: var(--d-active-text); }
+.demo-card__desc { margin: 0; font: 400 16px/1.5 var(--d-font); color: var(--d-muted); }
+body.dark .demo-card__desc { color: #edf3fa; }
+.demo-chips { display: flex; flex-wrap: wrap; gap: 8px 12px; }
+.demo-chip { display: inline-flex; align-items: center; padding: 8px 12px 8px 8px; gap: 2px; border-radius: 8px; background: var(--d-chip); color: var(--d-chip-text); font: 700 13px/1.5 var(--d-font); }
+.demo-card:active .demo-chip { background: #edf3fa; }
+
+/* адаптив: ≤ 811 — нижний тапбар (в конце файла), ≤ 481 — карточка в колонку */
+@media (width <= 481px) {
+  .demo-card { flex-direction: column; }
+  .demo-card__img { width: 100%; height: 120px; }
+  .demo-panel { padding: 16px; border-radius: 16px; }
+}
+
+/* переключатель темы — на всю ширину бокового меню */
+.demo-side .demo-tabs { width: 100%; flex-wrap: nowrap; }
+.demo-side .demo-tab { flex: 1 1 0; justify-content: center; }
+@media (width <= 811px) { .demo-side .demo-tabs { width: auto; flex: none; } .demo-side .demo-tab { flex: none; } }
+
+/* служебные страницы (во весь экран, узкие контейнеры): плавающая ссылка обратно в меню демо */
+.demo-back { position: fixed; z-index: 1000; left: 12px; bottom: 12px; display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px 8px 8px; border-radius: 12px; background: #fff; border: 1px solid #edf3fa; color: #262626; font: 600 14px/1.4 "Ted Inter", "Inter", system-ui, sans-serif; text-decoration: none; box-shadow: 0 4px 16px rgba(13, 13, 13, .12); }
+.demo-back:hover { background: #edf3fa; color: #1975f7; }
+.demo-back:active { background: #d2e2f7; color: #104fa6; }
+.demo-back svg { width: 24px; height: 24px; }
+
+/* «Сайт»: содержимое всегда светлое, как реальный сайт; меню и панель — как в остальных режимах */
+.site-frame { background: #fff; color: #262626; border-radius: 24px; overflow: clip; }
+.site-bar { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin: 0 0 12px; padding: 4px 0; background: var(--d-page); }
+
+/* Мобильное меню — нижний тапбар (Buttons/menu, direction=vertical: иконка над подписью); тема — рядом, в том же ряду */
+@media (width <= 811px) {
+  .demo-app { grid-template-columns: minmax(0, 1fr); }
+  .demo-side { position: fixed; z-index: 100; inset: auto 0 0 0; height: auto; flex-direction: row; flex-wrap: nowrap; align-items: stretch; gap: 2px; padding: 4px 8px calc(4px + env(safe-area-inset-bottom)); border-right: 0; border-top: 1px solid var(--d-line); overflow-x: auto; }
+  .demo-brand, .demo-spacer { display: none; }
+  .demo-menu { flex: 1 0 auto; flex-direction: column; justify-content: center; gap: 2px; width: auto; min-width: 64px; height: 56px; padding: 4px 8px; font-size: 11px; text-align: center; white-space: nowrap; }
+  .demo-side .demo-tabs { width: auto; flex: none; align-self: center; margin-left: 4px; padding-left: 8px; border-left: 1px solid var(--d-line); }
+  .demo-side .demo-tab { flex: none; }
+  .demo-main { padding: 16px 8px 88px; }
+  .demo-back { bottom: 12px; }
+}
+.demo-theme-top { display: none; }
+@media (width <= 811px) {
+  .demo-menu--service, .demo-side .demo-theme { display: none; }
+  .demo-theme-top { display: inline-flex; margin: 0 0 12px; background: var(--d-hover); }
+  .demo-menu { min-width: 0; flex: 1 1 0; }
+}

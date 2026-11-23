@@ -1,0 +1,12 @@
+{
+  "type": "toc",
+  "title": "Содержание",
+  "figma": "block-navigation",
+  "menu": { "group": "Интерактив", "order": 0, "icon": "toc", "words": "содержание оглавление навигация главы якоря toc navigation", "convert": false, "sample": "<nav class=\"ted-toc\"><div class=\"ted-toc__progress\"><div class=\"ted-toc__bar\" style=\"width:30%\"></div></div><div class=\"ted-toc__panel\"><p class=\"ted-toc__title\">Содержание</p><ul class=\"ted-toc__list\"><li><a>Как всё начиналось</a></li><li><a>Что мы сделали</a></li><li><a>Что дальше</a></li></ul></div></nav>" },
+  "selector": ".ted-toc",
+  "html": {},
+  "toolbar": { "bg": false, "align": false, "style": false, "marks": [] },
+  "inContainers": false,
+  "neverEmpty": true,
+  "lineAfter": true
+}

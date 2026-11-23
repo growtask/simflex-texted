@@ -1,0 +1,23 @@
+/* Блок «Список» и «Нумерованный список» — вид на сайте и в редакторе (Text/body, type list / list-numb): отступ слева,
+   маркеры по уровню вложенности, цвет маркера, зазор между пунктами. Правила общие для всех ul / ol в тексте. */
+
+/* ---------- Списки (Text/body, type list / list-numb) ---------- */
+
+.ted-content :is(ul, ol) {
+  padding-left: calc(var(--ted-list-pad) * var(--ted-u));
+  list-style-position: outside;
+}
+
+.ted-content ul { list-style-type: disc; }
+.ted-content ol { list-style-type: decimal; }
+.ted-content ul ul { list-style-type: circle; }
+.ted-content ul ul ul { list-style-type: square; }
+.ted-content ol ol { list-style-type: lower-alpha; }
+.ted-content ol ol ol { list-style-type: lower-roman; }
+
+.ted-content li { display: list-item; }
+.ted-content li::marker { color: var(--ted-c-marker); }
+
+.ted-content :is(li + li, li > ul, li > ol) {
+  margin-top: calc(var(--ted-gap-li) * var(--ted-u));
+}

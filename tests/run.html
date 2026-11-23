@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>texted — автотесты</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../dist/ted.css">
+<style>
+  body { margin: 0; padding: 24px; font: 14px/1.5 Inter, system-ui, sans-serif; color: #262626; background: #fff; }
+  h1 { margin: 0 0 4px; font-size: 22px; }
+  #summary { margin: 0 0 16px; font-weight: 600; }
+  #summary.ok { color: #0f7a3b; }
+  #summary.fail { color: #cc2929; }
+  #list { list-style: none; margin: 0; padding: 0; max-width: 900px; }
+  #list li { padding: 4px 0; border-bottom: 1px solid #edf3fa; }
+  #list li.fail { color: #cc2929; }
+  #list li.fail .err { display: block; margin: 2px 0 4px 20px; font: 12px/1.4 ui-monospace, Consolas, monospace; white-space: pre-wrap; }
+  .m { display: inline-block; width: 16px; }
+  #note { color: #919599; margin-top: 24px; }
+</style>
+</head>
+<body>
+<h1>texted — автотесты</h1>
+<p id="summary">Запуск…</p>
+<ul id="list"></ul>
+<p id="note">Новые наборы тестов по этапам (MODULAR_PLAN.md). Один набор: <code>?suite=layer</code>, <code>drag</code>, <code>rhythm</code>, <code>server</code>, <code>presets</code>, <code>security</code>, <code>styles</code>, <code>blocks</code>; без параметра — все по порядку.
+  Фильтр по названию: <code>?q=слово</code>. Редакторы после прогона убираются; чтобы их посмотреть, добавьте <code>?keep</code>.
+  Тесты работают на исходниках из <code>src/</code> и стилях из <code>dist/ted.css</code>. Все наборы по порядку из консоли: <code>pwsh -File tools/test.ps1</code>.</p>
+<script src="../content.js"></script>
+<script type="module">
+  import { run } from './harness.js';
+  import { sandbox } from './helpers.js';
+
+  // наборы — в том порядке, в каком их запускает tools/test.ps1
+  const SUITES = {
+    layer: './interaction/layer.test.js',    // этап 0: рамка, кнопки блока, пустые блоки, ручка при наведении, меню
+    drag: './interaction/drag.test.js',      // этап 0: перетаскивание — блок и его кнопки
+    rhythm: './rhythm/rhythm.test.js',       // этап 0: отступы между блоками
+    server: './server/server.test.js',       // этап 1: настройки сервера в редакторе (папка файлов, лимиты, карточки, iFrame)
+    presets: './presets/presets.test.js',    // этап 2: наборы блоков и право на правку
+    security: './security/security.test.js', // этап 3: ссылки, белый список, XSS-векторы, импорт и вставка, сайт со строгой CSP
+    styles: './styles/styles.test.js',       // этап 4: токены админки и сайта, только переменные, страница вокруг и сброс стилей сайта
+    legacy: './legacy.suite.js',             // прежние тесты — страховка на время переноса блоков (этап 5)
+    blocks: './blocks/blocks.suite.js',      // этап 5: реестр и тесты блоков из папок (blocks/<тип>/<тип>.test.js)
+  };
+  const params = new URLSearchParams(location.search);
+  const suite = params.get('suite');
+  const names = suite ? suite.split(',') : Object.keys(SUITES);
+  for (const n of names) {
+    // file:имя — один прежний файл тестов (tests/имя.test.js) на время переноса блоков (этап 5)
+    if (n.startsWith('file:')) { await import('./' + n.slice(5).replace(/[^a-z0-9-]/g, '') + '.test.js'); continue; }
+    if (!SUITES[n]) throw new Error('Нет набора тестов: ' + n);
+    await import(SUITES[n]);
+  }
+  document.querySelector('h1').textContent = 'texted — автотесты: ' + names.join(', ');
+
+  const cleanup = () => { sandbox.remove(); document.querySelectorAll('.ted-ui-pop, .ted-ui-tip, .ted-ui-toast').forEach((x) => x.remove()); };
+  const q = params.get('q');
+  const list = document.getElementById('list');
+  const summary = document.getElementById('summary');
+  const results = await run((r) => {
+    if (q && !r.name.toLowerCase().includes(q.toLowerCase())) return;
+    const li = document.createElement('li');
+    li.className = r.ok ? 'ok' : 'fail';
+    li.innerHTML = `<span class="m">${r.ok ? '✓' : '✗'}</span>`;
+    li.append(r.name);
+    if (!r.ok) { const e = document.createElement('span'); e.className = 'err'; e.textContent = r.error; li.append(e); }
+    list.append(li);
+  }, params.get('only'));
+  if (!params.has('keep')) cleanup();
+  const failed = results.filter((r) => !r.ok);
+  summary.textContent = failed.length ? `Не прошло ${failed.length} из ${results.length}` : `Все тесты прошли: ${results.length}`;
+  summary.className = failed.length ? 'fail' : 'ok';
+  document.title = (failed.length ? '✗ ' : '✓ ') + summary.textContent;
+  window.__tedTests = { total: results.length, failed: failed.map((r) => ({ name: r.name, error: r.error })) };
+</script>
+</body>
+</html>

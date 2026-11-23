@@ -1,0 +1,11 @@
+{
+  "type": "button",
+  "title": "Кнопка",
+  "figma": "block-button (Action/button)",
+  "menu": { "group": "Действия", "order": 0, "icon": "button", "words": "кнопка кнопки баннер призыв ссылка cta button banner", "convert": false, "sample": "<div class=\"ted-button\"><a class=\"ted-button__btn\">Подробнее</a><a class=\"ted-button__btn ted-button__btn--secondary\">Каталог</a></div>" },
+  "selector": "div.ted-button",
+  "html": {},
+  "toolbar": { "bg": false, "align": false, "style": false, "marks": [] },
+  "neverEmpty": true,
+  "caretBelow": true
+}

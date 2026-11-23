@@ -1,0 +1,54 @@
+/* ==========================================================================
+   Подсказки (Tooltip)
+   Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
+   ========================================================================== */
+
+/* ==========================================================================
+   Подсказка (Tooltip/main): r 12, текст ui/xs 11/1.4, уголок 8×4, тень s
+   ========================================================================== */
+.ted-ui-tip {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 240px;
+  filter: drop-shadow(0 0 5px rgba(13, 13, 13, 0.1));
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-3px);
+  transition: opacity 80ms ease, transform 80ms ease;
+}
+
+.ted-ui-tip.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition-duration: 140ms;
+  transition-timing-function: ease-out;
+}
+
+.ted-ui-tip__corner {
+  width: 8px;
+  height: 4px;
+  margin-left: var(--corner-x, 0);
+  background: var(--ui-tip-bg);
+  clip-path: path("M0 4L3.2 0.444C3.733 -0.148 4.267 -0.148 4.8 0.444L8 4H0Z");
+}
+
+.ted-ui-tip__body {
+  padding: 12px 16px;
+  border-radius: var(--ui-radius-medium);
+  background: var(--ui-tip-bg);
+  color: var(--ui-tip-text);
+  font-family: var(--ui-font);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.ted-ui-tip__body kbd {
+  margin-left: 6px;
+  font: inherit;
+  opacity: 0.6;
+}

@@ -1,0 +1,22 @@
+/* Блок «iFrame» — вид на сайте и в редакторе (макет block-iframe (Embed/iframe)). */
+
+/* iFrame (этап 6.4, block-iframe / Embed/iframe): фрейм на всю колонку, r32 (Figma --blocks), без рамки; высота — из настроек
+   (атрибут height), без неё — пропорция 16 : 10. Подпись — как у медиа (решение заказчика 16.11): text/t3 13 / 1.5 #919599
+   (тёмная #DADFE5), от фрейма 12 (≤ 811 — 8). Под блоком — обычный промежуток. */
+.ted-content figure.ted-iframe { margin: 0 0 calc(var(--ted-gap) * var(--ted-u)); min-width: 0; }
+.ted-content .ted-iframe > iframe { display: block; width: 100%; max-width: 100%; aspect-ratio: 16 / 10; border: 0; border-radius: calc(32 * var(--ted-u)); background: var(--color-main-gray-lighter, #edf3fa); }
+.ted-content .ted-iframe > iframe[height] { aspect-ratio: auto; }
+/* пропорции (решение 22.11): стандартные; 9 : 16 — узкий вертикальный виджет по центру */
+.ted-content .ted-iframe[data-ratio="16:9"] > iframe { aspect-ratio: 16 / 9; }
+.ted-content .ted-iframe[data-ratio="4:3"] > iframe { aspect-ratio: 4 / 3; }
+.ted-content .ted-iframe[data-ratio="1:1"] > iframe { aspect-ratio: 1 / 1; }
+.ted-content .ted-iframe[data-ratio="21:9"] > iframe { aspect-ratio: 21 / 9; }
+.ted-content .ted-iframe[data-ratio="9:16"] > iframe { aspect-ratio: 9 / 16; max-width: min(100%, calc(400 * var(--ted-u))); margin-inline: auto; }
+/* высота из атрибута height — и под сбросом сайта (Simflex: iframe{height:auto} сильнее атрибута, фрейм становился 150 px);
+   браузерам без attr() высоту ставит content.js (siteFrameHeight) — этап 4 */
+@supports (height: attr(height px)) { .ted-content .ted-iframe > iframe[height] { height: attr(height px); } }
+[data-ted-theme='dark'] .ted-content .ted-iframe > iframe { background: var(--color-main-gray-dark, #4d4d4d); }
+.ted-content .ted-iframe > figcaption { margin-top: calc(12 * var(--ted-u)); font-size: calc(13 * var(--ted-u)); line-height: 1.5; color: var(--ted-c-muted); }
+[data-ted-theme='dark'] .ted-content .ted-iframe > figcaption { color: var(--color-text-icon-gray-light, #dadfe5); }
+@media (width <= 811px) { .ted-content .ted-iframe > figcaption { margin-top: calc(8 * var(--ted-u)); } }
+@container ted (width <= 812px) { .ted-content .ted-iframe > figcaption { margin-top: calc(8 * var(--ted-u)); } }

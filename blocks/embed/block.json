@@ -1,0 +1,11 @@
+{
+  "type": "embed",
+  "title": "Встраивание",
+  "figma": "block-embed (Embed/embed type=post)",
+  "menu": { "group": "Встраивание", "order": 0, "icon": "embed", "words": "встраивание встроить карточка ссылка статья пост embed card link opengraph", "convert": false, "sample": "<div class=\"ted-embed\"><div class=\"ted-embed__head\"><span class=\"ted-embed__avatar\">СШ</span><span class=\"ted-embed__who\"><span class=\"ted-embed__name\">Simflex Shop</span><span class=\"ted-embed__sub\">simflex.ru · 2 ч назад</span></span></div><p class=\"ted-embed__text\">Весенняя коллекция уже здесь.</p><div class=\"ted-embed__foot\"><span class=\"ted-embed__pill ted-embed__pill--views\">1.2K</span><span class=\"ted-embed__pill ted-embed__pill--likes\">128</span><a class=\"ted-embed__open\">Открыть</a></div></div>" },
+  "selector": "div.ted-embed",
+  "html": { "div": ["data-ted-article"] },
+  "ids": ["data-ted-article"],
+  "neverEmpty": true,
+  "caretBelow": true
+}

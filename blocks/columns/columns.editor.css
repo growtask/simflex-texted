@@ -1,0 +1,20 @@
+/* Блок «Колонки» — только отличия в редакторе. */
+
+/* Колонки в правке: заглушки «Заголовок» / «Текст колонки» (gray/light), место под «Добавить колонку» */
+.ted-ui-editable .ted-columns__col { position: relative; }
+.ted-ui-editable .ted-columns__col > :is(p, h6) { position: relative; }
+.ted-ui-editable .ted-columns__col > :is(p, h6)[data-tedui-ph]::before { top: 0; }
+.ted-ui-editable .ted-columns__col > .ted-ui-media { --ted-media-image-height: calc(204 * var(--ted-u)); --ted-media-radius: calc(12 * var(--ted-u)); }
+.ted-ui-editable .ted-columns[data-tedui-addbtn] { margin-bottom: calc(var(--ted-gap) * var(--ted-u) + 60px); }
+
+/* колонка при перетаскивании — рамка, как у шагов и пунктов (общие правила — styles/ui/blocks.css) */
+.ted-ui-editable div.ted-columns > .ted-columns__col[data-tedui-drag] {
+  border-radius: var(--ui-radius-medium);
+  z-index: 2;
+  outline: 2px solid var(--ui-drag-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--ui-drag-bg);
+}
+.ted-ui.is-dragging .ted-ui-editable div.ted-columns > .ted-columns__col { transition: transform 0.22s var(--ui-ease); }
+.ted-ui.is-dragging .ted-ui-editable div.ted-columns > .ted-columns__col[data-tedui-drag] { transition: none; }
+.ted-ui.is-dropping .ted-ui-editable div.ted-columns > .ted-columns__col { transition: none !important; }

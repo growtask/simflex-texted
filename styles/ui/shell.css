@@ -1,0 +1,167 @@
+/* ==========================================================================
+   Оболочка редактора, холст и колонка
+   Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
+   ========================================================================== */
+
+/* ==========================================================================
+   Ted — интерфейс редактора. Источник: макет TextEd (editor-ui) на компонентах
+   библиотеки «Симфлекс АИ»: Tabs/main soft (кнопки), Tooltip/main,
+   Dropdown/main (меню), Inputs/main, Buttons/main, Buttons/icon-small.
+   Классы интерфейса: ted-ui-*. Размеры и цвета — см. LAYOUT.md.
+   ========================================================================== */
+.ted-ui {
+  /* light */
+  --ui-font: var(--font-family-body, "Ted Inter", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif);   /* шрифт админки */
+  --ui-page: var(--ui-color-main-gray-white);              /* main/gray/white */
+  --ui-bar: var(--ui-color-main-gray-white);
+  --ui-line: var(--ui-color-main-gray-lighter);              /* main/gray/lighter */
+  --ui-icon: var(--ui-color-text-icon-gray-darker);              /* text-icon/gray/darker */
+  --ui-text: var(--ui-color-text-icon-gray-darker);
+  --ui-muted: var(--ui-color-text-icon-gray-medium);             /* text-icon/gray/medium */
+  --ui-hover: var(--ui-color-main-gray-lighter);             /* Tabs soft hover */
+  --ui-press: var(--ui-color-main-color1-lighter);             /* Tabs soft press/active: main/color1/lighter */
+  --ui-press-ring: transparent;
+  --ui-accent: var(--ui-color-main-color1-main);            /* main/color1/main */
+  --ui-drag-ring: var(--ui-color-main-color1-light);         /* рамка перетаскивания — main/color1/light */
+  --ui-pop: var(--ui-color-main-gray-white);
+  --ui-pop-ring: transparent;
+  --ui-field: var(--ui-color-main-gray-lighter);
+  --ui-input-border: var(--ui-color-main-gray-light);      /* main/gray/light */
+  --ui-tip-bg: var(--ui-color-main-gray-black);            /* main/gray/black */
+  --ui-tip-text: var(--ui-color-text-icon-gray-white);
+  --ui-small-bg: var(--ui-color-main-gray-white);          /* Buttons/icon-small secondary */
+  --ui-controls-border: var(--ui-color-main-gray-lighter);
+  --ui-selected: var(--ui-color-main-color1-lighter);
+  --ui-drag-bg: var(--ui-color-main-gray-white);
+  --ui-danger: var(--ui-color-states-error-medium);            /* states/error/medium */
+  --ui-placeholder: var(--ui-color-text-icon-gray-light);       /* text-icon/gray/light */
+  --ui-thumb: rgba(99, 161, 247, 0.2);
+  --ui-preview-bg: var(--ui-color-main-gray-lighter);
+  --ui-ease: cubic-bezier(0.14, 0.18, 0.16, 1.02);
+  /* движение (решение 22.11, как в UI-ките rpm): fast — нажатие и цвет, base — появление панелей и переключатели,
+     slow — смена темы и раскрытие; закрытие быстрее открытия. Анимируем только цвет, прозрачность, transform, тени */
+  --ui-motion-fast: 120ms;
+  --ui-motion-base: 180ms;
+  --ui-motion-slow: 240ms;
+  --ui-ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ui-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* --ui-shadow-primary-xs — токен админки в tokens.css: эффект shadows/primary/xs (Симфлекс АИ) — свечение рамки перетаскивания */
+
+  container-type: inline-size;
+  container-name: ted;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: max(var(--ted-editor-min-height, 320px), var(--ted-pop-min-height, 0px));
+  background: var(--ui-page);
+  color: var(--ui-text);
+  font-family: var(--ui-font);
+  font-size: 14px;
+  line-height: 1.4;
+  font-feature-settings: "lnum" 1, "pnum" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ted-ui *,
+.ted-ui *::before,
+.ted-ui *::after { box-sizing: border-box; }
+
+.ted-ui button {
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.ted-ui svg { display: block; flex: none; }
+
+/* Защита интерфейса от сброса стилей админки и сайта (этап 4): корень и значки — явно, значениями браузера по умолчанию
+   (Simflex: *{box-sizing:border-box}, svg{max-width:100%;height:auto}, html{text-size-adjust:100%}). Тест — набор styles. */
+.ted-ui, .ted-ui-toasts { box-sizing: content-box; letter-spacing: normal; word-spacing: normal; text-transform: none; text-indent: 0; font-style: normal; text-shadow: none; text-wrap: wrap; -webkit-text-size-adjust: auto; text-size-adjust: auto; }
+.ted-ui :where(svg, iframe, img, video, audio, canvas), .ted-ui-toasts :where(svg) { max-width: none; }
+
+.ted-ui [hidden] { display: none !important; }
+
+.ted-ui-canvas {
+  position: relative;
+  flex: 1 1 auto;
+  padding: 24px 0 48px;
+  cursor: text;
+}
+
+.ted-ui-column {
+  --col: 700px;
+  /* поля по бокам: слева помещаются «+ ⠿» при наведении (60 px) и ⠿ 🗑 в правке (34 px) —
+     в узком контейнере с overflow они не обрезаются. На мобильном (< 480) кнопки в строке — поля 16 */
+  --edge: 64px;
+  position: relative;
+  width: min(var(--col), 100% - 2 * var(--edge));
+  margin: 0 auto;
+}
+
+@container ted (width < 480px) { .ted-ui-column { --edge: 16px; } }
+
+/* границы с допуском 20 px на вертикальную полосу прокрутки окна (1000 → 980, 860 → 840) */
+@container ted (width < 980px) { .ted-ui-column { --col: 628px; } }
+
+@container ted (width < 840px)  { .ted-ui-column { --col: 480px; } }
+
+/* Выделение остаётся видимым, пока фокус в окне «Ссылка» (CSS Custom Highlight API) */
+::highlight(ted-held) { background-color: rgba(25, 117, 247, 0.28); color: inherit; }
+
+/* подсветка найденных правок в тексте (CSS Custom Highlight API) */
+::highlight(ted-fix) { background-color: rgba(25, 117, 247, 0.22); color: inherit; }
+
+/* ==========================================================================
+   Плавность: редактор удлиняется и укорачивается под выпадающие меню без рывков
+   ========================================================================== */
+.ted-ui { transition: min-height 0.24s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+::highlight(ted-kw) { color: var(--ted-tok-kw); }
+
+::highlight(ted-str) { color: var(--ted-tok-str); }
+
+::highlight(ted-num) { color: var(--ted-tok-num); }
+
+::highlight(ted-com) { color: var(--ted-tok-com); }
+
+::highlight(ted-fn) { color: var(--ted-tok-fn); }
+
+::highlight(ted-tag) { color: var(--ted-tok-tag); }
+
+::highlight(ted-attr) { color: var(--ted-tok-attr); }
+
+::highlight(ted-prop) { color: var(--ted-tok-prop); }
+
+::highlight(ted-var) { color: var(--ted-tok-var); }
+
+/* До запуска редактора поле с классом ted-editor выглядит как пустой редактор: страница не показывает голый textarea
+   и не прыгает, когда редактор встаёт на место (панель 56 + линия 1, высота как у редактора). Тема — data-ted-theme="dark"
+   у самого поля или у контейнера. */
+textarea.ted-editor,
+.ted-editor:empty {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--ted-editor-min-height, 320px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  outline: 0;
+  resize: none;
+  overflow: hidden;
+  color: transparent;
+  caret-color: transparent;
+  background: linear-gradient(var(--ui-color-main-gray-white) 0 56px, var(--ui-color-main-gray-lighter) 56px 57px, var(--ui-color-main-gray-white) 57px);   /* main/gray/white, линия main/gray/lighter */
+}
+textarea.ted-editor[data-ted-theme="dark"],
+.ted-editor:empty[data-ted-theme="dark"],
+[data-ted-theme="dark"] textarea.ted-editor,
+[data-ted-theme="dark"] .ted-editor:empty {
+  background: linear-gradient(var(--ui-color-main-gray-darker) 0 56px, var(--ui-color-main-gray-dark) 56px 57px, var(--ui-color-main-gray-black) 57px);   /* main/gray/darker, линия gray/dark, поле gray/black */
+}
+
+/* редактор в фокусе после Esc (дальше Tab — к панели): своей рамки нет, видимый фокус — у кнопок (22.11) */
+.ted-ui:focus { outline: none; }

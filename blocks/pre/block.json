@@ -1,0 +1,39 @@
+{
+  "type": "pre",
+  "title": "Код",
+  "jsonExample": "{ \"type\": \"code\", \"lang\": \"js\", \"code\": \"const a = 1;\" }",
+  "aliases": [
+    "code"
+  ],
+  "jsonType": "code",
+  "figma": "block-code",
+  "text": true,
+  "toolbar": {
+    "bg": false,
+    "align": false,
+    "marks": []
+  },
+  "menu": {
+    "group": "Текст",
+    "order": 50,
+    "icon": "code-block",
+    "words": "код code",
+    "sample": "<pre>echo \"Initial: \".memory_get_usage().\" bytes \\n\";\n/* All script */</pre>"
+  },
+  "style": {
+    "label": "Код",
+    "icon": "code-block",
+    "keys": "",
+    "order": 110
+  },
+  "markdown": "```",
+  "selector": "pre",
+  "html": {
+    "pre": [
+      "data-lang",
+      "data-nums",
+      "data-nums-d",
+      "data-nonums"
+    ]
+  }
+}

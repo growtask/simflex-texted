@@ -1,0 +1,38 @@
+/* Блок «Таблица» — только отличия в редакторе (кнопки строк и столбцов, «Добавить …», заглушки, перетаскивание, формулы). */
+
+/* Таблица в правке (block-table, edit): кнопки строки и столбца — .ted-ui-itemctl (как у шагов), «+ Добавить строку / столбец» — как «Добавить автора»;
+   под блоком место под кнопками; пустая подпись — заглушка «Описание»; перетаскиваемая строка или столбец — рамка main/color1/light. */
+.ted-ui-editable figure.ted-table[data-tedui-tbtn] { margin-bottom: calc(var(--ted-gap) * var(--ted-u) + 60px); }
+.ted-ui-tablectl [data-act="row-grip"], .ted-ui-tablectl [data-act="col-grip"] { cursor: grab; touch-action: none; }
+.ted-ui-tableadd { position: absolute; z-index: 5; left: 0; max-width: 100%; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; opacity: 0; pointer-events: none; transition: opacity 0.12s ease; }
+.ted-ui-tableadd.is-visible { opacity: 1; pointer-events: auto; }
+/* в строке «Добавить строку / столбец» — та же общая кнопка «+ Добавить …», только в потоке строки; видна вместе со строкой */
+.ted-ui-tableadd .ted-ui-addauthor { position: static; flex: none; white-space: nowrap; opacity: 1; pointer-events: inherit; }
+/* пустая ячейка шапки — заглушка «Заголовок» (block-table, state=empty) */
+
+/* Таблица: заглушки «Заголовок», «Текст», «Описание» (макет block-table, empty; text-icon/gray/light) — поверх пустой ячейки,
+   курсор стоит в начале строки; исчезают с первым символом (data-tedui-ph ставит editor.updatePlaceholders) */
+.ted-ui-editable figure.ted-table :is(th, td, figcaption) { position: relative; }
+.ted-ui-editable figure.ted-table :is(th, td)[data-tedui-ph]::before { top: calc(10 * var(--ted-u)); left: calc(8 * var(--ted-u)); right: calc(8 * var(--ted-u)); }
+.ted-ui-editable figure.ted-table > figcaption[data-tedui-ph]::before { top: 0; }
+
+/* Перетаскивание строки / столбца — как у шагов и чек-листа: рамка 2 main/color1/light, r12, на 4 вокруг (отступ 2 + рамка 2);
+   строка непрозрачна и над соседями, соседи сдвигаются плавно */
+.ted-ui-tableframe { position: absolute; z-index: 4; box-sizing: border-box; border: 2px solid var(--ui-drag-ring); border-radius: var(--ui-radius-medium); box-shadow: inset 0 0 0 2px var(--ui-drag-bg); opacity: 0; pointer-events: none; }
+.ted-ui-tableframe.is-visible { opacity: 1; }
+.ted-ui-editable figure.ted-table [data-tedui-drag] { position: relative; z-index: 3; background-color: var(--ui-drag-bg); }
+.ted-ui-editable figure.ted-table th[data-tedui-drag] { background-color: var(--ted-table-head-bg); }
+.ted-ui.is-dragging .ted-ui-editable figure.ted-table :is(th, td) { transition: transform 0.22s var(--ui-ease); }
+.ted-ui.is-dragging .ted-ui-editable figure.ted-table [data-tedui-drag] { transition: none; }
+.ted-ui.is-dropping .ted-ui-editable figure.ted-table :is(th, td) { transition: none !important; }
+
+/* Формулы (этап 6.1б). Маска — цвет выделения текста редактора (rgba main/color1/main 20 %): ссылки формулы и протягивание.
+   Маска плавно растёт по ячейкам; квадрат протягивания — main/color1/main с белой каймой, как точка выбора в таблицах; зона для пальца 24. */
+.ted-ui-tablemask { position: absolute; z-index: 3; border-radius: var(--ui-radius-xsmall); background: rgba(25, 117, 247, 0.2); opacity: 0; pointer-events: none; transition: left 0.12s var(--ui-ease), top 0.12s var(--ui-ease), width 0.12s var(--ui-ease), height 0.12s var(--ui-ease), opacity 0.12s ease; }
+.ted-ui-tablemask.is-visible { opacity: 1; }
+.ted-ui-tablefill { position: absolute; z-index: 6; width: 8px; height: 8px; margin: -4px 0 0 -4px; box-sizing: border-box; border: 1px solid var(--ui-small-bg); border-radius: 2px; background: var(--ui-accent); opacity: 0; pointer-events: none; cursor: crosshair; touch-action: none; transition: opacity 0.12s ease; }
+.ted-ui-tablefill::before { content: ''; position: absolute; inset: -8px; }
+.ted-ui-tablefill.is-visible { opacity: 1; pointer-events: auto; }
+.ted-ui.is-dragging:not(.is-carrying) .ted-ui-tablefill { opacity: 0; }
+.ted-ui-editable figure.ted-table [data-tedui-ferr] { color: var(--ui-color-states-error-dark); }   /* states/error/dark: ошибка формулы видна в правке */
+.ted-ui-tableadd::-webkit-scrollbar { display: none; }

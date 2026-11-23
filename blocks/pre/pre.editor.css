@@ -1,0 +1,6 @@
+/* Блок «Код» — только отличия в редакторе. */
+
+/* Заглушка кода учитывает те же боковые поля, что и текст. */
+.ted-ui-editable pre[data-tedui-ph]::before {
+  inset-inline: calc(var(--ted-code-pad) * var(--ted-u));
+}

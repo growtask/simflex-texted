@@ -1,0 +1,50 @@
+/* Блок «Ключевые цифры» — вид на сайте и в редакторе. Общие переменные плашек и значков (--ted-c-*, --ted-icon-*) — в styles/content.css. */
+
+/* ---------- Ключевые цифры: ul.ted-facts — сетка 4, карточки r12 p16, число 28 / 700 акцентом, подпись 11 ---------- */
+
+.ted-content ul.ted-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: calc(12 * var(--ted-u));
+  padding-left: 0;
+  list-style: none;
+}
+
+.ted-content ul.ted-facts > li {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;   /* значение сверху, подпись прижата к низу карточки (карточки в строке одной высоты) */
+  min-width: 0;
+  padding: calc(16 * var(--ted-u));
+  border-radius: calc(12 * var(--ted-u));
+  background: var(--ted-c-fact-bg);
+  font-size: calc(11 * var(--ted-u));
+  line-height: 1.45;
+  color: var(--ted-c-text);
+}
+
+.ted-content ul.ted-facts > li > strong:first-child {
+  display: block;
+  margin-bottom: calc(4 * var(--ted-u));
+  color: var(--ted-c-fact-num, var(--ted-c-accent));   /* в тёмной теме — color1/light: синий main на тёмной плитке не читался (контраст 2:1, проверка 22.11) */
+  font-size: calc(28 * var(--ted-u));
+  font-weight: 700;
+  line-height: 1;
+}
+.ted-content ul.ted-facts > li > strong:first-child + br { display: none; }
+
+@media (width <= 811px) {
+  .ted-content ul.ted-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+
+/* карточки в сетке: общий отступ между пунктами списка здесь не нужен */
+.ted-content ul.ted-facts > li + li { margin-top: 0; }
+
+/* Ключевые цифры перекрашиваются кнопкой «Цветной фон»: фон получает карточка (выноска — blocks/callout) */
+.ted-content ul.ted-facts[class*="ted-bg-"] { padding: 0; background: none; border-radius: 0; }
+.ted-content ul.ted-facts.ted-bg-gray > li { background: var(--ted-bg-gray); }
+.ted-content ul.ted-facts.ted-bg-color1 > li { background: var(--ted-bg-color1); }
+.ted-content ul.ted-facts.ted-bg-color2 > li { background: var(--ted-bg-color2); }
+
+[data-ted-theme='dark'] .ted-content ul.ted-facts { --ted-c-fact-num: var(--color-main-color1-light, #63a1f7); }

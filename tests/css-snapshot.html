@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Ted — снимок вычисленных стилей</title>
+<!-- Снимок вычисленных стилей интерфейса (хеши по элементам и ::before/::after) в 2 темах × 4 ширинах × ~60 состояний.
+     Нужен при перестановке и чистке CSS: снимок до и после должен совпасть. Запуск: pwsh -File tools/css-snapshot.ps1 -OutFile before.txt -->
+<link rel="stylesheet" href="../dist/ted.css">
+<style>* { transition: none !important; animation: none !important; } body { margin: 0; }</style>
+</head>
+<body>
+<div id="wrap"></div>
+<pre id="out">...</pre>
+<script src="../dist/ted.js"></script>
+<script>
+(async function () {
+  await Promise.all(['400', '500', '600', '700'].map(function (w) { return document.fonts.load(w + ' 14px Inter'); }));
+  await document.fonts.load('400 14px "Roboto Mono"');
+  await document.fonts.ready;
+  var HTML = '<h2>Заголовок</h2><p>Текст <strong>жирный</strong> <a href="/x">ссылка</a> <code>код</code> <mark>метка</mark></p>' +
+    '<ul><li>Пункт</li><li>Два</li></ul><ol><li>Раз</li></ol><blockquote><p>Цитата</p></blockquote>' +
+    '<ul class="ted-checklist"><li class="ted-checked">Отмечен</li><li>Нет</li></ul>' +
+    '<ol class="ted-steps"><li><strong>Шаг</strong><br>Описание</li><li><strong>Два</strong><br>Описание два</li></ol>' +
+    '<blockquote class="ted-callout"><p><strong>Выноска</strong></p><p>Текст выноски</p></blockquote>' +
+    '<ul class="ted-facts"><li><strong>120+</strong><br>стран</li><li><strong>4.8</strong><br>оценка</li><li><strong></strong><br></li></ul>' +
+    '<ul class="ted-proscons"><li class="ted-pros"><strong>Плюсы</strong><ul><li>Раз</li><li>Два</li></ul></li><li class="ted-cons"><strong>Минусы</strong><ul><li>Три</li><li></li></ul></li></ul>' +
+    '<p class="ted-bg-gray">Серый</p><p class="ted-bg-color1">Акцент</p><p class="ted-bg-color2">Доп</p>' +
+    '<blockquote><p>С автором</p><p class="ted-author"><strong>Анна Петрова</strong><br>Редактор</p></blockquote>' +
+    '<blockquote><p>Без автора</p></blockquote>' +
+    '<pre data-lang="js" data-nums="1\n2"><code>let a = 1;\nlet b = 2;</code></pre><pre><code><br></code></pre>' +
+    '<table><tr><td>сырой</td></tr></table><hr><h3 id="anchor">С якорем</h3><p class="ted-align-center">По центру</p><p></p>';
+
+  function fnv(s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); }
+  function sig(el, pseudo) {
+    var cs = getComputedStyle(el, pseudo || null);
+    if (pseudo && (cs.content === 'none' || cs.content === 'normal')) return '-';
+    var s = '';
+    // переменные (--*) не входят: снимок сравнивает то, что видно, а не то, как оно записано (токены этапа 4)
+    var names = []; for (var i = 0; i < cs.length; i++) if (cs[i].indexOf('--') !== 0) names.push(cs[i]); names.sort();
+    names.forEach(function (p) { s += p + ':' + cs.getPropertyValue(p) + ';'; });
+    var dm = new URLSearchParams(location.search).get('detail');
+    if (dm && window.__curKey && window.__curKey.indexOf(dm) >= 0) return s;
+    return fnv(s);
+  }
+  function pathOf(el, root) {
+    var p = [];
+    while (el && el !== root) { var par = el.parentNode; p.push(par ? Array.prototype.indexOf.call(par.children, el) : 0); el = par; }
+    return p.reverse().join('.');
+  }
+  function snapshot(label, roots, out) {
+    roots.forEach(function (root, ri) {
+      var all = [root].concat(Array.prototype.slice.call(root.querySelectorAll('*')));
+      all.forEach(function (el) {
+        if (el.closest && (el.closest('.ted-ui-tile') || el.closest('svg'))) return;   // плитки с картинками грузятся асинхронно
+        var key = label + '|' + ri + '|' + (el.tagName + (el.className && el.className.baseVal === undefined ? '.' + String(el.className).split(' ')[0] : '')) + '|' + pathOf(el, root);
+        window.__curKey = key;
+        out[key] = sig(el) + '/' + sig(el, '::before') + '/' + sig(el, '::after');
+      });
+    });
+  }
+
+  var out = {};
+  var themes = ['light', 'dark'];
+  var widths = [1000, 860, 768, 414];
+  var idx = 0;
+  themes.forEach(function (theme) {
+    widths.forEach(function (width) {
+      var host = document.createElement('div');
+      host.style.cssText = 'width:' + width + 'px;position:relative';
+      document.getElementById('wrap').appendChild(host);
+      var ta = document.createElement('div');
+      ta.id = 'e' + (idx++);
+      host.appendChild(ta);
+      document.querySelectorAll('.ted-ui-pop, .ted-ui-picker, .ted-ui-toasts, .ted-ui-tip').forEach(function (n) { n.remove(); });
+      var ed = Ted.create(ta, { toasts: true, unit: 'px', theme: theme, authors: [{ id: 'a', name: 'А', role: 'Р' }] });
+      ed.setHTML(HTML, { silent: true });
+      var tag = theme + width;
+      var ui = ed.ui;
+      function caretIn(sel, text) {
+        ed.focus();
+        var el = ed.editable.querySelector(sel);
+        var node = el;
+        var w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        var t = w.nextNode();
+        var r = document.createRange();
+        if (t) { r.setStart(t, Math.min(1, t.length)); } else { r.setStart(el, 0); }
+        r.collapse(true);
+        getSelection().removeAllRanges();
+        getSelection().addRange(r);
+        ed.updatePlaceholders(); ed.updateState(); ed.handle.syncItem(); ed.handle.refresh();
+      }
+      var scenarios = [
+        ['base', function () { ed.editable.blur(); getSelection().removeAllRanges(); ed.updateState(); }],
+        ['p', function () { caretIn('p'); }],
+        ['h2', function () { caretIn('h2'); }],
+        ['li', function () { caretIn('ul > li'); }],
+        ['check', function () { caretIn('ul.ted-checklist > li'); }],
+        ['step', function () { caretIn('ol.ted-steps > li'); }],
+        ['callout', function () { caretIn('blockquote.ted-callout > p'); }],
+        ['fact', function () { caretIn('ul.ted-facts > li'); }],
+        ['factEmpty', function () { caretIn('ul.ted-facts > li:nth-child(3)'); }],
+        ['pros', function () { caretIn('li.ted-pros li'); }],
+        ['cons', function () { caretIn('li.ted-cons li'); }],
+        ['quoteAuthor', function () { caretIn('blockquote > p.ted-author'); }],
+        ['quoteNoAuthor', function () { caretIn('blockquote:not(.ted-callout):last-of-type > p'); }],
+        ['code', function () { caretIn('pre > code'); }],
+        ['codeEmpty', function () { caretIn('pre:last-of-type > code'); }],
+        ['bg', function () { caretIn('p.ted-bg-gray'); }],
+        ['raw', function () { ed.editable.blur(); }],
+        ['dragStep', function () { caretIn('ol.ted-steps > li'); var li = ed.editable.querySelector('ol.ted-steps > li'); li.setAttribute('data-tedui-drag', ''); ed.ui.classList.add('is-dragging'); }],
+        ['dragOff', function () { ed.ui.classList.remove('is-dragging'); var li = ed.editable.querySelector('[data-tedui-drag]'); if (li) li.removeAttribute('data-tedui-drag'); }],
+        ['selectedBlock', function () { var b = ed.editable.querySelector('pre'); b.setAttribute('data-tedui-selected', ''); }],
+        ['selectedOff', function () { var b = ed.editable.querySelector('[data-tedui-selected]'); if (b) b.removeAttribute('data-tedui-selected'); }],
+        ['picker', function () { ed.blockMenu.openPicker(ed.editable.firstElementChild); }],
+        ['pickerOff', function () { ed.blockMenu.closePicker(); }],
+        ['link', function () { caretIn('p'); var a = ed.editable.querySelector('a'); ed.openLink && ed.openLink(); }],
+        ['popOff', function () { ed.popover.close(); }],
+        ['lang', function () { caretIn('pre > code'); ed.handle.openLangMenu(ed.editable.querySelector('pre')); }],
+        ['langOff', function () { ed.popover.close(); }],
+        ['author', function () { caretIn('blockquote:not(.ted-callout):last-of-type > p'); ed.handle.pickAuthor && ed.handle.authorQuote && ed.handle.pickAuthor(ed.handle.authorQuote, ed.handle.authorBtn); }],
+        ['authorOff', function () { ed.popover.close(); }],
+        ['toast', function () { ed.toast('Сохранено', { action: 'Отменить', onAction: function () {} }); }],
+        ['view', function () { ed.setMode('view'); }],
+        ['viewBack', function () { ed.setMode('edit'); }]
+      ];
+      var roots = [ui];
+      var finish = function () { Ted.destroy(ed); host.remove(); };
+      scenarios.forEach(function (sc) {
+        try { sc[1](); } catch (e) { out[tag + '|' + sc[0] + '|ERR'] = String(e.message || e); }
+        var extra = Array.prototype.slice.call(document.querySelectorAll('.ted-ui-pop, .ted-ui-picker, .ted-ui-toasts, .ted-ui-tip'));
+        var o = {};
+        snapshot(tag + '|' + sc[0], roots.concat(extra), o);
+        Object.keys(o).forEach(function (k) { out[k] = o[k]; });
+      });
+      // все кнопки панели: открываем каждую (выпадающие списки, окна ссылки, якоря, цвета, помощь)
+      var btns = Array.prototype.slice.call(ui.querySelectorAll('.ted-ui-toolbar button'));
+      btns.forEach(function (b, i) {
+        if (/save|view|mode|preview/i.test(b.getAttribute('data-act') || '')) return;
+        try {
+          caretIn('p');
+          b.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+          b.click();
+        } catch (e) { out[tag + '|tb' + i + '|ERR'] = String(e.message || e); }
+        var extra2 = Array.prototype.slice.call(document.querySelectorAll('.ted-ui-pop, .ted-ui-picker, .ted-ui-toasts, .ted-ui-tip'));
+        var o2 = {};
+        snapshot(tag + '|tb' + i + ':' + (b.getAttribute('data-act') || b.getAttribute('aria-label') || ''), roots.concat(extra2), o2);
+        Object.keys(o2).forEach(function (k) { out[k] = o2[k]; });
+        try { ed.popover.close(); if (ed.blockMenu.picker) ed.blockMenu.closePicker(); if (ed.blockMenu.close) ed.blockMenu.close(); } catch (e) {}
+        if (ed.mode !== 'edit') ed.setMode('edit');
+      });
+      // меню «/»
+      try { caretIn('p:last-of-type'); ed.editable.firstElementChild; ed.blockMenu.openAtSlash && 0; } catch (e) {}
+      finish();
+    });
+  });
+  var keys = Object.keys(out).sort();
+  var lines = keys.map(function (k) { return k + '=' + out[k]; });
+  document.getElementById('out').textContent = 'SNAP-BEGIN\n' + lines.join('\n') + '\nSNAP-END';
+  document.title = 'snap done ' + keys.length;
+})();
+</script>
+</body>
+</html>

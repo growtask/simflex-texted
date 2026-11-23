@@ -1,0 +1,259 @@
+/* ==========================================================================
+   Блоки этапа 4 и код в правке
+   Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
+   ========================================================================== */
+
+/* ---- Шаги: рамка шага, кнопки справа (item-controls), «Добавить шаг» (макет block-steps) ---- */
+.ted-ui-editable :is(ol.ted-steps, ul.ted-checklist) > li { border-radius: var(--ui-radius-medium); }
+
+/* заглушки: пока заголовок или описание пусты (text-icon/gray/light) */
+.ted-ui-editable ol.ted-steps > li[data-tedui-notitle] > strong::before {
+  position: absolute;
+  content: "Шаг";
+  color: var(--ui-placeholder);
+  pointer-events: none;
+}
+
+.ted-ui-editable ol.ted-steps > li[data-tedui-nodesc] > strong::after {
+  content: "Описание шага";
+  position: absolute;
+  left: calc(56 * var(--ted-u));
+  top: calc(24 * var(--ted-u));
+  font-size: calc(13 * var(--ted-u));
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--ui-placeholder);
+  pointer-events: none;
+}
+
+/* рамка шага — только при перетаскивании: как у блоков (2 px, main/color1/light, r12), вокруг шага отступ 4 px, внутри подложка */
+.ted-ui-editable :is(ol.ted-steps, ul.ted-checklist, ul.ted-facts) > li[data-tedui-drag],
+.ted-ui-editable ul.ted-proscons > li > ul > li[data-tedui-drag] {
+  border-radius: var(--ui-radius-medium);
+  z-index: 2;
+  outline: 2px solid var(--ui-drag-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--ui-drag-bg);
+}
+
+/* ручка и корзина шага: в правом верхнем углу рамки, от рамки 4 px, между кнопками 2 px, значки 16 как у блоков */
+.ted-ui-itemctl {
+  position: absolute;
+  z-index: 6;
+  display: flex;
+  gap: 2px;
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-small-bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.ted-ui-itemctl.is-visible { opacity: 1; pointer-events: auto; }
+
+.ted-ui-itemctl .ted-ui-small { background: transparent; border-radius: var(--ui-radius-small); }
+
+.ted-ui-itemctl .ted-ui-small:hover { background: var(--ui-hover); }
+
+.ted-ui-itemctl .ted-ui-small svg { width: 16px; height: 16px; }
+
+.ted-ui-itemctl [data-act="item-grip"] { cursor: grab; }
+
+/* Чек-бокс в правке: состояния как у check-box (hover — светлее акцент, press — темнее); курсор-рука задаёт JS */
+.ted-ui-editable ul.ted-checklist > li[data-tedui-cb="hover"].ted-checked::before { background: var(--ui-color-main-color1-light); }
+
+.ted-ui-editable ul.ted-checklist > li[data-tedui-cb="press"]::before { background: var(--ui-color-main-gray-dark); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-editable ul.ted-checklist > li[data-tedui-cb="press"]::before { background: var(--ui-color-main-gray-light); }
+
+.ted-ui-editable ul.ted-checklist > li[data-tedui-cb="press"].ted-checked::before,
+.ted-ui[data-ted-theme="dark"] .ted-ui-editable ul.ted-checklist > li[data-tedui-cb="press"].ted-checked::before { background: var(--ui-color-main-color1-dark); }
+
+/* Заглушка пустого пункта чек-листа: ::before занят чек-боксом, поэтому текст — в ::after */
+.ted-ui-editable ul.ted-checklist > li[data-tedui-ph]::before {
+  content: "";
+  position: absolute;
+  inset: auto;
+  left: calc(2 * var(--ted-u));
+  top: calc(6 * var(--ted-u));
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.ted-ui-editable ul.ted-checklist > li[data-tedui-ph]::after {
+  content: attr(data-tedui-ph);
+  position: absolute;
+  left: calc(32 * var(--ted-u));
+  top: calc(4 * var(--ted-u));
+  color: var(--ui-placeholder);
+  line-height: 1.5;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Ключевые цифры (макет block-facts, empty): заглушки «0» и «Подпись» */
+.ted-ui-editable ul.ted-facts > li { position: relative; }
+
+.ted-ui-editable ul.ted-facts > li[data-tedui-notitle] > strong::before {
+  position: absolute;
+  content: "0";
+  color: var(--ui-placeholder);
+  pointer-events: none;
+}
+
+.ted-ui-editable ul.ted-facts > li[data-tedui-nodesc] > strong::after {
+  content: "Подпись";
+  position: absolute;
+  left: calc(16 * var(--ted-u));
+  bottom: calc(16 * var(--ted-u));   /* подпись прижата к низу карточки, как и сама подпись */
+  font-size: calc(11 * var(--ted-u));
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--ui-placeholder);
+  pointer-events: none;
+}
+
+/* Плюсы и минусы (макет block-proscons, empty): заглушки «Пункт» цветом text-icon/gray/medium */
+.ted-ui-editable ul.ted-proscons > li[data-tedui-notitle] > strong::before {
+  position: absolute;
+  content: "Пункт";
+  color: var(--ui-color-text-icon-gray-medium);
+  pointer-events: none;
+}
+
+.ted-ui-editable ul.ted-proscons > li > ul > li[data-tedui-empty]::after {
+  content: "Пункт";
+  position: absolute;
+  left: calc(32 * var(--ted-u));
+  top: 0;
+  color: var(--ui-color-text-icon-gray-medium);
+  pointer-events: none;
+}
+
+/* Перенос шагов, пунктов и плиток плавный, как у блоков */
+.ted-ui.is-dragging .ted-ui-editable :is(ol.ted-steps, ul.ted-checklist, ul.ted-facts) > li,
+.ted-ui.is-dragging .ted-ui-editable ul.ted-proscons > li > ul > li {
+  transition: transform 0.22s var(--ui-ease);
+}
+
+.ted-ui.is-dragging .ted-ui-editable :is(ol.ted-steps, ul.ted-checklist, ul.ted-facts) > li[data-tedui-drag],
+.ted-ui.is-dragging .ted-ui-editable ul.ted-proscons > li > ul > li[data-tedui-drag] { transition: none; }
+
+.ted-ui.is-dropping .ted-ui-editable :is(ol, ul) :is(ol, ul) > li,
+.ted-ui.is-dropping .ted-ui-editable :is(ol.ted-steps, ul.ted-checklist, ul.ted-facts) > li { transition: none !important; }
+
+
+.ted-ui-addauthor {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px 8px 12px;
+  border: 0;
+  border-radius: var(--ui-radius-medium);
+  background: var(--ui-hover);
+  color: var(--ui-text);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease, background-color 0.12s ease;
+}
+
+/* ui/s 600 14 (Buttons/main secondary s): .ted-ui button { font: inherit } перебивал шрифт — было 400 */
+.ted-ui .ted-ui-addauthor { font: 600 14px/1.4 var(--ui-font); }
+
+.ted-ui-addauthor.is-visible { opacity: 1; pointer-events: auto; }
+
+.ted-ui-addauthor:hover { background: var(--ui-press); }
+
+.ted-ui-addauthor svg { width: 24px; height: 24px; }
+
+
+/* Блок кода в правке: заглушка языка, кнопка «Копировать» в шапке, подсветка через CSS Custom Highlight API */
+/* заглушка шапки: в макете она цвета шапки (#DADFE5 на #DADFE5, не видна) — берём text-icon/gray/medium */
+.ted-ui-editable pre:not([data-lang])::before { content: "Выберите язык"; color: var(--ui-color-text-icon-gray-medium); }
+
+/* кнопка «Копировать» в шапке блока кода (макет: 24, белая r8, значок 16 #919599) — фон шапки рисует значок справа */
+.ted-ui-editable pre::before {
+  cursor: pointer;
+  background-color: var(--ted-c-code-head, var(--ui-color-main-gray-light));
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='8' fill='white'/%3E%3Cg transform='translate(4 4)' fill='none' stroke='%23919599' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5.5' y='5.5' width='8' height='8' rx='1.5'/%3E%3Cpath d='M10.5 5.5V4a1.5 1.5 0 0 0-1.5-1.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5h1.5'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right calc(6 * var(--ted-u)) center;   /* отступ справа 6, как сверху и снизу (в шапке 36, кнопка 24) */
+  background-size: 24px 24px;
+}
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-editable pre::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='8' fill='%23262626'/%3E%3Cg transform='translate(4 4)' fill='none' stroke='%23919599' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5.5' y='5.5' width='8' height='8' rx='1.5'/%3E%3Cpath d='M10.5 5.5V4a1.5 1.5 0 0 0-1.5-1.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5h1.5'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* карточки плюсов и минусов меняются местами: рамка при перетаскивании как у плиток */
+.ted-ui-editable ul.ted-proscons > li[data-tedui-drag] {
+  z-index: 2;
+  border-radius: var(--ui-radius-large);
+  outline: 2px solid var(--ui-drag-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--ui-drag-bg);
+}
+
+.ted-ui.is-dragging .ted-ui-editable ul.ted-proscons > li { transition: transform 0.22s var(--ui-ease); }
+
+.ted-ui.is-dragging .ted-ui-editable ul.ted-proscons > li[data-tedui-drag] { transition: none; }
+
+
+/* Пустой блок кода (макет block-code, state=empty): в шапке «Выберите язык», в теле «// Вставьте или напишите код», номер строки — цветом заглушки */
+.ted-ui-editable pre[data-tedui-empty] > code::before {
+  content: "// Вставьте или напишите код";
+  position: absolute;
+  inset: 0;
+  padding: inherit;
+  overflow: hidden;
+  color: var(--ui-placeholder);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+/* Шапка блока кода: прозрачные кнопки поверх нарисованной шапки (язык — слева, копирование — справа) */
+.ted-ui-codehead { position: absolute; z-index: 4; }
+
+.ted-ui-codebtn {
+  position: absolute;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-medium);
+  background: transparent;
+  cursor: pointer;
+}
+
+.ted-ui-codebtn.is-lang { left: 0; height: 100%; }
+
+.ted-ui-codebtn.is-copy { border-radius: var(--ui-radius-small); }
+
+.ted-ui-codebtn:focus-visible { outline: 2px solid var(--ui-drag-ring); outline-offset: -2px; }
+
+/* Заглушки цифр читаются на плашке (выноска — blocks/callout): text-icon/gray/medium (как «Пункт» и заглушка на цветном фоне) */
+.ted-ui-editable ul.ted-facts > li[data-tedui-notitle] > strong::before,
+.ted-ui-editable ul.ted-facts > li[data-tedui-nodesc] > strong::after { color: var(--ui-color-text-icon-gray-medium); }
+
+/* Пустой «хвост» пунктов плюсов и минусов после заполненных: значок не рисуем (при сохранении пункт отбрасывается). Строка остаётся, чтобы курсор в ней не терялся, если редактор на миг потерял фокус */
+.ted-ui-editable ul.ted-proscons > li > ul > li[data-tedui-tail]::before { visibility: hidden; }
+
+/* «Добавить …» — Buttons/main secondary s: press main/color1/light; тёмная — hover gray/medium, press gray/darker (нажатия не было, заказчик 17.11) */
+.ted-ui .ted-ui-addauthor:active { background: var(--ui-color-main-color1-light); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-addauthor:hover { background: var(--ui-color-main-gray-medium); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-addauthor:active { background: var(--ui-color-main-gray-darker); }
+/* Пока блок перетаскивают, кнопки под ним («Добавить автора», «Добавить строку / столбец», шапка кода) не остаются на старом месте */
+/* кнопки другого блока прячутся, свои кнопки блока едут вместе с ним (is-carrying, заказчик 17.11) */
+.ted-ui.is-dragging:not(.is-carrying) :is(.ted-ui-addauthor, .ted-ui-tableadd, .ted-ui-codehead) { opacity: 0; pointer-events: none; }
+.ted-ui.is-carrying :is(.ted-ui-addauthor, .ted-ui-tableadd, .ted-ui-tablectl, .ted-ui-codehead) { pointer-events: none; transition: none; }
+
+/* Аккордеон в правке: пункт с курсором раскрыт, остальные свёрнуты; шеврон (правые 32 px строки вопроса) раскрывает и сворачивает — плавно.
+   Рамок при наведении нет (PRINCIPLES.md); перетаскивание вопроса — как у шагов. Под блоком — «Добавить вопрос» (как «Добавить автора»). */
+
+/* Группа полей окна (ручной ввод товара): тот же шаг 8, что между полями окна */
+.ted-ui-pop__group { display: grid; gap: 8px; }
+

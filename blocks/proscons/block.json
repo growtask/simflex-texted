@@ -1,0 +1,26 @@
+{
+  "type": "proscons",
+  "title": "Плюсы и минусы",
+  "jsonExample": "{ \"type\": \"proscons\", \"pros\": { \"title\": \"Плюсы\", \"items\": [\"…\"] }, \"cons\": { \"title\": \"Минусы\", \"items\": [\"…\"] } }",
+  "figma": "block-proscons",
+  "text": true,
+  "toolbar": {
+    "bg": false,
+    "align": false,
+    "style": false
+  },
+  "menu": {
+    "convert": false,
+    "group": "Акцент",
+    "order": 30,
+    "icon": "proscons",
+    "words": "плюсы минусы достоинства недостатки pros cons",
+    "sample": "<ul class=\"ted-proscons\"><li class=\"ted-pros\"><strong>Плюсы</strong><ul><li>Чистый звук</li><li>Долгая работа</li><li>Удобная посадка</li></ul></li><li class=\"ted-cons\"><strong>Минусы</strong><ul><li>Громоздкий кейс</li><li>Без провода</li><li>Цена выше средней</li></ul></li></ul>"
+  },
+  "selector": "ul.ted-proscons",
+  "html": {
+    "ul": [],
+    "li": [],
+    "strong": []
+  }
+}

@@ -1,0 +1,112 @@
+/* ==========================================================================
+   Тостеры
+   Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
+   ========================================================================== */
+
+/* ==========================================================================
+   Тостер — Feedback/toast из дизайн-системы (чёрный, default)
+   p 8 × 12, gap 12, r 12, фон #0D0D0D, текст Inter 13 / 1.5 белый,
+   действие #63A1F7 + стрелка 16, таймер 2 px #919599, тень 0 0 10 2 rgba(13,13,13,.1)
+   Контейнер в body → не зависит от тем и от overflow контейнеров админки.
+   ========================================================================== */
+.ted-ui-toasts {
+  position: fixed;
+  z-index: 1100;
+  left: 50%;
+  bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100vw - 16px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.ted-ui-toast {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(480px, calc(100vw - 16px));
+  padding: 8px 12px;
+  overflow: hidden;
+  border-radius: var(--ui-radius-medium);
+  background: var(--ui-color-main-gray-black);
+  box-shadow: var(--ui-shadow-gray-s);
+  color: var(--ui-color-text-icon-gray-white);
+  font: 400 13px/1.5 "Ted Inter", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-feature-settings: "lnum" 1, "pnum" 1;
+  pointer-events: auto;
+  animation: ted-ui-toast-in 0.2s cubic-bezier(0.14, 0.18, 0.16, 1.02);
+}
+
+.ted-ui-toast.is-closing {
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.ted-ui-toast__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.ted-ui-toast__action {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ui-color-text-icon-color1-light);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.12s ease;
+}
+
+.ted-ui-toast__action:hover { color: var(--ui-color-text-icon-color1-lighter); }
+
+.ted-ui-toast__action:active { color: var(--ui-color-text-icon-gray-white); }
+
+
+
+.ted-ui-toast__timer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--ui-color-main-gray-medium);
+  transform-origin: left;
+  animation: ted-ui-toast-timer linear forwards;
+}
+
+/* Тёмный тостер — только для редактора (в дизайн-системе Feedback/toast одинаковый в обеих темах).
+   Как тёмный Tooltip/main: фон #DADFE5, текст #262626, действие #1975F7, таймер #919599 */
+.ted-ui-toast--on-dark {
+  background: var(--ui-color-main-gray-light);
+  box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.35);
+  color: var(--ui-color-text-icon-gray-darker);
+}
+
+.ted-ui-toast--on-dark .ted-ui-toast__action { color: var(--ui-color-text-icon-color1-main); }
+
+.ted-ui-toast--on-dark .ted-ui-toast__action:hover { color: var(--ui-color-text-icon-color1-dark); }
+
+.ted-ui-toast--on-dark .ted-ui-toast__action:active { color: var(--ui-color-text-icon-color1-darker); }
+
+.ted-ui-toast--success { background: var(--ui-color-states-success-dark); }
+.ted-ui-toast--error { background: var(--ui-color-states-error-dark); }
+:is(.ted-ui-toast--success, .ted-ui-toast--error) .ted-ui-toast__timer { visibility: hidden; }
+
+/* Колода (решение 22.11, как Feedback/stack в UI-ките rpm): уведомления лежат стопкой — нижние чуть меньше и выглядывают
+   сверху; при наведении стопка раскрывается списком. Место каждого — переменные --toast-y / --toast-scale (Toaster.layout) */
+.ted-ui-toasts { display: grid; justify-items: center; align-items: end; gap: 0; }
+.ted-ui-toast { grid-area: 1 / 1; transform: translateY(var(--toast-y, 0px)) scale(var(--toast-scale, 1)); transform-origin: 50% 0; transition: transform var(--ui-motion-base, 180ms) var(--ui-ease-out, ease), opacity var(--ui-motion-base, 180ms) ease; }
+.ted-ui-toast[data-back] > * { opacity: 0; transition: opacity var(--ui-motion-fast, 120ms) ease; }
+.ted-ui-toast.is-closing { transform: translateY(calc(var(--toast-y, 0px) + 4px)) scale(var(--toast-scale, 1)); }

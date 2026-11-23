@@ -1,0 +1,19 @@
+/* Блок «Заголовок» h2–h6 — вид на сайте и в редакторе (макет block-heading, Text/heading): шрифт заголовков, 700, высота
+   строки 1, цвет text-icon/gray/darker. Размеры — переменные --ted-h2…--ted-h6 (content.css: десктоп 42/28/24/20/16,
+   ≤ 811 px — 28/24/20/20/16). Отступы сверху и снизу — общий ритм блоков (content.css). */
+
+.ted-content :is(h2, h3, h4, h5, h6) {
+  font-family: var(--ted-font-heading);
+  font-weight: 700;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ted-c-heading);
+}
+
+.ted-content h2 { font-size: calc(var(--ted-h2) * var(--ted-u)); }
+.ted-content h3 { font-size: calc(var(--ted-h3) * var(--ted-u)); }
+.ted-content h4 { font-size: calc(var(--ted-h4) * var(--ted-u)); }
+.ted-content h5 { font-size: calc(var(--ted-h5) * var(--ted-u)); }
+.ted-content h6 { font-size: calc(var(--ted-h6) * var(--ted-u)); }

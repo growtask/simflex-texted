@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TextEd — редактор на всю ширину (сверка с макетом)</title>
+<link rel="stylesheet" href="site-theme.css">
+<link rel="preload" href="../fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../dist/ted.css">
+<link rel="stylesheet" href="demo.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  .ted-ui, .ted-editor { --ted-editor-min-height: 100vh; }
+</style>
+</head>
+<body data-demo-back>
+<!--
+  Сверка с экранами макета TextEd: editor-screen-fullhd / hd / tablet / mobile
+  (ширина окна 1000 / 860 / 768 / 414 → колонка 700 / 628 / 480 / 382).
+  ?empty — пустой документ (как editor-screen-*-start), ?dark — тёмная тема.
+-->
+<textarea id="content" class="ted-editor"></textarea><script>if(localStorage.getItem('ted-demo-dark')==='1')document.currentScript.previousElementSibling.dataset.tedTheme='dark'</script>
+
+<script src="demo-icons.js"></script><script src="demo.js"></script>
+<script src="../dist/ted.js"></script>
+<script src="../content.js"></script>
+<script src="sample.js"></script>
+<script>
+  var params = new URLSearchParams(location.search);
+  var demo = '<h2>Заголовок 2</h2><p>Всё это создал один человек с простой целью: сделать разработку сайтов быстрее и эффективнее. Моя миссия — помогать командам запускать магазины без лишней сложности.</p>' +
+    '<blockquote><p>Лучший способ предсказать будущее — создавать его, шаг за шагом.</p></blockquote>' +
+    '<pre>echo "Initial: ".memory_get_usage()." bytes \\n";\n/* All script */</pre><hr>' +
+    '<ul><li>Первый пункт</li><li>Второй пункт</li></ul><ol><li>Шаг один</li><li>Шаг два</li></ol>';
+  document.getElementById('content').value = params.has('empty') ? '' : (params.has('sample') ? window.SAMPLE_HTML : demo);
+  window.editor = Ted.init({
+    selector: '#content',
+    unit: 'vw',
+    previewScreen: 'editor',
+    theme: params.has('dark') ? 'dark' : 'light',
+    contentCss: ['site-theme.css'],
+    startWithHeading: true,
+    // загрузка через демо-сервер (tools/demo.ps1): файлы и картинки по ссылке сжимаются, как в админке
+    mediaPageUrl: '/company/',
+    upload: location.protocol !== 'file:' ? Ted.createUpload('/ted-demo-media/upload', { headers: { 'X-Ted-Demo': 'media' } }) : null,
+    // «Встраивание»: карточку по ссылке читает демо-сервер (php/opengraph.php), статьи CMS — демо-список из sample.js
+    opengraph: location.protocol !== 'file:' ? Ted.createOpenGraph('/ted-demo-media/og', { headers: { 'X-Ted-Demo': 'media' } }) : null,
+    articles: { search: async (q) => (window.DEMO_ARTICLE_LIST || []).filter((a) => a.title.toLowerCase().includes(q.toLowerCase())), get: async (id) => (window.DEMO_ARTICLE_LIST || []).find((a) => a.id === id) },
+  })[0];
+</script>
+</body>
+</html>

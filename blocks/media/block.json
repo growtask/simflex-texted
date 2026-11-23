@@ -1,0 +1,68 @@
+{
+  "type": "media",
+  "title": "Медиа",
+  "figma": "Media/image, Media/gallery, Media/video, Media/audio, Media/file",
+  "html": {},
+  "wrap": "ted-ui-media",
+  "variants": [
+    {
+      "type": "image",
+      "title": "Изображение",
+      "selector": "figure.ted-media--image",
+      "degrade": "drop",
+      "insertMenu": "media",
+      "menu": {
+        "group": "Медиа",
+        "order": 0,
+        "icon": "image"
+      },
+      "jsonExample": "{ \"type\": \"image\", \"url\": \"https://…/photo.jpg\", \"alt\": \"Описание\", \"caption\": \"Подпись\" }"
+    },
+    {
+      "type": "gallery",
+      "title": "Галерея",
+      "selector": "figure.ted-media--gallery",
+      "degrade": "drop",
+      "menu": {
+        "group": "Медиа",
+        "order": 10,
+        "icon": "gallery"
+      }
+    },
+    {
+      "type": "video",
+      "title": "Видео",
+      "selector": "figure.ted-media--video",
+      "insertMenu": "media",
+      "menu": {
+        "group": "Медиа",
+        "order": 20,
+        "icon": "video"
+      }
+    },
+    {
+      "type": "audio",
+      "title": "Аудио",
+      "selector": "figure.ted-media--audio",
+      "degrade": "drop",
+      "insertMenu": "media",
+      "menu": {
+        "group": "Медиа",
+        "order": 30,
+        "icon": "audio"
+      }
+    },
+    {
+      "type": "file",
+      "title": "Файл",
+      "selector": "figure.ted-media--file",
+      "insertMenu": "media",
+      "menu": {
+        "group": "Файлы и таблицы",
+        "picker": "Файлы",
+        "order": 0,
+        "icon": "file"
+      }
+    }
+  ]
+}

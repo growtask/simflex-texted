@@ -1,0 +1,30 @@
+{
+  "type": "steps",
+  "title": "Шаги",
+  "jsonExample": "{ \"type\": \"steps\", \"items\": [{ \"title\": \"Шаг\", \"text\": \"Пояснение\" }] }",
+  "figma": "block-steps",
+  "text": true,
+  "toolbar": {
+    "bg": false,
+    "align": false
+  },
+  "menu": {
+    "group": "Списки",
+    "order": 30,
+    "icon": "steps",
+    "words": "шаги инструкция этапы steps",
+    "sample": "<ol class=\"ted-steps\"><li><strong>Выберите товар</strong><br>Откройте каталог и выберите нужное.</li><li><strong>Добавьте в корзину</strong><br>Проверьте опции и количество.</li><li><strong>Оформите заказ</strong><br>Выберите доставку и оплату.</li></ol>"
+  },
+  "style": {
+    "label": "Шаги",
+    "icon": "steps",
+    "keys": "",
+    "order": 90
+  },
+  "selector": "ol.ted-steps",
+  "html": {
+    "ol": [],
+    "li": [],
+    "strong": []
+  }
+}

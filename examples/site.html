@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TextEd — так текст выглядит на сайте</title>
+<!-- На сайте нужны только стили: переменные сайта + dist/ted.css (+ ted.vw.css для vw-сайтов) -->
+<link rel="stylesheet" href="site-theme.css">
+<link rel="preload" href="../fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../dist/ted.css">
+<link rel="stylesheet" href="../dist/ted.vw.css" id="vw">
+<link rel="stylesheet" href="demo.css">
+<style>
+  /* типичный reset сайта — Ted должен его пережить (применяем только к «сайту», не к меню демо) */
+  :where(.site-frame) * { margin: 0; padding: 0; box-sizing: border-box; }
+  :where(.site-frame) ul, :where(.site-frame) ol { list-style: none; }
+  :where(.site-frame) b, :where(.site-frame) strong { font-weight: inherit; }
+  :where(.site-frame) a { color: inherit; text-decoration: none; }
+  .container { max-width: 52.0833vw; margin: 0 auto; padding: 4.1667vw 0; }
+  @media (width <= 811px) { .container { max-width: none; padding: 5.2083vw 2.0833vw; } }
+  @media (width <= 481px) { .container { padding: 9.6618vw 3.8647vw; } }
+</style>
+</head>
+<body>
+<div class="demo-app">
+  <nav class="demo-side" data-demo-nav aria-label="Режимы демо"></nav>
+  <main class="demo-main">
+    <div class="demo-head site-bar">
+      <h1>Как выглядит на сайте</h1>
+      <span class="demo-hint" id="w"></span>
+      <button type="button" class="demo-tab" id="toggle"><span>Выключить vw</span></button>
+    </div>
+    <p class="demo-hint" style="margin:0 0 12px">Показан сохранённый в админке текст (если ничего не сохранено — пример). Меняйте ширину окна: размеры считаются как в миксинах 1920 / 1366 / 768 / 414.</p>
+    <div class="site-frame">
+      <div class="container">
+        <div id="content"></div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="sample.js"></script>
+<script src="../dist/ted.js"></script><!-- только для Ted.clean: в демо без PHP он заменяет серверную очистку перед выводом -->
+<script src="demo-icons.js"></script><script src="demo-logo.js"></script>
+<script src="demo.js"></script>
+<script>
+  // На реальном сайте PHP выводит поле, очищенное на сервере и перед выводом: <?= $ted->clean($page['content']) ?> (этап 3).
+  // В демо без PHP то же делает Ted.clean: и сохранённое в админке, и образец (в нём нарочно есть onclick и style) выводятся очищенными.
+  var saved = localStorage.getItem('ted-demo-html') || SAMPLE_HTML;
+  var tpl = document.createElement('template');   // разбор без выполнения: только чтобы взять числа сводки с обёртки
+  tpl.innerHTML = saved;
+  var root = tpl.content.firstElementChild;
+  var wrap = document.createElement('div');
+  wrap.className = 'ted-content';
+  if (root && root.matches('div.ted-content')) ['data-words', 'data-chars', 'data-minutes', 'data-blocks'].forEach(function (n) {
+    var v = root.getAttribute(n);
+    if (/^\d+$/.test(v || '')) wrap.setAttribute(n, v);
+  });
+  wrap.innerHTML = Ted.clean(saved);
+  document.getElementById('content').append(wrap);
+  // липкая шапка демо: глава содержания и полоса прогресса чтения встают ниже неё (на сайте — так же, переменной --ted-sticky-top)
+  function stickyTop() { var bar = document.querySelector('.site-bar'); document.documentElement.style.setProperty('--ted-sticky-top', (bar ? bar.offsetHeight : 0) + 'px'); }
+  addEventListener('resize', stickyTop); stickyTop();
+  // Карточка статьи CMS — снимок; CMS при выводе обновляет адрес по data-ted-article (статью могли переместить)
+  document.querySelectorAll('.ted-embed[data-ted-article]').forEach(function (card) {
+    var a = (window.DEMO_ARTICLE_LIST || []).find(function (x) { return x.id === card.getAttribute('data-ted-article'); });
+    var open = card.querySelector('.ted-embed__open');
+    if (a && open) open.setAttribute('href', a.url);
+  });
+  var vw = document.getElementById('vw');
+  document.getElementById('toggle').onclick = function () {
+    vw.disabled = !vw.disabled;
+    this.querySelector('span').textContent = vw.disabled ? 'Включить vw' : 'Выключить vw';
+  };
+  function w() { document.getElementById('w').textContent = 'ширина окна: ' + innerWidth + 'px'; }
+  addEventListener('resize', w); w();
+</script>
+<script src="../content.js" defer></script>
+</body>
+</html>

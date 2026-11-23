@@ -1,0 +1,125 @@
+{
+  "type": "heading",
+  "title": "Заголовок",
+  "jsonExample": "{ \"type\": \"h2\", \"text\": \"Заголовок раздела\" } — также h3, h4, h5, h6",
+  "figma": "block-heading (Text/heading)",
+  "text": true,
+  "placeholder": "Заголовок",
+  "html": {
+    "h2": [],
+    "h3": [],
+    "h4": [],
+    "h5": [],
+    "h6": []
+  },
+  "variants": [
+    {
+      "type": "h2",
+      "title": "Заголовок 2",
+      "selector": "h2",
+      "menu": {
+        "group": "Текст",
+        "order": 0,
+        "icon": "heading",
+        "words": "заголовок 2 h2 heading"
+      },
+      "style": {
+        "label": "Заголовок 2",
+        "icon": "heading",
+        "keys": "Mod+Shift+2",
+        "order": 10
+      },
+      "hotkey": {
+        "code": "Mod+Shift+Digit2",
+        "keys": "Mod+Shift+2",
+        "label": "Заголовок 2",
+        "convert": true,
+        "after": "block:p"
+      }
+    },
+    {
+      "type": "h3",
+      "title": "Заголовок 3",
+      "selector": "h3",
+      "menu": {
+        "group": "Текст",
+        "order": 10,
+        "icon": "heading-3",
+        "words": "заголовок 3 h3 heading"
+      },
+      "style": {
+        "label": "Заголовок 3",
+        "icon": "heading-3",
+        "keys": "Mod+Shift+3",
+        "order": 20
+      },
+      "hotkey": {
+        "code": "Mod+Shift+Digit3",
+        "keys": "Mod+Shift+3",
+        "label": "Заголовок 3",
+        "convert": true,
+        "after": "block:h2"
+      }
+    },
+    {
+      "type": "h4",
+      "title": "Заголовок 4",
+      "selector": "h4",
+      "menu": {
+        "group": "Текст",
+        "order": 20,
+        "icon": "heading-4",
+        "words": "заголовок 4 h4 heading"
+      },
+      "style": {
+        "label": "Заголовок 4",
+        "icon": "heading-4",
+        "keys": "Mod+Shift+4",
+        "order": 30
+      },
+      "hotkey": {
+        "code": "Mod+Shift+Digit4",
+        "keys": "Mod+Shift+4",
+        "label": "Заголовок 4",
+        "convert": true,
+        "after": "block:h3"
+      }
+    },
+    {
+      "type": "h5",
+      "title": "Заголовок 5",
+      "selector": "h5",
+      "style": {
+        "label": "Заголовок 5",
+        "icon": "heading-5",
+        "keys": "Mod+Shift+5",
+        "order": 40
+      },
+      "hotkey": {
+        "code": "Mod+Shift+Digit5",
+        "keys": "Mod+Shift+5",
+        "label": "Заголовок 5",
+        "convert": true,
+        "after": "block:h4"
+      }
+    },
+    {
+      "type": "h6",
+      "title": "Заголовок 6",
+      "selector": "h6",
+      "style": {
+        "label": "Заголовок 6",
+        "icon": "heading-6",
+        "keys": "Mod+Shift+6",
+        "order": 50
+      },
+      "hotkey": {
+        "code": "Mod+Shift+Digit6",
+        "keys": "Mod+Shift+6",
+        "label": "Заголовок 6",
+        "convert": true,
+        "after": "block:h5"
+      }
+    }
+  ]
+}

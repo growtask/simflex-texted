@@ -1,0 +1,110 @@
+/* ==========================================================================
+   Окна (Popover): ссылка, якорь, помощь, проверка правок ✨, подменю
+   Общий элемент интерфейса (этап 4): шапка с крестиком, поля 16, промежуток 8; содержимое — кнопки, поля, переключатели.
+   ========================================================================== */
+
+/* ==========================================================================
+   Поповер ссылки (editor-popover kind=link): p 16, gap 8
+   ========================================================================== */
+/* окна (ссылка, якорь, помощь, проверка правок ✨) — одни поля и промежуток */
+.ted-ui-pop--link .ted-ui-pop__box,
+.ted-ui-pop--help .ted-ui-pop__box,
+.ted-ui-pop--format .ted-ui-pop__box {
+  gap: 8px;
+  padding: 16px;
+}
+
+.ted-ui-form__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.ted-ui-form__title {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.ted-ui-form__footer {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Справка по горячим клавишам */
+.ted-ui-help__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ted-ui-help__row kbd {
+  padding: 0 8px;
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-field);
+  font: 600 11px/20px var(--ui-font);
+  white-space: nowrap;
+}
+
+/* Инструкция под горячими клавишами (макет editor-help-text 7527:121550): шаги через 16, текст — text/t3 13 / 1.5
+   (text-icon/gray/darker, тёмная — text-icon/gray/white), через 8 — картинка интерфейса: подложка main/gray/lighter (тёмная main/gray/dark),
+   r12, высота 120; картинка в своём размере от левого верхнего угла, в узком окне обрезается справа (как в варианте mobile) */
+.ted-ui-help__guide { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+
+.ted-ui-help__step { display: flex; flex-direction: column; gap: 8px; }
+
+.ted-ui-help__text { margin: 0; color: var(--ui-text); font-size: 13px; line-height: 1.5; }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-help__text { color: var(--ui-icon); }   /* text-icon/gray/white */
+
+.ted-ui-help__shot { height: 120px; overflow: hidden; border-radius: var(--ui-radius-medium); background: var(--ui-field) no-repeat left top / 496px 120px; }
+
+.ted-ui-help__shot[data-step="1"] { background-image: url(../tiles/help-1-light.webp); }
+.ted-ui-help__shot[data-step="2"] { background-image: url(../tiles/help-2-light.webp); }
+.ted-ui-help__shot[data-step="3"] { background-image: url(../tiles/help-3-light.webp); }
+.ted-ui-help__shot[data-step="4"] { background-image: url(../tiles/help-4-light.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-help__shot[data-step="1"] { background-image: url(../tiles/help-1-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-help__shot[data-step="2"] { background-image: url(../tiles/help-2-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-help__shot[data-step="3"] { background-image: url(../tiles/help-3-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-help__shot[data-step="4"] { background-image: url(../tiles/help-4-dark.webp); }
+
+/* ==========================================================================
+   Холст: отступ 24 сверху, колонка 700 / 628 / 480 / 382
+   ========================================================================== */
+.ted-ui-body {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+/* Подменю (справа от пункта) — без уголка */
+.ted-ui-pop--side .ted-ui-pop__corner { visibility: hidden; }
+
+/* Справка: прокрутка, если не помещается */
+.ted-ui-pop--help .ted-ui-pop__box {
+  max-height: min(560px, calc(100vh - 120px));
+  overflow-y: auto;
+}
+
+/* ---------- Форматирование ✨: панель проверки правок ---------- */
+.ted-ui-pop--format { width: 320px; }
+
+.ted-ui .ted-ui-fix__row { margin: 0; }
+
+.ted-ui .ted-ui-fix__row .ted-ui-toggle__text { flex: 1 1 auto; }
+
+.ted-ui .ted-ui-fix__count { flex: none; min-width: 24px; padding: 0 8px; border-radius: 9999px; background: var(--ui-hover); color: var(--ui-text); font: 600 11px/18px var(--ui-font); text-align: center; }
+
+.ted-ui, .ted-ui-toolbar, .ted-ui-pop__box { transition: min-height 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.2s ease, color 0.2s ease; }
+
+/* Ряд кнопок в окне (выравнивание кнопок блока «Кнопка»): те же кнопки, что в панели */
+.ted-ui-pop__row { display: flex; gap: 4px; }

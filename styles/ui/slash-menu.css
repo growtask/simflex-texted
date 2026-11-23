@@ -1,0 +1,49 @@
+/* ==========================================================================
+   Меню блоков по «/»
+   Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
+   ========================================================================== */
+
+.ted-ui-menu__scroll {
+  display: flex;
+  width: 100%;
+  max-height: 420px;
+}
+
+.ted-ui-menu__list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.ted-ui-menu__group {
+  flex: none;
+  padding: 4px 0 6px 8px;
+  color: var(--ui-muted);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
+.ted-ui-menu__divider {
+  flex: none;
+  width: 100%;
+  padding: 8px 0;
+}
+
+.ted-ui-menu__divider::before {
+  content: "";
+  display: block;
+  height: 1px;
+  background: var(--ui-line);
+}
+
+.ted-ui-menu__empty {
+  padding: 8px;
+  color: var(--ui-muted);
+  font-size: 14px;
+}

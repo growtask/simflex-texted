@@ -1,0 +1,6 @@
+/vendor/
+/ted.config.php
+/uf/
+*.bak
+*.tmp
+*.log

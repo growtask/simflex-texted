@@ -1,0 +1,32 @@
+{
+  "type": "hr",
+  "title": "Разделитель",
+  "jsonExample": "{ \"type\": \"hr\" }",
+  "aliases": [
+    "separator"
+  ],
+  "figma": "block-line (Layout/line)",
+  "menu": {
+    "group": "Макет",
+    "order": 10,
+    "icon": "separator",
+    "words": "разделитель линия hr line",
+    "convert": false,
+    "sample": "<hr>"
+  },
+  "object": true,
+  "outline": true,
+  "handleAt": "middle",
+  "selector": "hr",
+  "markdown": "---",
+  "hotkey": {
+    "code": "Mod+Shift+Minus",
+    "keys": "Mod+Shift+-",
+    "label": "Линия",
+    "after": "redo"
+  },
+  "html": {
+    "hr": []
+  },
+  "degrade": "drop"
+}

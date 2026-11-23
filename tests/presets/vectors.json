@@ -1,0 +1,410 @@
+{
+ "custom": [
+  "h2",
+  "callout",
+  "table",
+  "background"
+ ],
+ "vectors": [
+  {
+   "html": "<h2>Текст h2</h2>",
+   "expect": {
+    "mini": "<h2>Текст h2</h2>",
+    "text": "<p>Текст h2</p>",
+    "custom": "<h2>Текст h2</h2>"
+   }
+  },
+  {
+   "html": "<p>Текст p</p>",
+   "expect": {
+    "mini": "<p>Текст p</p>",
+    "text": "<p>Текст p</p>",
+    "custom": "<p>Текст p</p>"
+   }
+  },
+  {
+   "html": "<blockquote><p>Текст blockquote</p></blockquote>",
+   "expect": {
+    "mini": "<blockquote><p>Текст blockquote</p></blockquote>",
+    "text": "<p>Текст blockquote</p>",
+    "custom": "<p>Текст blockquote</p>"
+   }
+  },
+  {
+   "html": "<pre data-nums=\"1\"><code>Текст pre</code></pre>",
+   "expect": {
+    "mini": "<p>Текст pre</p>",
+    "text": "<p>Текст pre</p>",
+    "custom": "<p>Текст pre</p>"
+   }
+  },
+  {
+   "html": "<blockquote class=\"ted-callout\"><p><strong>Текст callout</strong></p></blockquote>",
+   "expect": {
+    "mini": "<p><strong>Текст callout</strong></p>",
+    "text": "<p><strong>Текст callout</strong></p>",
+    "custom": "<blockquote class=\"ted-callout\"><p><strong>Текст callout</strong></p></blockquote>"
+   }
+  },
+  {
+   "html": "<p class=\"ted-bg-gray\">Текст background</p>",
+   "expect": {
+    "mini": "<p>Текст background</p>",
+    "text": "<p>Текст background</p>",
+    "custom": "<p class=\"ted-bg-gray\">Текст background</p>"
+   }
+  },
+  {
+   "html": "<ul class=\"ted-facts\">\n  <li><strong>Текст facts</strong></li>\n</ul>",
+   "expect": {
+    "mini": "<p>Текст facts</p>",
+    "text": "<p>Текст facts</p>",
+    "custom": "<p>Текст facts</p>"
+   }
+  },
+  {
+   "html": "<ul class=\"ted-proscons\">\n  <li class=\"ted-pros\"><strong>Текст proscons</strong></li>\n</ul>",
+   "expect": {
+    "mini": "<p><strong>Текст proscons</strong></p>",
+    "text": "<p><strong>Текст proscons</strong></p>",
+    "custom": "<p><strong>Текст proscons</strong></p>"
+   }
+  },
+  {
+   "html": "<ul>\n  <li>Текст ul</li>\n</ul>",
+   "expect": {
+    "mini": "<ul>\n  <li>Текст ul</li>\n</ul>",
+    "text": "<ul>\n  <li>Текст ul</li>\n</ul>",
+    "custom": "<p>Текст ul</p>"
+   }
+  },
+  {
+   "html": "<ol>\n  <li>Текст ol</li>\n</ol>",
+   "expect": {
+    "mini": "<ol>\n  <li>Текст ol</li>\n</ol>",
+    "text": "<ol>\n  <li>Текст ol</li>\n</ol>",
+    "custom": "<p>Текст ol</p>"
+   }
+  },
+  {
+   "html": "<ul class=\"ted-checklist\">\n  <li>Текст checklist</li>\n</ul>",
+   "expect": {
+    "mini": "<ul>\n  <li>Текст checklist</li>\n</ul>",
+    "text": "<ul>\n  <li>Текст checklist</li>\n</ul>",
+    "custom": "<p>Текст checklist</p>"
+   }
+  },
+  {
+   "html": "<ol class=\"ted-steps\">\n  <li><strong>Текст steps</strong></li>\n</ol>",
+   "expect": {
+    "mini": "<ol>\n  <li>Текст steps</li>\n</ol>",
+    "text": "<ol>\n  <li>Текст steps</li>\n</ol>",
+    "custom": "<p>Текст steps</p>"
+   }
+  },
+  {
+   "html": "<figure class=\"ted-table\"><div class=\"ted-table__wrap\"><table data-cols=\"3\"><thead><tr><th>Текст table</th><th></th><th></th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table></div></figure>",
+   "expect": {
+    "mini": "<p>Текст table</p>",
+    "text": "<p>Текст table</p>",
+    "custom": "<figure class=\"ted-table\"><div class=\"ted-table__wrap\"><table data-cols=\"3\"><thead><tr><th>Текст table</th><th></th><th></th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table></div></figure>"
+   }
+  },
+  {
+   "html": "<div class=\"ted-columns ted-columns--2\">\n<div class=\"ted-columns__col\">\n<p>Текст columns</p>\n</div>\n<div class=\"ted-columns__col\">\n\n</div>\n</div>",
+   "expect": {
+    "mini": "<p>Текст columns</p>",
+    "text": "<p>Текст columns</p>",
+    "custom": "<p>Текст columns</p>"
+   }
+  },
+  {
+   "html": "<hr>",
+   "expect": {
+    "mini": "",
+    "text": "",
+    "custom": ""
+   }
+  },
+  {
+   "html": "<p>Текст hr</p>",
+   "expect": {
+    "mini": "<p>Текст hr</p>",
+    "text": "<p>Текст hr</p>",
+    "custom": "<p>Текст hr</p>"
+   }
+  },
+  {
+   "html": "<nav class=\"ted-toc\"><div class=\"ted-toc__progress\"><div class=\"ted-toc__bar\"></div></div><div class=\"ted-toc__panel\"><p class=\"ted-toc__title\">Текст toc</p><ul class=\"ted-toc__list\"></ul></div></nav>",
+   "expect": {
+    "mini": "<p><strong>Текст toc</strong></p>",
+    "text": "<p><strong>Текст toc</strong></p>",
+    "custom": "<p><strong>Текст toc</strong></p>"
+   }
+  },
+  {
+   "html": "<div class=\"ted-accordion\" itemscope itemtype=\"https://schema.org/FAQPage\">\n<details class=\"ted-accordion__item\" itemscope itemprop=\"mainEntity\" itemtype=\"https://schema.org/Question\"><summary class=\"ted-accordion__q\" itemprop=\"name\">Текст accordion</summary><div class=\"ted-accordion__a\" itemscope itemprop=\"acceptedAnswer\" itemtype=\"https://schema.org/Answer\"><div class=\"ted-accordion__body\" itemprop=\"text\">\n<p><br></p>\n</div></div></details>\n</div>",
+   "expect": {
+    "mini": "<p><strong>Текст accordion</strong></p>",
+    "text": "<p><strong>Текст accordion</strong></p>",
+    "custom": "<p><strong>Текст accordion</strong></p>"
+   }
+  },
+  {
+   "html": "<div class=\"ted-tabs\">\n<div class=\"ted-tabs__panel\"><p class=\"ted-tabs__title\">Текст tabs</p><div class=\"ted-tabs__body\">\n<p><br></p>\n</div></div>\n<div class=\"ted-tabs__panel\"><p class=\"ted-tabs__title\"></p><div class=\"ted-tabs__body\">\n<p><br></p>\n</div></div>\n<div class=\"ted-tabs__panel\"><p class=\"ted-tabs__title\"></p><div class=\"ted-tabs__body\">\n<p><br></p>\n</div></div>\n</div>",
+   "expect": {
+    "mini": "<p><strong>Текст tabs</strong></p>",
+    "text": "<p><strong>Текст tabs</strong></p>",
+    "custom": "<p><strong>Текст tabs</strong></p>"
+   }
+  },
+  {
+   "html": "<figure class=\"ted-media ted-media--image\"><img src=\"/uf/images/a.webp\" alt=\"\" loading=\"lazy\"><figcaption>Подпись</figcaption></figure>",
+   "expect": {
+    "mini": "<figure class=\"ted-media ted-media--image\"><img src=\"/uf/images/a.webp\" alt=\"\" loading=\"lazy\"><figcaption>Подпись</figcaption></figure>",
+    "text": "",
+    "custom": ""
+   }
+  },
+  {
+   "html": "<figure class=\"ted-media ted-media--gallery\"><figure><img src=\"/uf/images/a.webp\" alt=\"\" loading=\"lazy\"></figure><figure><img src=\"/uf/images/b.webp\" alt=\"\" loading=\"lazy\"></figure></figure>",
+   "expect": {
+    "mini": "",
+    "text": "",
+    "custom": ""
+   }
+  },
+  {
+   "html": "<figure class=\"ted-media ted-media--video\"><video src=\"/uf/video/a.mp4\" controls=\"\" preload=\"metadata\" playsinline=\"\"></video></figure>",
+   "expect": {
+    "mini": "",
+    "text": "",
+    "custom": ""
+   }
+  },
+  {
+   "html": "<figure class=\"ted-media ted-media--file\"><a href=\"/uf/files/a.pdf\" download=\"\">Файл.pdf</a></figure>",
+   "expect": {
+    "mini": "<p><a href=\"/uf/files/a.pdf\">Файл.pdf</a></p>",
+    "text": "<p><a href=\"/uf/files/a.pdf\">Файл.pdf</a></p>",
+    "custom": "<p><a href=\"/uf/files/a.pdf\">Файл.pdf</a></p>"
+   }
+  },
+  {
+   "html": "<figure class=\"ted-iframe\"><iframe src=\"https://example.com/\" height=\"200\" title=\"Подпись\" loading=\"lazy\" sandbox=\"allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe><figcaption>Подпись</figcaption></figure>",
+   "expect": {
+    "mini": "<p><a href=\"https://example.com/\">Подпись</a></p>",
+    "text": "<p><a href=\"https://example.com/\">Подпись</a></p>",
+    "custom": "<p><a href=\"https://example.com/\">Подпись</a></p>"
+   }
+  },
+  {
+   "html": "<div class=\"ted-embed\"><div class=\"ted-embed__head\"><span class=\"ted-embed__avatar\">GI</span><span class=\"ted-embed__who\"><span class=\"ted-embed__name\">AndreyTimofeevich - Overview</span><span class=\"ted-embed__sub\">GitHub</span></span></div><div class=\"ted-embed__foot\"><a class=\"ted-embed__open\" href=\"https://github.com/\" target=\"_blank\" rel=\"noopener\">Открыть</a></div></div>",
+   "expect": {
+    "mini": "<p><a href=\"https://github.com/\">AndreyTimofeevich - Overview</a></p>",
+    "text": "<p><a href=\"https://github.com/\">AndreyTimofeevich - Overview</a></p>",
+    "custom": "<p><a href=\"https://github.com/\">AndreyTimofeevich - Overview</a></p>"
+   }
+  },
+  {
+   "html": "<div class=\"ted-product\"><span class=\"ted-product__img\"></span><div class=\"ted-product__text\"><p class=\"ted-product__name\">Наушники</p><p class=\"ted-product__price\"><span class=\"ted-product__now\">12 900 ₽</span></p></div><a class=\"ted-product__btn\" href=\"/a\">Перейти</a></div>",
+   "expect": {
+    "mini": "<p><a href=\"/a\">Наушники — 12 900 ₽</a></p>",
+    "text": "<p><a href=\"/a\">Наушники — 12 900 ₽</a></p>",
+    "custom": "<p><a href=\"/a\">Наушники — 12 900 ₽</a></p>"
+   }
+  },
+  {
+   "html": "<p class=\"ted-bg-gray\">Абзац на сером фоне</p>",
+   "expect": {
+    "mini": "<p>Абзац на сером фоне</p>",
+    "text": "<p>Абзац на сером фоне</p>",
+    "custom": "<p class=\"ted-bg-gray\">Абзац на сером фоне</p>"
+   }
+  },
+  {
+   "html": "<h2 class=\"ted-bg-color1\" id=\"razdel\">Заголовок на фоне</h2>",
+   "expect": {
+    "mini": "<h2 id=\"razdel\">Заголовок на фоне</h2>",
+    "text": "<p>Заголовок на фоне</p>",
+    "custom": "<h2 class=\"ted-bg-color1\" id=\"razdel\">Заголовок на фоне</h2>"
+   }
+  },
+  {
+   "html": "<p>Текст <strong>жирный</strong>, <em>курсив</em>, <a href=\"https://example.com/\" target=\"_blank\" rel=\"noopener\">ссылка</a>, <code>код</code>, метка.</p>",
+   "expect": {
+    "mini": "<p>Текст <strong>жирный</strong>, <em>курсив</em>, <a href=\"https://example.com/\" target=\"_blank\" rel=\"noopener\">ссылка</a>, <code>код</code>, метка.</p>",
+    "text": "<p>Текст <strong>жирный</strong>, <em>курсив</em>, <a href=\"https://example.com/\" target=\"_blank\" rel=\"noopener\">ссылка</a>, <code>код</code>, метка.</p>",
+    "custom": "<p>Текст <strong>жирный</strong>, <em>курсив</em>, <a href=\"https://example.com/\" target=\"_blank\" rel=\"noopener\">ссылка</a>, <code>код</code>, метка.</p>"
+   }
+  },
+  {
+   "html": "<h5>Заголовок 5</h5>",
+   "expect": {
+    "mini": "<p>Заголовок 5</p>",
+    "text": "<p>Заголовок 5</p>",
+    "custom": "<p>Заголовок 5</p>"
+   }
+  },
+  {
+   "html": "<pre data-lang=\"js\" data-nums=\"1\n2\"><code><span class=\"ted-k\">const</span> a = <span class=\"ted-n\">1</span>;\n<span class=\"ted-k\">const</span> b = <span class=\"ted-n\">2</span>;</code></pre>",
+   "expect": {
+    "mini": "<p>const a = 1;<br>const b = 2;</p>",
+    "text": "<p>const a = 1;<br>const b = 2;</p>",
+    "custom": "<p>const a = 1;<br>const b = 2;</p>"
+   }
+  },
+  {
+   "html": "<figure class=\"ted-media ted-media--audio\"><audio src=\"/uf/audio/a.mp3\" title=\"Запись\" controls=\"\" preload=\"metadata\"></audio></figure>",
+   "expect": {
+    "mini": "",
+    "text": "",
+    "custom": ""
+   }
+  },
+  {
+   "html": "<blockquote><p>Цитата</p><p class=\"ted-author\" data-initials=\"А\">Автор</p></blockquote>",
+   "expect": {
+    "mini": "<blockquote><p>Цитата</p><p class=\"ted-author\" data-initials=\"А\">Автор</p></blockquote>",
+    "text": "<p>Цитата</p>",
+    "custom": "<p>Цитата</p>"
+   }
+  },
+  {
+   "html": "<ul class=\"ted-facts\">\n  <li><strong>120</strong><br>магазинов по стране</li>\n  <li><strong>24/7</strong><br>поддержка</li>\n</ul>",
+   "expect": {
+    "mini": "<p>120 — магазинов по стране</p>\n<p>24/7 — поддержка</p>",
+    "text": "<p>120 — магазинов по стране</p>\n<p>24/7 — поддержка</p>",
+    "custom": "<p>120 — магазинов по стране</p>\n<p>24/7 — поддержка</p>"
+   }
+  },
+  {
+   "html": "<ol class=\"ted-steps\">\n  <li><strong>Скачайте</strong><br>Файл по ссылке</li>\n  <li><strong>Установите</strong></li>\n</ol>",
+   "expect": {
+    "mini": "<ol>\n  <li>Скачайте — Файл по ссылке</li>\n  <li>Установите</li>\n</ol>",
+    "text": "<ol>\n  <li>Скачайте — Файл по ссылке</li>\n  <li>Установите</li>\n</ol>",
+    "custom": "<p>Скачайте — Файл по ссылке</p>\n<p>Установите</p>"
+   }
+  },
+  {
+   "html": "<ul class=\"ted-proscons\">\n  <li class=\"ted-pros\"><strong>Плюсы</strong>\n    <ul>\n      <li>Быстро</li>\n    </ul>\n  </li>\n  <li class=\"ted-cons\"><strong>Минусы</strong>\n    <ul>\n      <li>Дорого</li>\n    </ul>\n  </li>\n</ul>",
+   "expect": {
+    "mini": "<p><strong>Плюсы</strong></p>\n<ul>\n  <li>Быстро</li>\n</ul>\n<p><strong>Минусы</strong></p>\n<ul>\n  <li>Дорого</li>\n</ul>",
+    "text": "<p><strong>Плюсы</strong></p>\n<ul>\n  <li>Быстро</li>\n</ul>\n<p><strong>Минусы</strong></p>\n<ul>\n  <li>Дорого</li>\n</ul>",
+    "custom": "<p><strong>Плюсы</strong></p>\n<p>Быстро</p>\n<p><strong>Минусы</strong></p>\n<p>Дорого</p>"
+   }
+  },
+  {
+   "html": "<ul class=\"ted-checklist\">\n  <li>Готово</li>\n  <li>Не готово</li>\n</ul>",
+   "expect": {
+    "mini": "<ul>\n  <li>Готово</li>\n  <li>Не готово</li>\n</ul>",
+    "text": "<ul>\n  <li>Готово</li>\n  <li>Не готово</li>\n</ul>",
+    "custom": "<p>Готово</p>\n<p>Не готово</p>"
+   }
+  },
+  {
+   "html": "<figure class=\"ted-table\"><div class=\"ted-table__wrap\"><table data-cols=\"2\"><thead><tr><th>Город</th><th>Цена</th></tr></thead><tbody><tr><td>Москва</td><td>100 ₽</td></tr><tr><td></td><td></td></tr></tbody></table></div><figcaption>Цены</figcaption></figure>",
+   "expect": {
+    "mini": "<p>Город · Цена</p>\n<p>Москва · 100 ₽</p>\n<p>Цены</p>",
+    "text": "<p>Город · Цена</p>\n<p>Москва · 100 ₽</p>\n<p>Цены</p>",
+    "custom": "<figure class=\"ted-table\"><div class=\"ted-table__wrap\"><table data-cols=\"2\"><thead><tr><th>Город</th><th>Цена</th></tr></thead><tbody><tr><td>Москва</td><td>100 ₽</td></tr><tr><td></td><td></td></tr></tbody></table></div><figcaption>Цены</figcaption></figure>"
+   }
+  },
+  {
+   "html": "<div class=\"ted-accordion\" itemscope itemtype=\"https://schema.org/FAQPage\">\n<details class=\"ted-accordion__item\" itemscope itemprop=\"mainEntity\" itemtype=\"https://schema.org/Question\"><summary class=\"ted-accordion__q\" itemprop=\"name\">Вопрос?</summary><div class=\"ted-accordion__a\" itemscope itemprop=\"acceptedAnswer\" itemtype=\"https://schema.org/Answer\"><div class=\"ted-accordion__body\" itemprop=\"text\">\n<p>Ответ первый.</p>\n<p>Ответ <strong>второй</strong>.</p>\n</div></div></details>\n<details class=\"ted-accordion__item\" itemscope itemprop=\"mainEntity\" itemtype=\"https://schema.org/Question\"><summary class=\"ted-accordion__q\" itemprop=\"name\">Второй вопрос</summary><div class=\"ted-accordion__a\" itemscope itemprop=\"acceptedAnswer\" itemtype=\"https://schema.org/Answer\"><div class=\"ted-accordion__body\" itemprop=\"text\">\n<ul>\n  <li>Пункт</li>\n</ul>\n</div></div></details>\n</div>",
+   "expect": {
+    "mini": "<p><strong>Вопрос?</strong></p>\n<p>Ответ первый.</p>\n<p>Ответ <strong>второй</strong>.</p>\n<p><strong>Второй вопрос</strong></p>\n<ul>\n  <li>Пункт</li>\n</ul>",
+    "text": "<p><strong>Вопрос?</strong></p>\n<p>Ответ первый.</p>\n<p>Ответ <strong>второй</strong>.</p>\n<p><strong>Второй вопрос</strong></p>\n<ul>\n  <li>Пункт</li>\n</ul>",
+    "custom": "<p><strong>Вопрос?</strong></p>\n<p>Ответ первый.</p>\n<p>Ответ <strong>второй</strong>.</p>\n<p><strong>Второй вопрос</strong></p>\n<p>Пункт</p>"
+   }
+  },
+  {
+   "html": "<div class=\"ted-tabs\">\n<div class=\"ted-tabs__panel\"><p class=\"ted-tabs__title\">Первая</p><div class=\"ted-tabs__body\">\n<p>Текст первой</p>\n</div></div>\n<div class=\"ted-tabs__panel\"><p class=\"ted-tabs__title\">Вторая</p><div class=\"ted-tabs__body\">\n<h3>Заголовок</h3>\n<p>Текст второй</p>\n</div></div>\n</div>",
+   "expect": {
+    "mini": "<p><strong>Первая</strong></p>\n<p>Текст первой</p>\n<p><strong>Вторая</strong></p>\n<h3>Заголовок</h3>\n<p>Текст второй</p>",
+    "text": "<p><strong>Первая</strong></p>\n<p>Текст первой</p>\n<p><strong>Вторая</strong></p>\n<p>Заголовок</p>\n<p>Текст второй</p>",
+    "custom": "<p><strong>Первая</strong></p>\n<p>Текст первой</p>\n<p><strong>Вторая</strong></p>\n<p>Заголовок</p>\n<p>Текст второй</p>"
+   }
+  },
+  {
+   "html": "<nav class=\"ted-toc\"><div class=\"ted-toc__progress\"><div class=\"ted-toc__bar\"></div></div><div class=\"ted-toc__panel\"><p class=\"ted-toc__title\">Содержание</p><ul class=\"ted-toc__list\"><li><a href=\"#one\">Первая глава</a></li><li><a href=\"#two\">Вторая глава</a></li></ul></div></nav>",
+   "expect": {
+    "mini": "<p><strong>Содержание</strong></p>\n<ul>\n  <li><a href=\"#one\">Первая глава</a></li>\n  <li><a href=\"#two\">Вторая глава</a></li>\n</ul>",
+    "text": "<p><strong>Содержание</strong></p>\n<ul>\n  <li><a href=\"#one\">Первая глава</a></li>\n  <li><a href=\"#two\">Вторая глава</a></li>\n</ul>",
+    "custom": "<p><strong>Содержание</strong></p>\n<p><a href=\"#one\">Первая глава</a></p>\n<p><a href=\"#two\">Вторая глава</a></p>"
+   }
+  },
+  {
+   "html": "<div class=\"ted-button ted-button--banner\"><div class=\"ted-button__text\"><p class=\"ted-button__title\">Скидка 10%</p><p class=\"ted-button__desc\">До конца месяца</p></div><a class=\"ted-button__btn\" href=\"/sale\">Купить</a></div>",
+   "expect": {
+    "mini": "<p><strong>Скидка 10%</strong></p>\n<p>До конца месяца</p>\n<p><a href=\"/sale\">Купить</a></p>",
+    "text": "<p><strong>Скидка 10%</strong></p>\n<p>До конца месяца</p>\n<p><a href=\"/sale\">Купить</a></p>",
+    "custom": "<p><strong>Скидка 10%</strong></p>\n<p>До конца месяца</p>\n<p><a href=\"/sale\">Купить</a></p>"
+   }
+  },
+  {
+   "html": "<div class=\"ted-columns ted-columns--2\">\n<div class=\"ted-columns__col\">\n<h3>Слева</h3>\n<p>Текст слева</p>\n</div>\n<div class=\"ted-columns__col\">\n<p>Текст справа</p>\n</div>\n</div>",
+   "expect": {
+    "mini": "<h3>Слева</h3>\n<p>Текст слева</p>\n<p>Текст справа</p>",
+    "text": "<p>Слева</p>\n<p>Текст слева</p>\n<p>Текст справа</p>",
+    "custom": "<p>Слева</p>\n<p>Текст слева</p>\n<p>Текст справа</p>"
+   }
+  },
+  {
+   "html": "<p>x</p>\n<figure class=\"ted-iframe\"><iframe src=\"https://evil.example/\" title=\"Встроенная страница\" loading=\"lazy\" sandbox=\"allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe></figure>",
+   "expect": {
+    "mini": "<p>x</p>\n<p><a href=\"https://evil.example/\">https://evil.example/</a></p>",
+    "text": "<p>x</p>\n<p><a href=\"https://evil.example/\">https://evil.example/</a></p>",
+    "custom": "<p>x</p>\n<p><a href=\"https://evil.example/\">https://evil.example/</a></p>"
+   }
+  },
+  {
+   "html": "<ul>\n  <li>Пункт</li>\n</ul>",
+   "expect": {
+    "mini": "<ul>\n  <li>Пункт</li>\n</ul>",
+    "text": "<ul>\n  <li>Пункт</li>\n</ul>",
+    "custom": "<p>Пункт</p>"
+   }
+  },
+  {
+   "html": "<p>Текст</p>",
+   "expect": {
+    "mini": "<p>Текст</p>",
+    "text": "<p>Текст</p>",
+    "custom": "<p>Текст</p>"
+   }
+  },
+  {
+   "html": "<ul>\n  <li>Пункт</li>\n</ul>",
+   "expect": {
+    "mini": "<ul>\n  <li>Пункт</li>\n</ul>",
+    "text": "<ul>\n  <li>Пункт</li>\n</ul>",
+    "custom": "<p>Пункт</p>"
+   }
+  },
+  {
+   "html": "<figure class=\"ted-iframe\"><iframe src=\"https://evil.example/\" title=\"Встроенная страница\" loading=\"lazy\" sandbox=\"allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe></figure>",
+   "expect": {
+    "mini": "<p><a href=\"https://evil.example/\">https://evil.example/</a></p>",
+    "text": "<p><a href=\"https://evil.example/\">https://evil.example/</a></p>",
+    "custom": "<p><a href=\"https://evil.example/\">https://evil.example/</a></p>"
+   }
+  },
+  {
+   "html": "<blockquote class=\"ted-callout\"><p>Выноска</p></blockquote>",
+   "expect": {
+    "mini": "<p>Выноска</p>",
+    "text": "<p>Выноска</p>",
+    "custom": "<blockquote class=\"ted-callout\"><p>Выноска</p></blockquote>"
+   }
+  },
+  {
+   "html": "<div class=\"ted-accordion\" itemscope itemtype=\"https://schema.org/FAQPage\">\n<details class=\"ted-accordion__item\" itemscope itemprop=\"mainEntity\" itemtype=\"https://schema.org/Question\"><summary class=\"ted-accordion__q\" itemprop=\"name\">Вопрос</summary><div class=\"ted-accordion__a\" itemscope itemprop=\"acceptedAnswer\" itemtype=\"https://schema.org/Answer\"><div class=\"ted-accordion__body\" itemprop=\"text\">\n<figure class=\"ted-iframe\"><iframe src=\"https://evil.example/\" title=\"Встроенная страница\" loading=\"lazy\" sandbox=\"allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe></figure>\n<h2>Глава</h2>\n</div></div></details>\n</div>",
+   "expect": {
+    "mini": "<p><strong>Вопрос</strong></p>\n<h2>Глава</h2>",
+    "text": "<p><strong>Вопрос</strong></p>\n<p>Глава</p>",
+    "custom": "<p><strong>Вопрос</strong></p>\n<h2>Глава</h2>"
+   }
+  }
+ ]
+}

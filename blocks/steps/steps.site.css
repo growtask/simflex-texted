@@ -1,0 +1,71 @@
+/* Блок «Шаги» — вид на сайте и в редакторе. Общие переменные плашек и значков (--ted-c-*, --ted-icon-*) — в styles/content.css. */
+
+/* ---------- Шаги (макет block-steps): ol.ted-steps, номер 40 × 40 r12, линия 2 px, заголовок 16 / 700, описание 13 / 1.5 ---------- */
+
+.ted-content ol.ted-steps {
+  padding-left: 0;
+  list-style: none;
+  counter-reset: ted-step;
+}
+
+.ted-content ol.ted-steps > li {
+  position: relative;
+  min-height: calc(40 * var(--ted-u));
+  padding: 0 0 calc(24 * var(--ted-u)) calc(56 * var(--ted-u));
+  counter-increment: ted-step;
+  font-size: calc(13 * var(--ted-u));
+  line-height: 1.5;
+  color: var(--ted-c-text);
+}
+
+
+/* номер в плашке акцентного цвета */
+.ted-content ol.ted-steps > li::before {
+  content: counter(ted-step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: calc(40 * var(--ted-u));
+  height: calc(40 * var(--ted-u));
+  border-radius: calc(12 * var(--ted-u));
+  background: var(--ted-c-accent);
+  color: var(--color-text-icon-gray-white, #ffffff);
+  font-size: calc(16 * var(--ted-u));
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* линия от номера до следующего шага */
+.ted-content ol.ted-steps > li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: calc(19 * var(--ted-u));
+  top: calc(40 * var(--ted-u));
+  bottom: 0;
+  width: calc(2 * var(--ted-u));
+  background: var(--ted-c-step-line, var(--color-main-gray-light, #dadfe5));
+}
+
+/* заголовок шага — первая строка жирным (Inter 700 16), описание — после Shift+Enter.
+   Высота строки 1.25 (решение заказчика 22.11: в макете 1, длинный заголовок в две строки слипался); до описания 4 —
+   описание начинается там же, где в макете (16 + 8) */
+.ted-content ol.ted-steps > li > strong:first-child {
+  display: block;
+  margin-bottom: calc(4 * var(--ted-u));
+  color: var(--ted-c-heading);
+  font-size: calc(16 * var(--ted-u));
+  font-weight: 700;
+  line-height: 1.25;
+}
+.ted-content ol.ted-steps > li > strong:first-child + br { display: none; }
+.ted-content ol.ted-steps > li > strong:first-child:last-child { margin-bottom: 0; }
+
+
+/* Шаги: соседние шаги без зазора, линия идёт вплотную от плашки к следующей плашке (макет block-steps) */
+.ted-content ol.ted-steps > li + li { margin-top: 0; }
+.ted-content ol.ted-steps > li:not(:last-child)::after { bottom: 0; }
+
+/* под последним шагом свой отступ шага равен обычному промежутку (как было: 24 шага + промежуток − 24) */
+.ted-content ol.ted-steps > li:last-child { padding-bottom: calc(var(--ted-gap) * var(--ted-u)); }

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TextEd — все блоки этапа 4</title>
+<link rel="stylesheet" href="site-theme.css">
+<link rel="preload" href="../fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../dist/ted.css">
+<link rel="stylesheet" href="demo.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  .ted-ui, .ted-editor { --ted-editor-min-height: 100vh; }
+</style>
+</head>
+<body data-demo-back>
+<!-- Все блоки этапа 4 для проверки. ?dark — тёмная тема, ?empty — только пустые блоки. -->
+<textarea id="content" class="ted-editor"></textarea><script>if(localStorage.getItem('ted-demo-dark')==='1')document.currentScript.previousElementSibling.dataset.tedTheme='dark'</script>
+
+<script src="demo-icons.js"></script><script src="demo.js"></script>
+<script src="../dist/ted.js"></script>
+<script>
+  var params = new URLSearchParams(location.search);
+  var html =
+    '<h2>Чек-лист</h2>' +
+    '<ul class="ted-checklist"><li class="ted-checked">Подготовьте материалы</li><li class="ted-checked">Проверьте настройки</li><li>Опубликуйте страницу</li><li>Покажите команде</li></ul>' +
+    '<h2>Шаги</h2>' +
+    '<ol class="ted-steps"><li><strong>Выберите товар</strong><br>Откройте каталог и выберите нужное.</li><li><strong>Добавьте в корзину</strong><br>Проверьте опции и количество.</li><li><strong>Оформите заказ</strong><br>Выберите доставку и оплату.</li><li><strong>Получите</strong><br>Заберите в пункте выдачи или дома.</li></ol>' +
+    '<h2>Выноска</h2>' +
+    '<blockquote class="ted-callout"><p><strong>Полезно знать</strong></p><p>Короткие заметки помогают заметить главное перед следующим шагом.</p></blockquote>' +
+    '<h2>Ключевые цифры</h2>' +
+    '<ul class="ted-facts"><li><strong>120+</strong><br>стран</li><li><strong>4.8</strong><br>средняя оценка</li><li><strong>24/7</strong><br>поддержка</li><li><strong>1M</strong><br>заказов</li></ul>' +
+    '<h2>Плюсы и минусы</h2>' +
+    '<ul class="ted-proscons"><li class="ted-pros"><strong>Плюсы</strong><ul><li>Чистый звук</li><li>Долгая работа</li><li>Удобная посадка</li></ul></li><li class="ted-cons"><strong>Минусы</strong><ul><li>Громоздкий кейс</li><li>Без провода</li><li>Цена выше средней</li></ul></li></ul>' +
+    '<h2>Цветной фон</h2>' +
+    '<p class="ted-bg-gray">Стандартный фон. Всё это создал один человек с простой целью: сделать разработку сайтов быстрее и эффективнее.</p>' +
+    '<p class="ted-bg-color1">Акцентный фон. Моя миссия — помогать командам запускать магазины без лишней сложности.</p>' +
+    '<p class="ted-bg-color2">Дополнительный фон. Текст на цветной подложке.</p>' +
+    '<h2>Цитата с автором</h2>' +
+    '<blockquote><p>Лучший способ предсказать будущее — создавать его, шаг за шагом.</p><p class="ted-author" data-initials="АП"><strong>Анна Петрова</strong><br>Главный редактор</p></blockquote>' +
+    '<h2>Код</h2>' +
+    '<pre data-lang="javascript" data-nums="1\n2\n3\n4">const total = items.reduce((sum, item) => sum + item.price, 0);\nconsole.log("Итого: " + total);\n// Проверка\nif (total > 1000) { applyDiscount(); }</pre>' +
+    '<p>Конец.</p>';
+  document.getElementById('content').value = params.has('empty') ? '' : html;
+  window.editor = Ted.init({
+    selector: '#content',
+    unit: 'vw',
+    previewScreen: 'editor',
+    theme: params.has('dark') ? 'dark' : 'light',
+    contentCss: ['site-theme.css'],
+  })[0];
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "type": "accordion",
+  "title": "Аккордеон",
+  "figma": "block-accordion",
+  "menu": { "group": "Интерактив", "order": 10, "icon": "accordion", "words": "аккордеон вопросы ответы faq раскрывающийся список spoiler accordion", "convert": false, "sample": "<div class=\"ted-accordion\"><details class=\"ted-accordion__item\" open><summary class=\"ted-accordion__q\">Как долго идёт доставка?</summary><div class=\"ted-accordion__a\"><div class=\"ted-accordion__body\"><p>От одного до трёх дней.</p></div></div></details><details class=\"ted-accordion__item\"><summary class=\"ted-accordion__q\">Можно ли вернуть товар?</summary></details></div>" },
+  "selector": ".ted-accordion",
+  "html": {},
+  "toolbar": { "bg": false, "align": false, "style": false },
+  "inContainers": false,
+  "container": true
+}

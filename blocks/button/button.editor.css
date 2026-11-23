@@ -1,0 +1,13 @@
+/* Блок «Кнопка» — только отличия в редакторе. */
+
+/* Кнопка в правке: нажатие открывает «Настройки кнопки»; пустая — «Текст кнопки» (на основной gray/light, на вторичной gray/medium);
+   кнопка, которую правят, — в рамке перетаскивания; у баннера — заглушки «Заголовок» и «Текст» */
+.ted-ui-editable .ted-button > .ted-button__btn { cursor: pointer; user-select: none; }
+.ted-ui-editable .ted-button > .ted-button__btn[data-tedui-ph]:empty::before { content: attr(data-tedui-ph); position: static; color: var(--ui-color-text-icon-gray-light); }
+.ted-ui-editable .ted-button > .ted-button__btn[data-tedui-ph]:not(:empty)::before { content: none; }
+.ted-ui-editable .ted-button > .ted-button__btn--secondary[data-tedui-ph]:empty::before { color: var(--ui-color-text-icon-gray-medium); }
+.ted-ui-editable .ted-button > .ted-button__btn[data-tedui-selected] { box-shadow: 0 0 0 8px var(--ui-selected); }   /* как выбранный блок: подложка 8 px, без обводки (решение 22.11) */
+.ted-ui-editable .ted-button__text > p { position: relative; }
+.ted-ui-editable .ted-button__text > p[data-tedui-ph]::before { top: 0; }
+/* на цветной подложке баннера светлая заглушка не видна (заказчик 23.11) — у заголовка и текста gray/medium */
+.ted-ui-editable :is(.ted-button__title, .ted-button__desc)[data-tedui-ph]::before { color: var(--ui-color-text-icon-gray-medium); }

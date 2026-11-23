@@ -1,0 +1,22 @@
+/* Блок «Аккордеон» — вид на сайте и в редакторе (макет block-accordion). */
+
+/* Аккордеон (этап 6.3, block-accordion: accordion / main underline m). Вопрос text/t1 20 / 1.5 text-icon/gray/darker и шеврон 24 (значок 14 × 8),
+   поля 20 сверху и снизу, между текстом и шевроном 20; ответ — обычные блоки, снизу 20; линия 2 main/gray/light под пунктом; между пунктами 12.
+   Тёмная: вопрос #FFF, шеврон text-icon/gray/light, ответ text-icon/gray/lighter, линия main/gray/dark.
+   На сайте без скриптов: <details> / <summary>, по умолчанию закрыт, раскрывается плавно там, где браузер это умеет (::details-content). */
+.ted-content .ted-accordion { display: grid; gap: calc(12 * var(--ted-u)); margin: 0 0 calc(var(--ted-gap) * var(--ted-u)); interpolate-size: allow-keywords; --ted-acc-line: var(--color-main-gray-light, #dadfe5); --ted-acc-q: var(--ted-c-heading); --ted-acc-chev: var(--ted-c-heading); --ted-acc-text: var(--ted-c-text); }
+[data-ted-theme='dark'] .ted-content .ted-accordion { --ted-acc-line: var(--color-main-gray-dark, #4d4d4d); --ted-acc-q: var(--color-main-gray-white, #ffffff); --ted-acc-chev: var(--color-main-gray-light, #dadfe5); --ted-acc-text: var(--color-text-icon-gray-lighter, #edf3fa); }
+.ted-content .ted-accordion__item { min-width: 0; border-bottom: calc(2 * var(--ted-u)) solid var(--ted-acc-line); }
+.ted-content .ted-accordion__q { position: relative; display: flex; align-items: center; gap: calc(20 * var(--ted-u)); padding: calc(20 * var(--ted-u)) 0; font-size: calc(20 * var(--ted-u)); font-weight: 400; line-height: 1.5; color: var(--ted-acc-q); overflow-wrap: anywhere; list-style: none; cursor: pointer; }
+.ted-content .ted-accordion__q::-webkit-details-marker { display: none; }
+.ted-content .ted-accordion__q::after { content: ''; flex: none; align-self: flex-start; width: calc(24 * var(--ted-u)); height: calc(24 * var(--ted-u)); margin: calc(3 * var(--ted-u)) 0 0 auto; background: var(--ted-acc-chev); -webkit-mask: var(--ted-icon-chevron) center / 100% 100% no-repeat; mask: var(--ted-icon-chevron) center / 100% 100% no-repeat; transition: transform var(--ted-motion-base, 180ms) var(--ted-ease-out, ease); }
+.ted-content .ted-accordion__item[open] > .ted-accordion__q::after { transform: rotate(180deg); }
+.ted-content .ted-accordion__body { padding-bottom: calc(20 * var(--ted-u)); color: var(--ted-acc-text); }
+.ted-content .ted-accordion__body > :last-child { margin-bottom: 0; }
+.ted-content .ted-accordion__item::details-content { block-size: 0; overflow-y: clip; transition: block-size var(--ted-motion-fast, 120ms) var(--ted-ease-in, ease), content-visibility var(--ted-motion-fast, 120ms) allow-discrete; }
+.ted-content .ted-accordion__item[open]::details-content { block-size: auto; transition-duration: var(--ted-motion-slow, 240ms); transition-timing-function: var(--ted-ease-out, ease); }
+/* на сайте ответ проявляется сверху вниз (opacity + сдвиг 4, как Accordion в UI-ките); закрытие быстрее. В редакторе своё раскрытие (accordion.editor.css) */
+.ted-content:not(.ted-ui-editable) .ted-accordion__body { opacity: 0; transform: translateY(-4px); transition: opacity var(--ted-motion-fast, 120ms) var(--ted-ease-in, ease), transform var(--ted-motion-fast, 120ms) var(--ted-ease-in, ease); }
+.ted-content:not(.ted-ui-editable) .ted-accordion__item[open] > .ted-accordion__body { opacity: 1; transform: none; transition: opacity var(--ted-motion-slow, 240ms) var(--ted-ease-out, ease), transform var(--ted-motion-slow, 240ms) var(--ted-ease-out, ease); }
+@starting-style { .ted-content:not(.ted-ui-editable) .ted-accordion__item[open] > .ted-accordion__body { opacity: 0; transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .ted-content .ted-accordion__item::details-content, .ted-content .ted-accordion__q::after, .ted-content .ted-accordion__body { transition: none; } }

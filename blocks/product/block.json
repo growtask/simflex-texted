@@ -1,0 +1,13 @@
+{
+  "type": "product",
+  "title": "Товар",
+  "figma": "block-product (Action/product)",
+  "menu": { "group": "Действия", "order": 10, "icon": "product", "words": "товар продукт каталог цена купить корзина product shop", "convert": false, "sample": "<div class=\"ted-product\"><span class=\"ted-product__img\"></span><div class=\"ted-product__text\"><p class=\"ted-product__name\">Наушники Studio 5</p><p class=\"ted-product__price\"><span class=\"ted-product__now\">12 900 ₽</span><s class=\"ted-product__old\">16 900 ₽</s></p></div><a class=\"ted-product__btn\">В корзину</a></div>" },
+  "toolbar": { "bg": false, "align": false, "style": false, "marks": [] },
+  "selector": "div.ted-product",
+  "html": { "div": ["data-ted-product"], "a": ["data-ted-cart"] },
+  "ids": ["data-ted-product", "data-ted-cart"],
+  "neverEmpty": true,
+  "inNarrow": false,
+  "caretBelow": true
+}

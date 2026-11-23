@@ -1,0 +1,33 @@
+/* Блок «Кнопка» — вид на сайте и в редакторе (макет block-button (Action/button)). */
+
+/* Кнопка (этап 6.5, block-button / Action/button). Кнопки — Buttons/main m: высота 48, поля 20, r12, ui/m 16 / 600 / 1.4;
+   primary main/color1/main, hover #1461CC, press #104FA6; secondary main/gray/lighter, hover color1/lighter, press color1/light
+   (тёмная: gray/dark, hover gray/medium, press gray/darker). Две кнопки — в ряд через 12, на телефоне друг под другом на всю ширину.
+   Баннер: подложка main/color1/lighter (тёмная main/gray/dark), r24, поля 24, между текстом и кнопкой 20; заголовок heading/h5 20,
+   текст text/t3 13 / 1.5 text-icon/gray/dark (тёмная gray/lighter). ≤ 811: поля 20, 16. ≤ 480: текст над кнопкой, кнопка на всю ширину. */
+.ted-content .ted-button { display: flex; flex-wrap: wrap; align-items: center; gap: calc(12 * var(--ted-u)); margin: 0 0 calc(var(--ted-gap) * var(--ted-u)); --ted-btn-bg: var(--color-main-color1-main, #1975f7); --ted-btn-hover: var(--color-main-color1-dark, #1461cc); --ted-btn-press: var(--color-main-color1-darker, #104fa6); --ted-btn2-bg: var(--color-main-gray-lighter, #edf3fa); --ted-btn2-text: var(--ted-c-heading); --ted-btn2-hover: var(--color-main-color1-lighter, #d2e2f7); --ted-btn2-press: var(--color-main-color1-light, #63a1f7); --ted-banner-bg: var(--color-main-color1-lighter, #d2e2f7); --ted-banner-title: var(--ted-c-heading); --ted-banner-text: var(--color-text-icon-gray-dark, #4d4d4d); }
+[data-ted-theme='dark'] .ted-content .ted-button { --ted-btn2-bg: var(--color-main-gray-dark, #4d4d4d); --ted-btn2-text: var(--color-text-icon-gray-white, #ffffff); --ted-btn2-hover: var(--color-main-gray-medium, #919599); --ted-btn2-press: var(--color-main-gray-darker, #262626); --ted-banner-bg: var(--color-main-gray-dark, #4d4d4d); --ted-banner-title: var(--color-main-gray-white, #ffffff); --ted-banner-text: var(--color-text-icon-gray-lighter, #edf3fa); }
+.ted-content .ted-button.ted-align-center { justify-content: center; }
+.ted-content .ted-button.ted-align-right { justify-content: flex-end; }
+.ted-content .ted-button__btn { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-height: calc(48 * var(--ted-u)); padding: 0 calc(20 * var(--ted-u)); border-radius: calc(12 * var(--ted-u)); background: var(--ted-btn-bg); color: var(--color-text-icon-gray-white, #ffffff); font-family: var(--ted-font-body); font-size: calc(16 * var(--ted-u)); font-weight: 600; line-height: 1.4; text-align: center; text-decoration: none; transition: background-color 0.12s ease; }
+.ted-content .ted-button__btn:hover { background: var(--ted-btn-hover); color: var(--color-text-icon-gray-white, #ffffff); }
+.ted-content .ted-button__btn:active { background: var(--ted-btn-press); }
+.ted-content .ted-button__btn--secondary { background: var(--ted-btn2-bg); color: var(--ted-btn2-text); }
+.ted-content .ted-button__btn--secondary:hover { background: var(--ted-btn2-hover); color: var(--ted-btn2-text); }
+.ted-content .ted-button__btn--secondary:active { background: var(--ted-btn2-press); }
+/* баннер: если тексту не хватает места (длинная надпись кнопки, узкая колонка редактора) — кнопка уходит под текст (проверка 22.11) */
+.ted-content .ted-button--banner { flex-wrap: wrap; gap: calc(20 * var(--ted-u)); padding: calc(24 * var(--ted-u)); border-radius: calc(24 * var(--ted-u)); background: var(--ted-banner-bg); }
+.ted-content .ted-button__text { display: grid; flex: 1 1 calc(200 * var(--ted-u)); gap: calc(8 * var(--ted-u)); min-width: 0; }
+.ted-content .ted-button__title { margin: 0; padding: 0; font-family: var(--ted-font-heading); font-size: calc(20 * var(--ted-u)); font-weight: 700; line-height: 1; color: var(--ted-banner-title); }
+.ted-content .ted-button__desc { margin: 0; padding: 0; font-size: calc(13 * var(--ted-u)); line-height: 1.5; color: var(--ted-banner-text); }
+.ted-content .ted-button--banner > .ted-button__btn { flex: none; }
+@media (width <= 811px) { .ted-content .ted-button--banner { gap: calc(16 * var(--ted-u)); padding: calc(20 * var(--ted-u)); } }
+@media (width <= 480px) {
+  .ted-content .ted-button:has(> .ted-button__btn + .ted-button__btn), .ted-content .ted-button--banner { flex-direction: column; align-items: stretch; }
+  .ted-content .ted-button:has(> .ted-button__btn + .ted-button__btn) > .ted-button__btn, .ted-content .ted-button--banner > .ted-button__btn { width: 100%; }
+}
+@container ted (width <= 812px) { .ted-content .ted-button--banner { gap: calc(16 * var(--ted-u)); padding: calc(20 * var(--ted-u)); } }
+@container ted (width <= 480px) {
+  .ted-content .ted-button:has(> .ted-button__btn + .ted-button__btn), .ted-content .ted-button--banner { flex-direction: column; align-items: stretch; }
+  .ted-content .ted-button:has(> .ted-button__btn + .ted-button__btn) > .ted-button__btn, .ted-content .ted-button--banner > .ted-button__btn { width: 100%; }
+}

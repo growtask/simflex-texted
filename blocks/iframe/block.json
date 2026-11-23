@@ -1,0 +1,11 @@
+{
+  "type": "iframe",
+  "title": "iFrame",
+  "figma": "block-iframe (Embed/iframe)",
+  "menu": { "group": "Встраивание", "order": 10, "icon": "iframe", "words": "iframe фрейм встроить форма калькулятор карта виджет", "convert": false },
+  "selector": "figure.ted-iframe",
+  "html": { "figure": ["data-ratio"] },
+  "neverEmpty": true,
+  "caretBelow": true,
+  "frames": true
+}

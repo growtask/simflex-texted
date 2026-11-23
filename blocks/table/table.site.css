@@ -1,0 +1,50 @@
+/* Блок «Таблица» — вид на сайте и в редакторе (макет block-table (Table/table)). */
+
+/* Таблица (этап 6.1, block-table / Table/table): рамка 2 main/gray/lighter r8, шапка на main/gray/lighter (#262626), строки text/t3 13/1.5 #4D4D4D,
+   ячейка 10 / 8, линии 2 между строками тела и между столбцами; столбцы равные и не уже 120 (data-cols; +4 на рамку 2 + 2), шире — прокрутка вбок с полосой под таблицей; подпись как у изображений: text/t3 через 12 (8 на планшете и телефоне).
+   Без границ (ted-table--plain): ни рамки, ни линий, подложка шапки остаётся. Тёмная: рамка, шапка и линии #4D4D4D, шапка #FFF, строки #EDF3FA, подпись #DADFE5. */
+.ted-content figure.ted-table { margin: 0 0 calc(var(--ted-gap) * var(--ted-u)); --ted-table-line: var(--color-main-gray-lighter, #edf3fa); --ted-table-head-bg: var(--color-main-gray-lighter, #edf3fa); --ted-table-head: var(--color-text-icon-gray-darker, #262626); --ted-table-text: var(--ted-c-text); }
+[data-ted-theme='dark'] .ted-content figure.ted-table { --ted-table-line: var(--color-main-gray-dark, #4d4d4d); --ted-table-head-bg: var(--color-main-gray-dark, #4d4d4d); --ted-table-head: var(--color-main-gray-white, #ffffff); --ted-table-text: var(--color-text-icon-gray-lighter, #edf3fa); }
+/* полоса прокрутки — Scrollbar/scrollbar classic m (как в макете block-table): 8, дорожка main/gray/lighter 20 %, ползунок main/color1/light 20 %;
+   таблица шире колонки (data-ted-scroll ставит content.js / редактор) — полоса на 12 ниже таблицы */
+.ted-content .ted-table__wrap { overflow-x: auto; overflow-y: hidden; }
+/* Firefox: тонкая полоса цветами Scrollbar; Chrome и Safari — ::-webkit-scrollbar ниже (scrollbar-width в Chrome 121+ отключил бы его, и зона захвата стала бы 10 px) */
+@supports not selector(::-webkit-scrollbar) {
+  .ted-content .ted-table__wrap { scrollbar-width: thin; scrollbar-color: rgba(99, 161, 247, 0.4) rgba(237, 243, 250, 0.2); }
+  }
+.ted-content .ted-table__wrap[data-ted-scroll] { padding-bottom: calc(12 * var(--ted-u)); }
+/* полоса видна 8 px, зона захвата 20 px: прозрачная рамка 6 px сверху и снизу; отступ до таблицы остаётся 12 */
+.ted-content .ted-table__wrap::-webkit-scrollbar { height: 20px; }
+@supports selector(::-webkit-scrollbar) { .ted-content .ted-table__wrap[data-ted-scroll] { padding-bottom: calc(12 * var(--ted-u) - 6px); } }
+.ted-content .ted-table__wrap::-webkit-scrollbar-button { display: none; }
+.ted-content .ted-table__wrap::-webkit-scrollbar-track { border-radius: 9999px; background: rgba(237, 243, 250, 0.2); }
+.ted-content .ted-table__wrap::-webkit-scrollbar-thumb { border-radius: 9999px; background: rgba(99, 161, 247, 0.4); }   /* как у кода (решение заказчика 17.11) */
+.ted-content .ted-table__wrap::-webkit-scrollbar-thumb:hover { background: rgba(25, 117, 247, 0.5); }
+.ted-content .ted-table__wrap::-webkit-scrollbar-thumb:active { background: rgba(20, 97, 204, 0.5); }
+.ted-content .ted-table__wrap::-webkit-scrollbar-track, .ted-content .ted-table__wrap::-webkit-scrollbar-thumb { border-block: 6px solid transparent; background-clip: padding-box !important; }   /* !important: background у :hover сбрасывает clip */
+.ted-content .ted-table table { box-sizing: border-box; width: 100%; margin: 0; border: calc(2 * var(--ted-u)) solid var(--ted-table-line); border-collapse: separate; border-spacing: 0; border-radius: calc(8 * var(--ted-u)); table-layout: fixed; overflow: hidden; }
+.ted-content .ted-table table[data-cols="1"] { min-width: calc(124 * var(--ted-u)); }
+.ted-content .ted-table table[data-cols="2"] { min-width: calc(244 * var(--ted-u)); }
+.ted-content .ted-table table[data-cols="3"] { min-width: calc(364 * var(--ted-u)); }
+.ted-content .ted-table table[data-cols="4"] { min-width: calc(484 * var(--ted-u)); }
+.ted-content .ted-table table[data-cols="5"] { min-width: calc(604 * var(--ted-u)); }
+.ted-content .ted-table table[data-cols="6"] { min-width: calc(724 * var(--ted-u)); }
+.ted-content .ted-table table[data-cols="7"] { min-width: calc(844 * var(--ted-u)); }
+.ted-content .ted-table table[data-cols="8"] { min-width: calc(964 * var(--ted-u)); }
+.ted-content .ted-table table[data-cols="9"] { min-width: calc(1084 * var(--ted-u)); }
+.ted-content .ted-table table[data-cols="10"] { min-width: calc(1204 * var(--ted-u)); }
+.ted-content .ted-table :is(th, td) { padding: calc(10 * var(--ted-u)) calc(8 * var(--ted-u)); border: 0; font-size: calc(13 * var(--ted-u)); font-weight: 400; line-height: 1.5; text-align: left; vertical-align: top; color: var(--ted-table-text); overflow-wrap: anywhere; }
+.ted-content .ted-table th { background: var(--ted-table-head-bg); color: var(--ted-table-head); }
+.ted-content .ted-table tbody tr + tr > td { border-top: calc(2 * var(--ted-u)) solid var(--ted-table-line); }
+.ted-content .ted-table :is(th, td) + :is(th, td) { border-left: calc(2 * var(--ted-u)) solid var(--ted-table-line); }   /* линии между столбцами (решение заказчика 16.11) */
+.ted-content .ted-table :is(th, td) strong { font-weight: 700; }
+.ted-content .ted-table--plain table { border-color: transparent; }
+.ted-content .ted-table--plain tbody tr + tr > td,
+.ted-content .ted-table--plain :is(th, td) + :is(th, td) { border-top-color: transparent; border-left-color: transparent; }
+/* подпись — как у изображений (решение заказчика 16.11): text/t3 13 / 1.5, через 12; на планшете и телефоне через 8 */
+.ted-content .ted-table > figcaption { margin-top: calc(12 * var(--ted-u)); font-size: calc(13 * var(--ted-u)); line-height: 1.5; color: var(--ted-c-muted); }
+[data-ted-theme='dark'] .ted-content .ted-table > figcaption { color: var(--color-text-icon-gray-light, #dadfe5); }
+@media (width <= 811px) { .ted-content figure.ted-table { margin-bottom: calc(var(--ted-gap) * var(--ted-u)); } .ted-content .ted-table > figcaption { margin-top: calc(8 * var(--ted-u)); } }
+
+/* пустая ячейка — высотой строки текста, пустая строка таблицы на сайте не схлопывается в полоску (проверка 22.11) */
+.ted-content .ted-table :is(td, th):empty::before { content: "\200b"; }

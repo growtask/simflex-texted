@@ -1,0 +1,29 @@
+/* Блок «Товар» — только отличия в редакторе. */
+
+/* Товар в правке: нажатие — «Настройки товара»; пустой — заглушки «Выберите товар» и «0 ₽» (text-icon/gray/light).
+   Ручной товар (решение 22.11): название и цены — поля прямо в карточке (вид — как у текста карточки), картинка — нажатием */
+.ted-ui-editable div.ted-product { cursor: pointer; user-select: none; }
+.ted-ui-editable div.ted-product a { pointer-events: none; }
+/* блок выделен целиком (кнопки блока у карточки): текст внутри не подсвечивается выделением — как у медиа */
+.ted-ui-editable div.ted-product ::selection { background: transparent; }
+.ted-ui-editable div.ted-product[data-tedui-empty] :is(.ted-product__name, .ted-product__now) { color: var(--ui-color-text-icon-gray-light); }
+.ted-ui-editable div.ted-product[data-tedui-empty] .ted-product__name::before { content: "Выберите товар"; }
+.ted-ui-editable div.ted-product[data-tedui-empty] .ted-product__now::before { content: "0\a0₽"; }
+.ted-ui[data-ted-theme="dark"] .ted-ui-editable div.ted-product[data-tedui-empty] :is(.ted-product__name, .ted-product__now) { color: var(--ui-color-text-icon-gray-dark); }
+
+/* поля карточки: настоящие тексты скрыты, вместо них поля того же вида */
+.ted-ui-editable div.ted-product[data-tedui-inline] { cursor: default; }
+.ted-ui-editable div.ted-product[data-tedui-inline] :is(.ted-product__name, .ted-product__price) { display: none; }
+.ted-ui-editable div.ted-product[data-tedui-inline] .ted-product__img { cursor: pointer; }
+.ted-ui-editable div.ted-product[data-tedui-inline] .ted-product__text { min-width: 0; grid-template-columns: minmax(0, 1fr); }   /* поля не раздвигают карточку на узком экране */
+.ted-ui-editable div.ted-product[data-tedui-inline] a.ted-product__btn { pointer-events: auto; cursor: pointer; }
+.ted-ui-prodfield { display: block; width: 100%; min-width: 0; margin: 0; padding: 0; border: 0; outline: 0; background: none; color: inherit; font: inherit; user-select: text; }
+.ted-ui-prodfield::placeholder { color: var(--ui-placeholder); opacity: 1; }
+.ted-ui-prodfield--name { resize: none; overflow: hidden; field-sizing: content; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--ted-font-heading); font-size: calc(16 * var(--ted-u)); font-weight: 700; line-height: 1.25; color: var(--ted-prod-text); }
+.ted-ui-prodfield__row { display: flex; flex-wrap: wrap; gap: 0 calc(8 * var(--ted-u)); align-items: baseline; min-width: 0; }
+.ted-ui-prodfield--now { flex: 0 1 auto; min-width: 3ch; max-width: 100%; font-size: calc(20 * var(--ted-u)); font-weight: 600; line-height: 1.3; color: var(--ted-prod-text); }
+.ted-ui-prodfield--old { flex: 0 1 auto; min-width: 3ch; max-width: 100%; font-size: calc(16 * var(--ted-u)); font-weight: 400; line-height: 1.3; text-decoration: line-through; color: var(--ted-prod-old, var(--color-text-icon-gray-medium)); }
+.ted-ui-editable div.ted-product[data-tedui-loading] .ted-product__img { opacity: 0.5; }
+/* пустая картинка ручного товара — скрепка, как у зоны загрузки медиа: нажатие загружает картинку */
+.ted-ui-editable div.ted-product[data-tedui-inline] span.ted-product__img { display: grid; place-items: center; }
+.ted-ui-editable div.ted-product[data-tedui-inline] span.ted-product__img::after { content: ""; width: 24px; height: 24px; background: center / contain no-repeat url('../icons/media-paperclip.svg'); }

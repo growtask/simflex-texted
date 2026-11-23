@@ -1,0 +1,16 @@
+/* Типичный сброс стилей сайта и админки (этап 4): такие правила, как в Simflex (Layout/assetsGlobal/styles/base/_reset.scss),
+   и ещё несколько частых. Набор styles проверяет, что они не меняют ни интерфейс редактора, ни блоки texted. */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; line-height: 1.15; }
+body { margin: 0; font-family: Georgia, serif; font-size: 18px; line-height: 1.7; color: #333; }
+body, h1, h2, h3, h4, h5, h6, p, ul, ol, dl, dd, figure, blockquote { margin: 0; font: inherit; }
+ul[role='list'], ol[role='list'], li { list-style: none; padding: 0; }
+a { color: inherit; text-decoration: none; }
+b, strong { font-weight: bolder; }
+code, kbd, samp, pre { font-family: Courier, monospace; letter-spacing: normal; }
+table { border-collapse: collapse; border-spacing: 0; }
+img, picture, svg, audio, canvas, iframe, video { max-width: 100%; height: auto; display: block; }
+input, button, textarea, select { font: inherit; color: inherit; margin: 0; }
+button { cursor: pointer; background: none; border: 0; padding: 0; text-transform: none; }
+hr { border: 0; height: 1px; background: #ccc; }
+p { text-wrap: pretty; }

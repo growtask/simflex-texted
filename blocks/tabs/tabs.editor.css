@@ -1,0 +1,23 @@
+/* Блок «Вкладки» — только отличия в редакторе. */
+
+/* Вкладки в правке: ряд названий — сетка (для плавной перестановки, как у плиток), видно содержимое активной вкладки */
+.ted-ui-editable .ted-tabs__bar { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(max-content, 1fr); }
+.ted-ui-editable .ted-tabs__bar > .ted-tabs__title { position: relative; cursor: text; white-space: pre-wrap; }
+.ted-ui-editable .ted-tabs__body:not([data-tedui-active]) { display: none; }
+.ted-ui-editable .ted-tabs__body[data-tedui-active] { animation: ted-tab-in 0.2s ease; }
+.ted-ui-editable .ted-tabs__bar > .ted-tabs__title[data-tedui-ph]::before { top: calc(12 * var(--ted-u)); left: 0; right: 0; text-align: center; }
+.ted-ui-editable .ted-tabs[data-tedui-addbtn] { margin-bottom: calc(var(--ted-gap) * var(--ted-u) + 60px); }
+
+/* вкладка при перетаскивании — рамка, как у шагов и пунктов (общие правила — styles/ui/blocks.css) */
+.ted-ui-editable div.ted-tabs > .ted-tabs__bar > .ted-tabs__title[data-tedui-drag] {
+  border-radius: var(--ui-radius-medium);
+  z-index: 2;
+  outline: 2px solid var(--ui-drag-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--ui-drag-bg);
+}
+.ted-ui.is-dragging .ted-ui-editable div.ted-tabs > .ted-tabs__bar > .ted-tabs__title { transition: transform 0.22s var(--ui-ease); }
+.ted-ui.is-dragging .ted-ui-editable div.ted-tabs > .ted-tabs__bar > .ted-tabs__title[data-tedui-drag] { transition: none; }
+.ted-ui.is-dropping .ted-ui-editable div.ted-tabs > .ted-tabs__bar > .ted-tabs__title { transition: none !important; }
+/* ряд названий прокручивается по горизонтали (overflow-x) и поэтому обрезал рамку перетаскиваемой вкладки — на время перетаскивания не обрезает (22.11) */
+.ted-ui.is-dragging .ted-ui-editable div.ted-tabs > .ted-tabs__bar:has([data-tedui-drag]) { overflow: visible; }

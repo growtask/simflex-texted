@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TextEd — проверка узких контейнеров</title>
+<link rel="stylesheet" href="site-theme.css">
+<link rel="preload" href="../fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../dist/ted.css">
+<link rel="stylesheet" href="demo.css">
+<style>
+  body { margin: 0; padding: 16px; background: #f2f4f7; font-family: system-ui, sans-serif; }
+  /* как в админке: контейнер с overflow, который обрезает всё, что выходит за его края */
+  .box { margin: 0 auto 16px; border: 1px solid #dadfe5; border-radius: 16px; overflow: clip; background: #fff; }
+  .box h4 { margin: 8px 12px; font-size: 12px; color: #919599; }
+</style>
+</head>
+<body data-demo-back>
+<!-- Проверка: меню и кнопки управления не обрезаются в узких контейнерах (ширина = число в px) -->
+<div class="box" style="width:300px"><h4>300 px</h4><textarea class="ed"></textarea></div>
+<div class="box" style="width:420px"><h4>420 px</h4><textarea class="ed"></textarea></div>
+<div class="box" style="width:540px"><h4>540 px</h4><textarea class="ed"></textarea></div>
+
+<script src="demo-icons.js"></script><script src="demo.js"></script>
+<script src="../dist/ted.js"></script>
+<script>
+  document.querySelectorAll('.ed').forEach(function (t) { t.value = '<h2>Заголовок</h2><p>Текст страницы для проверки.</p><ul><li>Пункт</li></ul>'; });
+  window.editors = Ted.init({ selector: '.ed', unit: 'px' });
+</script>
+</body>
+</html>

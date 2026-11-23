@@ -1,0 +1,23 @@
+/* Блок «Содержание» — только отличия в редакторе. */
+
+/* Содержание в правке: главы — ссылки, нажатие открывает окно главы; «Скрыть» / «Показать» сворачивает список, как на сайте */
+.ted-ui-editable .ted-toc__list > li { position: relative; cursor: pointer; }
+.ted-ui-editable .ted-toc__list > li > a { pointer-events: none; }
+.ted-ui-editable .ted-toc__toggle { cursor: pointer; user-select: none; }
+/* свёрнутый список в правке — плавно, теми же правилами, что на сайте (toc.site.css) */
+.ted-ui-editable .ted-toc[data-tedui-collapsed] .ted-toc__toggle::after { transform: none; }
+.ted-ui-editable .ted-toc__title[data-tedui-ph]::before { top: 0; }
+.ted-ui-editable .ted-toc__title { position: relative; }
+.ted-ui-editable .ted-toc[data-tedui-addbtn] { margin-bottom: calc(var(--ted-gap) * var(--ted-u) + 60px); }
+
+/* глава при перетаскивании — рамка, как у шагов и пунктов (общие правила — styles/ui/blocks.css) */
+.ted-ui-editable .ted-toc__list > li[data-tedui-drag] {
+  border-radius: var(--ui-radius-medium);
+  z-index: 2;
+  outline: 2px solid var(--ui-drag-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--ui-drag-bg);
+}
+.ted-ui.is-dragging .ted-ui-editable .ted-toc__list > li { transition: transform 0.22s var(--ui-ease); }
+.ted-ui.is-dragging .ted-ui-editable .ted-toc__list > li[data-tedui-drag] { transition: none; }
+.ted-ui.is-dropping .ted-ui-editable .ted-toc__list > li { transition: none !important; }

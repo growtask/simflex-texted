@@ -1,0 +1,29 @@
+/* Блок «Товар» — вид на сайте и в редакторе (макет block-product (Action/product)). */
+
+/* Товар (этап 6.5, block-product / Action/product): рамка 2 main/gray/lighter (тёмная main/gray/dark), r16, поля 16 / 32 / 16 / 16,
+   между частями 16 (≤ 811 — 12). Картинка 96, r12 (без картинки — заглушка main/gray/lighter). Название heading/h6 16 / 700 / 1
+   text-icon/gray/darker (тёмная #FFF), через 8 — цена ui/l 20 / 600 и старая цена ui/m-strike 16 #919599 (зачёркнута) через 8.
+   Кнопка — Buttons/main primary s (40, поля 16, r12, ui/s 14 / 600). ≤ 480: кнопка под текстом на всю ширину, поля 16. */
+.ted-content .ted-product { --ted-prod-line: var(--color-main-gray-lighter, #edf3fa); --ted-prod-text: var(--ted-c-heading); display: flex; align-items: center; gap: calc(16 * var(--ted-u)); box-sizing: border-box; margin: 0 0 calc(var(--ted-gap) * var(--ted-u)); padding: calc(16 * var(--ted-u)) calc(32 * var(--ted-u)) calc(16 * var(--ted-u)) calc(16 * var(--ted-u)); border: 2px solid var(--ted-prod-line); border-radius: calc(16 * var(--ted-u)); text-align: start; }
+[data-ted-theme='dark'] .ted-content .ted-product { --ted-prod-line: var(--color-main-gray-dark, #4d4d4d); --ted-prod-text: var(--color-text-icon-gray-white, #ffffff); }
+.ted-content .ted-product__img { display: block; flex: none; width: calc(96 * var(--ted-u)); height: calc(96 * var(--ted-u)); border-radius: calc(12 * var(--ted-u)); background: var(--color-main-gray-lighter, #edf3fa); object-fit: cover; }
+.ted-content .ted-product__text { display: grid; flex: 1 1 auto; gap: calc(8 * var(--ted-u)); min-width: 0; }
+.ted-content .ted-product__name { margin: 0; padding: 0; font-family: var(--ted-font-heading); font-size: calc(16 * var(--ted-u)); font-weight: 700; line-height: 1; color: var(--ted-prod-text); overflow-wrap: anywhere; hyphens: auto; }
+.ted-content .ted-product__price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 calc(8 * var(--ted-u)); margin: 0; padding: 0; line-height: 1.4; }
+.ted-content .ted-product__now { font-size: calc(20 * var(--ted-u)); font-weight: 600; color: var(--ted-prod-text); white-space: nowrap; }
+.ted-content .ted-product__old { font-size: calc(16 * var(--ted-u)); font-weight: 400; color: var(--color-text-icon-gray-medium, #919599); white-space: nowrap; }
+.ted-content .ted-product__btn { display: inline-flex; flex: none; align-items: center; justify-content: center; box-sizing: border-box; height: calc(40 * var(--ted-u)); padding: 0 calc(16 * var(--ted-u)); border-radius: calc(12 * var(--ted-u)); background: var(--color-main-color1-main, #1975f7); color: var(--color-text-icon-gray-white, #ffffff); font-size: calc(14 * var(--ted-u)); font-weight: 600; line-height: 1.4; text-decoration: none; white-space: nowrap; transition: background-color 0.12s ease; }
+.ted-content .ted-product__btn:hover { background: var(--color-main-color1-dark, #1461cc); color: var(--color-text-icon-gray-white, #ffffff); }
+.ted-content .ted-product__btn:active { background: var(--color-main-color1-darker, #104fa6); }
+@media (width <= 811px) { .ted-content .ted-product { gap: calc(12 * var(--ted-u)); } }
+@container ted (width <= 812px) { .ted-content .ted-product { gap: calc(12 * var(--ted-u)); } }
+@media (width <= 480px) {
+  .ted-content .ted-product { flex-wrap: wrap; gap: calc(16 * var(--ted-u)); padding: calc(16 * var(--ted-u)); }
+  .ted-content .ted-product__text { flex-basis: 0; }
+  .ted-content .ted-product__btn { width: 100%; }
+}
+@container ted (width <= 480px) {
+  .ted-content .ted-product { flex-wrap: wrap; gap: calc(16 * var(--ted-u)); padding: calc(16 * var(--ted-u)); }
+  .ted-content .ted-product__text { flex-basis: 0; }
+  .ted-content .ted-product__btn { width: 100%; }
+}

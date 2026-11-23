@@ -1,0 +1,212 @@
+/* ==========================================================================
+   Меню всех блоков (editor-block-picker)
+   Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
+   ========================================================================== */
+
+/* ==========================================================================
+   Меню всех блоков (макет editor-block-picker): всплывающая панель внутри редактора под шапкой.
+   Шапка: заголовок + поиск (Inputs filled s, 40) + × (Buttons/main secondary s, 40 × 40), линия, плитки по группам.
+   Плитка = editor-block-tile: превью 112 (r12) + подпись 13. Редактор под панель удлиняется плавно (Popover.grow).
+   ========================================================================== */
+.ted-ui-picker {
+  --ui-tile-bg: var(--ui-color-main-gray-lighter);
+  position: absolute;
+  z-index: 900;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: calc(100% - 16px);
+  padding: 20px 24px;   /* editor-block-picker desktop: 20 сверху и снизу, 24 по бокам */
+  border-radius: var(--ui-radius-xlarge);
+  background: var(--ui-pop);
+  box-shadow: var(--ui-shadow-gray-m);
+  animation: ted-picker-in 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ted-ui-picker.is-closing { animation: ted-picker-out 0.12s ease forwards; pointer-events: none; }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-picker { --ui-tile-bg: var(--ui-color-main-gray-dark); box-shadow: none; border: 1px solid var(--ui-pop-ring); }
+
+@container ted (width < 480px) { .ted-ui-picker { padding: 20px 16px; } }   /* mobile: 20 / 16 */
+
+.ted-ui-picker__head { display: flex; align-items: center; gap: 12px; }
+
+.ted-ui .ted-ui-picker__title { flex: none; margin: 0; color: var(--ui-text); font: 700 20px/1 var(--ui-font); }
+
+.ted-ui-picker__head .ted-ui-search { flex: 1 1 auto; min-width: 140px; width: auto; height: 40px; box-sizing: border-box; }
+
+.ted-ui-picker__head .ted-ui-search input { font-size: 14px; }
+
+.ted-ui-picker__headline { flex: none; height: 1px; background: var(--ui-line); }
+
+/* мобильный: заголовок и × в первой строке, поиск — на всю ширину во второй */
+@container ted (width < 480px) {
+  .ted-ui-picker__head { display: grid; grid-template-columns: 1fr auto; row-gap: 12px; }
+  .ted-ui-picker__head .ted-ui-search { grid-column: 1 / -1; grid-row: 2; }
+}
+
+.ted-ui-picker__scroll { max-height: 420px; overflow-y: auto; padding-right: 8px; margin-right: -8px; }
+
+.ted-ui-picker__list { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+.ted-ui-picker__group { display: flex; flex-direction: column; gap: 12px; }
+
+.ted-ui .ted-ui-picker__label { margin: 0; color: var(--ui-muted); font: 400 11px/1.45 var(--ui-font); }
+
+.ted-ui-picker__line { flex: none; height: 1px; background: var(--ui-line); }
+
+.ted-ui-picker__tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 12px; }
+
+/* мобильный: всегда два столбца (макет: 414 → 2 × 184), даже на 360–390 px */
+@container ted (width < 480px) { .ted-ui-picker__tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.ted-ui .ted-ui-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ui-text);
+  font: 400 13px/1.5 var(--ui-font);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ted-ui-tile__preview {
+  position: relative;
+  box-sizing: border-box;
+  height: 112px;
+  overflow: hidden;
+  border-radius: var(--ui-radius-medium);
+  background: var(--ui-tile-bg) center / cover no-repeat;
+  transition: box-shadow 0.12s ease;
+}
+
+/* рамка 2 px — при наведении мышью и при выборе с клавиатуры (подсветка выбора гаснет, когда мышь пошла) */
+.ted-ui-tile:hover .ted-ui-tile__preview,
+.ted-ui-picker.is-kbd .ted-ui-tile.is-active .ted-ui-tile__preview { box-shadow: inset 0 0 0 2px var(--ui-color-main-color1-main); }
+
+.ted-ui-tile:active .ted-ui-tile__preview { box-shadow: inset 0 0 0 2px var(--ui-color-main-color1-dark); }
+
+.ted-ui-tile.is-soon { cursor: default; }
+
+.ted-ui-tile.is-soon .ted-ui-tile__name { color: var(--ui-muted); }
+
+/* образец блока: настоящая разметка шириной 700 px, уменьшенная и по центру */
+.ted-ui-tile__sample {
+  --k: 0.25;
+  --ted-c-line: var(--ui-color-main-gray-light);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 700px;
+  max-height: 440px;
+  overflow: hidden;
+  transform: translate(-50%, -50%) scale(var(--k));
+  transform-origin: 50% 50%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.ted-ui-tile__sample > :last-child { padding-bottom: 0; margin-bottom: 0; }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile__sample {
+  --ted-c-text: var(--ui-color-text-icon-gray-lighter);
+  --ted-c-heading: var(--ui-color-text-icon-gray-white);
+  --ted-c-quote: var(--ui-color-text-icon-gray-white);
+  --ted-c-line: var(--ui-color-main-gray-medium);
+  --ted-c-code-bg: var(--ui-color-main-gray-darker);
+  --ted-c-code-head: var(--ui-color-main-gray-dark);
+  --ted-c-code-text: var(--ui-color-text-icon-gray-lighter);
+  /* подложки блоков — как в тёмной правке (preview.css), иначе светлый текст на светлой плашке выноски не виден (проверка 22.11) */
+  --ted-c-step-line: var(--ui-color-main-gray-dark);
+  --ted-c-callout-bg: var(--ui-color-main-gray-darker);
+  --ted-c-fact-bg: var(--ui-color-main-gray-dark);
+  --ted-c-fact-num: var(--ui-color-main-color1-light);
+  --ted-c-pros-bg: var(--ui-color-main-gray-dark);
+  --ted-c-cons-bg: var(--ui-color-main-gray-dark);
+}
+
+/* картинки плиток ещё не готовых блоков — из макета (tiles/<тип>-light|dark.webp, 352 × 224) */
+
+.ted-ui-tile[data-type="background"] .is-image { background-image: url(../tiles/background-light.webp); }
+
+.ted-ui-tile[data-type="facts"] .is-image { background-image: url(../tiles/facts-light.webp); }
+
+.ted-ui-tile[data-type="proscons"] .is-image { background-image: url(../tiles/proscons-light.webp); }
+
+.ted-ui-tile[data-type="checklist"] .is-image { background-image: url(../tiles/checklist-light.webp); }
+
+.ted-ui-tile[data-type="steps"] .is-image { background-image: url(../tiles/steps-light.webp); }
+
+.ted-ui-tile[data-type="image"] .is-image { background-image: url(../tiles/image-light.webp); }
+
+.ted-ui-tile[data-type="gallery"] .is-image { background-image: url(../tiles/gallery-light.webp); }
+
+.ted-ui-tile[data-type="video"] .is-image { background-image: url(../tiles/video-light.webp); }
+
+.ted-ui-tile[data-type="audio"] .is-image { background-image: url(../tiles/audio-light.webp); }
+
+.ted-ui-tile[data-type="embed"] .is-image { background-image: url(../tiles/embed-light.webp); }
+
+.ted-ui-tile[data-type="iframe"] .is-image { background-image: url(../tiles/iframe-light.webp); }
+
+.ted-ui-tile[data-type="file"] .is-image { background-image: url(../tiles/file-light.webp); }
+
+.ted-ui-tile[data-type="table"] .is-image { background-image: url(../tiles/table-light.webp); }
+
+.ted-ui-tile[data-type="columns"] .is-image { background-image: url(../tiles/columns-light.webp); }
+
+.ted-ui-tile[data-type="toc"] .is-image { background-image: url(../tiles/toc-light.webp); }
+
+.ted-ui-tile[data-type="accordion"] .is-image { background-image: url(../tiles/accordion-light.webp); }
+
+.ted-ui-tile[data-type="tabs"] .is-image { background-image: url(../tiles/tabs-light.webp); }
+
+.ted-ui-tile[data-type="button"] .is-image { background-image: url(../tiles/button-light.webp); }
+
+.ted-ui-tile[data-type="product"] .is-image { background-image: url(../tiles/product-light.webp); }
+
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="background"] .is-image { background-image: url(../tiles/background-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="facts"] .is-image { background-image: url(../tiles/facts-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="proscons"] .is-image { background-image: url(../tiles/proscons-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="checklist"] .is-image { background-image: url(../tiles/checklist-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="steps"] .is-image { background-image: url(../tiles/steps-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="image"] .is-image { background-image: url(../tiles/image-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="gallery"] .is-image { background-image: url(../tiles/gallery-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="video"] .is-image { background-image: url(../tiles/video-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="audio"] .is-image { background-image: url(../tiles/audio-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="embed"] .is-image { background-image: url(../tiles/embed-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="iframe"] .is-image { background-image: url(../tiles/iframe-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="file"] .is-image { background-image: url(../tiles/file-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="table"] .is-image { background-image: url(../tiles/table-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="columns"] .is-image { background-image: url(../tiles/columns-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="toc"] .is-image { background-image: url(../tiles/toc-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="accordion"] .is-image { background-image: url(../tiles/accordion-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="tabs"] .is-image { background-image: url(../tiles/tabs-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="button"] .is-image { background-image: url(../tiles/button-dark.webp); }
+
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="product"] .is-image { background-image: url(../tiles/product-dark.webp); }

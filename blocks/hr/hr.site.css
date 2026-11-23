@@ -1,0 +1,13 @@
+/* Блок «Разделитель» — вид на сайте и в редакторе (макет block-line, Layout/line): 2 px, main/gray/lighter (--ted-c-line),
+   скругление blocks. Переменные — из темы блоков (styles/theme.default.css, этап 4). */
+
+/* поля браузера (0.5em auto) убираем; отступ под линией — общий ритм блоков (content.css), поэтому margin-bottom не трогаем */
+.ted-content hr {
+  margin-top: 0;
+  margin-inline: 0;
+  padding: 0;
+  height: max(calc(var(--ted-line) * var(--ted-u)), 2px);
+  border: 0;
+  border-radius: calc(32 * var(--ted-u));
+  background: var(--ted-c-line);
+}

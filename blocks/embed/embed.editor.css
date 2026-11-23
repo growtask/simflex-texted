@@ -1,0 +1,8 @@
+/* Блок «Встраивание» — только отличия в редакторе. */
+
+/* нажатие на карточку — «Настройки встраивания»; пустой блок — поле ссылки (без рамки карточки) */
+.ted-ui-editable div.ted-embed { cursor: pointer; user-select: none; }
+/* блок выделен целиком (кнопки блока у карточки): текст внутри не подсвечивается выделением — как у медиа */
+.ted-ui-editable div.ted-embed ::selection { background: transparent; }
+.ted-ui-editable div.ted-embed a { pointer-events: none; }
+.ted-ui-editable div.ted-embed[data-tedui-empty] { display: block; padding: 0; border: 0; border-radius: 0; cursor: default; }

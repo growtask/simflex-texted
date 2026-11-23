@@ -1,0 +1,24 @@
+{
+  "type": "callout",
+  "title": "Выноска",
+  "jsonExample": "{ \"type\": \"callout\", \"title\": \"Важно\", \"text\": \"Текст выноски\" }",
+  "figma": "block-callout",
+  "menu": {
+    "group": "Акцент",
+    "order": 0,
+    "icon": "callout",
+    "words": "выноска заметка совет callout notice",
+    "sample": "<blockquote class=\"ted-callout\"><p><strong>Полезно знать</strong></p><p>Короткие заметки помогают замечать важное.</p></blockquote>"
+  },
+  "compound": true,
+  "linePlaceholder": "Текст выноски",
+  "noBold": "blockquote.ted-callout > p:first-child",
+  "selector": "blockquote.ted-callout",
+  "classes": [
+    "ted-callout"
+  ],
+  "html": {
+    "blockquote": []
+  },
+  "degrade": "children"
+}

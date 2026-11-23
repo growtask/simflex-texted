@@ -1,0 +1,24 @@
+/* Блок «Цитата» — только отличия в редакторе: заглушки «Имя» и «Должность» у автора; место под кнопкой «+ Добавить автора»
+   (общая кнопка «+ Добавить …» — ui/blocks.css). */
+
+/* Автор цитаты: заглушки «Имя» и «Должность», кнопка «Добавить автора» (под цитатой, пока в ней курсор) */
+.ted-ui-editable blockquote > p.ted-author[data-tedui-notitle] > strong::before {
+  content: "Имя";
+  position: absolute;
+  color: var(--ui-placeholder);
+  pointer-events: none;
+}
+
+.ted-ui-editable blockquote > p.ted-author[data-tedui-nodesc] > strong::after {
+  content: "Должность";
+  position: absolute;
+  left: calc(52 * var(--ted-u));
+  top: calc(22 * var(--ted-u));
+  font-size: calc(11 * var(--ted-u));
+  line-height: 1.45;
+  font-weight: 400;
+  color: var(--ui-placeholder);
+  pointer-events: none;
+}
+
+.ted-ui-editable blockquote[data-tedui-qbtn] { margin-bottom: 80px; }

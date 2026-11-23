@@ -1,0 +1,72 @@
+/* Блок «Плюсы и минусы» — вид на сайте и в редакторе. Общие переменные плашек и значков (--ted-c-*, --ted-icon-*) — в styles/content.css. */
+
+/* ---------- Плюсы и минусы: ul.ted-proscons — две карточки r16 p20, заголовок 20 / 700, пункты со значком ---------- */
+
+.ted-content ul.ted-proscons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: calc(16 * var(--ted-u));
+  padding-left: 0;
+  list-style: none;
+}
+
+.ted-content ul.ted-proscons > li {
+  min-width: 0;
+  padding: calc(20 * var(--ted-u));
+  border-radius: calc(16 * var(--ted-u));
+  background: var(--ted-c-pros-bg);
+  color: var(--ted-c-heading);
+}
+
+.ted-content ul.ted-proscons > li.ted-cons { background: var(--ted-c-cons-bg); }
+
+.ted-content ul.ted-proscons > li > strong:first-child {
+  display: block;
+  margin-bottom: calc(12 * var(--ted-u));
+  color: var(--ted-c-heading);
+  font-size: calc(20 * var(--ted-u));
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ted-content ul.ted-proscons > li > ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+.ted-content ul.ted-proscons > li > ul > li {
+  position: relative;
+  min-height: calc(24 * var(--ted-u));
+  padding-left: calc(32 * var(--ted-u));
+  font-size: calc(16 * var(--ted-u));
+  line-height: 1.5;
+}
+
+.ted-content ul.ted-proscons > li > ul > li + li { margin-top: calc(12 * var(--ted-u)); }
+
+.ted-content ul.ted-proscons > li > ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(24 * var(--ted-u));
+  height: calc(24 * var(--ted-u));
+  background: var(--ted-c-pros);
+  -webkit-mask: var(--ted-icon-check) center / 100% 100% no-repeat;
+  mask: var(--ted-icon-check) center / 100% 100% no-repeat;
+}
+
+.ted-content ul.ted-proscons > li.ted-cons > ul > li::before {
+  background: var(--ted-c-cons);
+  -webkit-mask-image: var(--ted-icon-close);
+  mask-image: var(--ted-icon-close);
+}
+
+/* макет: карточки в ряд на десктопе и планшете (234 + 12 + 234 при колонке 480), друг под другом — только на телефоне (колонка 382) */
+@media (width <= 480px) {
+  .ted-content ul.ted-proscons { grid-template-columns: minmax(0, 1fr); }
+}
+
+
+/* карточки в сетке: общий отступ между пунктами списка здесь не нужен */
+.ted-content ul.ted-proscons > li + li { margin-top: 0; }

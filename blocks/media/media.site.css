@@ -1,0 +1,79 @@
+/* Медиа — вид на сайте и в редакторе (Media/image, gallery, video, audio, file): общие правила фигуры и подписи,
+   затем по видам. Аудиоплеер (Media/audio) — один и тот же в редакторе и на сайте. */
+
+/* Медиа на сайте и в предпросмотре. */
+.ted-content figure.ted-media { min-width: 0; }
+.ted-content .ted-media--gallery > figure { margin: 0; min-width: 0; }
+/* Подпись под медиа — text/t3 (Inter 13, строка 150%), #919599 (в тёмной #DADFE5); от медиа 12, на планшете и телефоне 8; у фото галереи от фото 8 */
+.ted-content .ted-media > figcaption { margin-top: calc(12 * var(--ted-u, 1px)); font-size: calc(13 * var(--ted-u, 1px)); line-height: 1.5; color: var(--ted-c-muted); }
+.ted-content .ted-media--gallery > figure > figcaption { margin-top: calc(8 * var(--ted-u, 1px)); font-size: calc(13 * var(--ted-u, 1px)); line-height: 1.5; color: var(--ted-c-muted); }
+[data-ted-theme='dark'] .ted-media figcaption { color: var(--color-text-icon-gray-light, #dadfe5); }
+@media (width <= 811px) { .ted-content .ted-media > figcaption { margin-top: calc(8 * var(--ted-u, 1px)); } }
+.ted-content .ted-media--image > img,
+.ted-content .ted-media--gallery > figure > img,
+.ted-content .ted-media > video,
+.ted-content .ted-media > iframe { display: block; width: 100%; max-width: 100%; height: auto; object-fit: cover; }
+.ted-content .ted-media--image > img { border-radius: var(--ted-media-radius, calc(24 * var(--ted-u, 1px))); }
+.ted-content .ted-media--gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(12 * var(--ted-u, 1px)); align-items: start; }
+.ted-content .ted-media--gallery > figure { position: relative; }
+.ted-content .ted-media--gallery > figure > img { aspect-ratio: auto; height: auto; object-fit: initial; border-radius: calc(12 * var(--ted-u, 1px)); }
+.ted-content .ted-media--gallery > figure:only-child { grid-column: 1 / -1; }
+.ted-content .ted-media--gallery > figcaption { grid-column: 1 / -1; }
+.ted-content .ted-media > video,
+.ted-content .ted-media > iframe { aspect-ratio: 16 / 9; border: 0; border-radius: var(--ted-media-radius, calc(24 * var(--ted-u, 1px))); background: var(--color-main-gray-black, #0d0d0d); }
+/* 16:9 без дробных пикселей: ширина колонки → высота округляется вниз до целого */
+.ted-content .ted-media--video { container-type: inline-size; }
+@supports (height: round(down, 1px, 1px)) {
+  .ted-content .ted-media--video > :is(video, iframe) { aspect-ratio: auto; height: round(down, calc(100cqi * 9 / 16), 1px); }
+}
+.ted-content .ted-media audio { width: 100%; }
+.ted-content .ted-media--audio[data-ted-player] > audio { display: none; }
+/* Аудиоплеер по Media/audio: подложка #EDF3FA, r 16, отступы 12/20/12/12; play 48 чёрный; волна из столбиков 5 px через 2 px; время 9 px; линия и название под волной */
+.ted-audio { --ted-audio-bg: var(--color-main-gray-lighter, #edf3fa); --ted-audio-play: var(--color-main-gray-black, #0d0d0d); --ted-audio-play-icon: var(--color-text-icon-gray-white, #ffffff); --ted-audio-bar: var(--color-main-color2-light, #9191f2); --ted-audio-bar-played: var(--color-main-color2-main, #6161f2); --ted-audio-line: var(--color-main-gray-light, #dadfe5); --ted-audio-text: var(--color-text-icon-gray-darker, #262626); --ted-audio-muted: var(--color-text-icon-gray-medium, #919599);
+  box-sizing: border-box; padding: calc(12 * var(--ted-u, 1px)) calc(20 * var(--ted-u, 1px)) calc(12 * var(--ted-u, 1px)) calc(12 * var(--ted-u, 1px)); border-radius: calc(16 * var(--ted-u, 1px)); background: var(--ted-audio-bg); color: var(--ted-audio-text); font-family: inherit; }
+[data-ted-theme='dark'] .ted-audio { --ted-audio-bg: var(--color-main-gray-dark, #4d4d4d); --ted-audio-play: var(--color-main-gray-white, #ffffff); --ted-audio-play-icon: var(--color-text-icon-gray-darker, #262626); --ted-audio-bar: var(--color-main-color2-darker, #38388c); --ted-audio-bar-played: var(--color-main-color2-light, #9191f2); --ted-audio-line: var(--color-main-gray-darker, #262626); --ted-audio-text: var(--color-text-icon-gray-white, #ffffff); }
+.ted-audio__body { display: grid; gap: calc(8 * var(--ted-u, 1px)); min-width: 0; }
+.ted-audio__controls { display: flex; align-items: flex-start; gap: calc(12 * var(--ted-u, 1px)); }
+.ted-audio .ted-audio__play { flex: none; display: grid; place-items: center; width: var(--ted-audio-play-size, calc(48 * var(--ted-u, 1px))); height: var(--ted-audio-play-size, calc(48 * var(--ted-u, 1px))); min-height: 0; margin: 0; padding: 0; border: 0; border-radius: 50%; background: var(--ted-audio-play); color: var(--ted-audio-play-icon); box-shadow: none; cursor: pointer; }
+.ted-audio .ted-audio__play svg { display: block; width: calc(24 * var(--ted-u, 1px)); height: calc(24 * var(--ted-u, 1px)); fill: currentColor; }
+.ted-audio__play:focus-visible, .ted-audio__wave:focus-visible { outline: 2px solid var(--color-main-color1-light, #63a1f7); outline-offset: 2px; }
+.ted-audio__track { flex: 1 1 auto; min-width: 0; display: grid; gap: calc(4 * var(--ted-u, 1px)); }
+.ted-audio__wave { display: flex; align-items: center; gap: calc(2 * var(--ted-u, 1px)); height: var(--ted-audio-wave-size, calc(48 * var(--ted-u, 1px))); overflow: hidden; cursor: pointer; touch-action: none; }
+.ted-audio__wave > i { flex: none; width: calc(5 * var(--ted-u, 1px)); border-radius: calc(4 * var(--ted-u, 1px)); background: var(--ted-audio-bar); }
+.ted-audio__wave > i.is-played { background: var(--ted-audio-bar-played); }
+.ted-audio__time { display: flex; justify-content: space-between; font-size: calc(9 * var(--ted-u, 1px)); line-height: var(--ted-audio-time-line, calc(14 * var(--ted-u, 1px))); font-weight: 400; color: var(--ted-audio-muted); }
+.ted-audio__line { height: calc(2 * var(--ted-u, 1px)); background: var(--ted-audio-line); }
+.ted-audio__name.is-empty { color: var(--ted-audio-muted); }
+.ted-audio__name { font-size: calc(16 * var(--ted-u, 1px)); line-height: calc(24 * var(--ted-u, 1px)); font-weight: 400; overflow-wrap: anywhere; }
+/* планшет и телефон (Media/audio tablet и mobile): play 40, волна 40, карточка 120 */
+@media (width <= 811px) { .ted-audio { --ted-audio-play-size: calc(40 * var(--ted-u, 1px)); --ted-audio-wave-size: calc(40 * var(--ted-u, 1px)); --ted-audio-time-line: calc(10 * var(--ted-u, 1px)); } }
+@container ted (width <= 812px) { .ted-audio { --ted-audio-play-size: calc(40 * var(--ted-u, 1px)); --ted-audio-wave-size: calc(40 * var(--ted-u, 1px)); --ted-audio-time-line: calc(10 * var(--ted-u, 1px)); } }
+.ted-content .ted-media--file { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(12 * var(--ted-u, 1px)); }
+.ted-content .ted-media--file > figcaption { grid-column: 1 / -1; }
+.ted-content .ted-media--file > a,
+.ted-content .ted-media a[data-ted-video] { padding: calc(12 * var(--ted-u, 1px)) calc(16 * var(--ted-u, 1px)); border-radius: calc(12 * var(--ted-u, 1px)); background: var(--ted-c-code-bg); }
+.ted-content .ted-media a[data-ted-video] { display: block; overflow-wrap: anywhere; }
+.ted-content .ted-media--file > a { display: grid; grid-template-columns: calc(48 * var(--ted-u, 1px)) minmax(0, 1fr) calc(24 * var(--ted-u, 1px)); align-items: center; gap: calc(12 * var(--ted-u, 1px)); padding: calc(12 * var(--ted-u, 1px)) calc(24 * var(--ted-u, 1px)) calc(12 * var(--ted-u, 1px)) calc(12 * var(--ted-u, 1px)); overflow-wrap: anywhere; text-decoration: none; color: var(--ted-media-link, var(--color-text-icon-color1-dark, #1461cc)); }
+.ted-content .ted-media--file > a::before { content: ''; width: calc(48 * var(--ted-u, 1px)); height: calc(48 * var(--ted-u, 1px)); border-radius: calc(12 * var(--ted-u, 1px)); background: url('../icons/media-file.svg') center / calc(24 * var(--ted-u, 1px)) calc(24 * var(--ted-u, 1px)) no-repeat var(--color-main-color1-lighter, #d2e2f7); }
+.ted-content .ted-media--file > a::after { content: ''; width: calc(24 * var(--ted-u, 1px)); height: calc(24 * var(--ted-u, 1px)); background: var(--ted-media-download, url('../icons/media-download.svg')) center / contain no-repeat; }
+/* название файла: две строки и многоточие (для этого текст оборачивается в span.ted-media__name, высота у него авто; по центру плитки в одну строку тоже) */
+.ted-content .ted-media--file > a > .ted-media__name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; min-width: 0; }
+.ted-ui[data-ted-theme='dark'] .ted-media--file { --ted-media-download: url('../icons/media-download-dark.svg'); --ted-media-link: var(--color-text-icon-color1-light, #63a1f7); }
+.ted-content .ted-media--file > a:hover { background: var(--ui-hover, var(--color-main-gray-light, #dadfe5)); }
+@media (width <= 480px) { .ted-content .ted-media--file { grid-template-columns: minmax(0, 1fr); } }
+
+/* Кнопка «Смотреть на YouTube» под плеером площадки — Buttons/main secondary s: 40, r12, поля 16, Inter 600 14/140%;
+   static #EDF3FA, hover #D2E2F7, press #63A1F7 (тёмная #4D4D4D / #919599 / #262626, текст #FFF); от видео 12, на планшете и телефоне 8 */
+.ted-content .ted-media__source {
+  display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; height: calc(40 * var(--ted-u, 1px)); margin-top: calc(12 * var(--ted-u, 1px));
+  padding: 0 calc(16 * var(--ted-u, 1px)); border-radius: calc(12 * var(--ted-u, 1px)); background: var(--color-main-gray-lighter, #edf3fa); color: var(--color-text-icon-gray-darker, #262626);
+  font-family: var(--ted-font-body); font-feature-settings: normal; font-size: calc(14 * var(--ted-u, 1px)); font-weight: 600; line-height: 1.4;   /* ui/s: Inter Semi Bold 14 / 140% */ text-decoration: none; white-space: nowrap;
+  transition: background-color .15s;
+}
+.ted-content .ted-media__source:hover { background: var(--color-main-color1-lighter, #d2e2f7); color: var(--color-text-icon-gray-darker, #262626); }
+.ted-content .ted-media__source:active { background: var(--color-main-color1-light, #63a1f7); }
+.ted-content .ted-media__source:focus-visible { outline: 2px solid var(--color-main-color1-light, #63a1f7); outline-offset: 2px; }
+[data-ted-theme='dark'] .ted-content .ted-media__source { background: var(--color-main-gray-dark, #4d4d4d); color: var(--color-text-icon-gray-white, #ffffff); }
+[data-ted-theme='dark'] .ted-content .ted-media__source:hover { background: var(--color-main-gray-medium, #919599); color: var(--color-text-icon-gray-white, #ffffff); }
+[data-ted-theme='dark'] .ted-content .ted-media__source:active { background: var(--color-main-gray-darker, #262626); }
+@media (width <= 811px) { .ted-content .ted-media__source { margin-top: calc(8 * var(--ted-u, 1px)); } }

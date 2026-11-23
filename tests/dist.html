@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Ted — проверка сборки: запуск…</title>
+<!-- Smoke-тест именно собранных файлов dist/ted.js и dist/ted.css (обычные <script> и <link>, как на сайте клиента). -->
+<link rel="stylesheet" href="../dist/ted.css">
+<style>body { margin: 24px; font: 14px/1.5 Inter, system-ui, sans-serif; } .fail { color: #cc2929; }</style>
+</head>
+<body>
+<h1>Ted — проверка собранных dist/ted.js и dist/ted.css</h1>
+<p id="summary">Запуск…</p>
+<ul id="list"></ul>
+<div id="host"><p>текст</p></div>
+<div id="out" class="ted-content"></div>
+<script src="../dist/ted.js"></script>
+<script>
+  (function () {
+    var results = [];
+    function t(name, fn) {
+      try { fn(); results.push({ name: name, ok: true }); } catch (e) { results.push({ name: name, ok: false, err: String(e && e.message || e) }); }
+    }
+    function eq(a, b, m) { if (a !== b) throw new Error((m || '') + ' ожидалось ' + JSON.stringify(b) + ', получено ' + JSON.stringify(a)); }
+    function ok(c, m) { if (!c) throw new Error(m || 'ложь'); }
+
+    t('глобальный Ted с нужным API', function () {
+      ok(window.Ted, 'нет window.Ted');
+      ['create', 'init', 'get', 'clean', 'destroy', 'setTheme'].forEach(function (k) { ok(typeof window.Ted[k] === 'function', 'нет Ted.' + k); });
+    });
+    var ed;
+    t('редактор создаётся и принимает HTML', function () {
+      ed = Ted.create(document.getElementById('host'), { toasts: false, unit: 'px' });
+      ed.setHTML('<h2>Заголовок</h2><ul class="ted-checklist"><li class="ted-checked">пункт</li></ul><ul class="ted-facts"><li><strong>1</strong><br>а</li><li><strong>2</strong><br>б</li></ul><pre data-lang="js"><code>let a = 1;</code></pre>', { silent: true });
+      var html = ed.getHTML();
+      ok(html.indexOf('ted-checklist') > 0 && html.indexOf('ted-facts') > 0 && html.indexOf('<pre') > 0, html);
+      ok(html.indexOf('class="ted-k"') > 0, 'в сохранённом коде нет подсветки: ' + html);
+      ok(html.indexOf('data-tedui') < 0, 'служебные атрибуты просочились');
+    });
+    t('Ted.clean вычищает опасное', function () {
+      var out = Ted.clean('<p onclick="x()">а</p><script>alert(1)<\/script>');
+      ok(out.indexOf('script') < 0 && out.indexOf('onclick') < 0, out);
+    });
+    t('стили собраны: блоки оформлены без JS', function () {
+      var out = document.getElementById('out');
+      out.innerHTML = '<ul class="ted-facts"><li><strong>1</strong><br>а</li></ul><pre data-lang="js" data-nums="1"><code><span class="ted-k">let</span></code></pre>';
+      eq(getComputedStyle(out.querySelector('ul.ted-facts')).display, 'grid', 'плитки цифр');
+      eq(getComputedStyle(out.querySelector('pre'), '::before').content, '"js"', 'шапка кода');
+      ok(getComputedStyle(out.querySelector('.ted-k')).color !== getComputedStyle(out).color, 'подсветка кода цветная');
+    });
+    t('destroy снимает редактор', function () {
+      Ted.destroy(ed);
+      ok(!document.getElementById('host').__ted, 'ссылка осталась');
+      ok(Ted.editors.indexOf(ed) < 0, 'остался в реестре');
+    });
+
+    var fails = results.filter(function (r) { return !r.ok; });
+    var list = document.getElementById('list');
+    results.forEach(function (r) {
+      var li = document.createElement('li');
+      if (!r.ok) li.className = 'fail';
+      li.textContent = (r.ok ? '✓ ' : '✗ ') + r.name + (r.err ? ' — ' + r.err : '');
+      list.appendChild(li);
+    });
+    var s = document.getElementById('summary');
+    s.textContent = fails.length ? 'Не прошло ' + fails.length + ' из ' + results.length : 'Все тесты прошли: ' + results.length;
+    document.title = fails.length ? 'Ted — сборка: ошибки' : 'Ted — сборка: Все тесты прошли';
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+/* Блок «iFrame» — только отличия в редакторе. */
+
+/* iFrame в правке: фрейм не перехватывает нажатия (первое нажатие — окно «Настройки iFrame»); пустой — поле адреса */
+.ted-ui-editable figure.ted-iframe { cursor: pointer; }
+.ted-ui-editable figure.ted-iframe > iframe { pointer-events: none; }
+.ted-ui-editable figure.ted-iframe[data-tedui-empty] { cursor: default; }
+/* блок выделен целиком (кнопки блока у фрейма): подпись не подсвечивается выделением — как у медиа */
+.ted-ui-editable figure.ted-iframe ::selection { background: transparent; }
+/* подпись правится полем под фреймом (как у медиа); настоящая figcaption в редакторе скрыта (в HTML остаётся) */
+.ted-ui-editable figure.ted-iframe > figcaption { display: none; }
+.ted-ui-editable figure.ted-iframe > .ted-ui-media__caption { display: block; width: 100%; margin-top: 12px; cursor: text; }
+@container ted (width <= 812px) { .ted-ui-editable figure.ted-iframe > .ted-ui-media__caption { margin-top: 8px; } }
+.ted-ui-pop__row--wrap { flex-wrap: wrap; }

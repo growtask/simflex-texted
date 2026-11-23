@@ -1,0 +1,8 @@
+/* Блок «Выноска» — только отличия в редакторе: заглушки «Заголовок выноски» и «Текст выноски» читаются на плашке
+   (text-icon/gray/medium); картинка плитки в «Все блоки». */
+
+.ted-ui-editable blockquote.ted-callout > p[data-tedui-ph]::before { color: var(--ui-color-text-icon-gray-medium); }
+
+.ted-ui-tile[data-type="callout"] .is-image { background-image: url(../tiles/callout-light.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="callout"] .is-image { background-image: url(../tiles/callout-dark.webp); }
+.ted-ui-editable blockquote.ted-callout > p[data-tedui-phline]::before { color: var(--ui-color-text-icon-gray-medium); }

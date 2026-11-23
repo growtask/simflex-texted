@@ -1,0 +1,11 @@
+{
+  "type": "columns",
+  "title": "Колонки",
+  "figma": "block-columns",
+  "menu": { "group": "Макет", "order": 0, "icon": "columns", "words": "колонки столбцы сетка карточки columns grid", "convert": false, "sample": "<div class=\"ted-columns ted-columns--2\"><div class=\"ted-columns__col\"><h6>Доставка</h6><p>От одного до трёх дней.</p></div><div class=\"ted-columns__col\"><h6>Возврат</h6><p>В течение двух недель.</p></div></div>" },
+  "selector": ".ted-columns",
+  "html": {},
+  "inContainers": false,
+  "narrow": true,
+  "container": true
+}

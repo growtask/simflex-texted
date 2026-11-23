@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TextEd — демо в админке</title>
+<!-- переменные сайта (шрифты, цвета) — нужны и в админке, чтобы текст выглядел как на сайте -->
+<link rel="stylesheet" href="site-theme.css">
+<!-- Ted: собранная версия — открывается даже двойным кликом по файлу, без сервера -->
+<link rel="preload" href="../fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../dist/ted.css">
+<link rel="stylesheet" href="demo.css">
+<style>
+  /* overflow: clip (а не hidden), иначе тулбар перестаёт «прилипать» при прокрутке */
+  .editor-box { border: 1px solid var(--d-line); border-radius: 16px; overflow: clip; background: #fff; }
+  body.dark .editor-box { background: #0d0d0d; }
+</style>
+</head>
+<body>
+<div class="demo-app">
+  <nav class="demo-side" data-demo-nav aria-label="Режимы демо"></nav>
+  <main class="demo-main">
+    <div class="demo-head">
+      <h1>Редактирование страницы «О компании»</h1>
+      <div class="demo-tabs" id="unit" aria-label="Единицы сайта"></div>
+      <button type="button" class="demo-btn" id="save-top">Сохранить</button>
+    </div>
+
+    <div class="demo-panel">
+      <form id="form" onsubmit="return false">
+        <label class="demo-label" for="content">Текст страницы</label>
+        <div class="editor-box">
+          <textarea id="content" name="content" class="ted-editor" rows="12"></textarea><script>if(localStorage.getItem('ted-demo-dark')==='1')document.currentScript.previousElementSibling.dataset.tedTheme='dark'</script>
+        </div>
+        <div class="demo-head" style="margin:16px 0 0">
+          <button type="submit" class="demo-btn" id="save">Сохранить</button>
+          <button type="button" class="demo-tab" id="reset"><span>Сбросить пример</span></button>
+          <a class="demo-tab" href="site.html"><span>Посмотреть на «сайте»</span></a>
+          <span class="demo-hint" id="status"></span>
+        </div>
+      </form>
+    </div>
+
+    <div class="demo-panel">
+      <label class="demo-label">HTML, который уйдёт в базу (живое обновление textarea)</label>
+      <pre class="demo-out" id="out"></pre>
+    </div>
+  </main>
+</div>
+
+<script src="demo-icons.js"></script><script src="demo-logo.js"></script>
+<script src="demo.js"></script>
+<script>document.write('<script src="/ted-demo-media/config.js' + location.search.replace(/"/g, '') + '"><\/script>')</script><!-- настройки сервера (ted.config.php) — только в демо на PHP; без него действуют значения по умолчанию. ?preset=mini&access=ro — набор поля и доступ без права правки (этап 2) -->
+<script src="../dist/ted.js"></script>
+<script src="../content.js"></script>
+<script src="sample.js"></script>
+<script>
+  // Для разработки можно подключать исходники: <script type="module" src="../src/index.js">
+
+  const KEY = 'ted-demo-html';
+  const textarea = document.getElementById('content');
+  const out = document.getElementById('out');
+  const status = document.getElementById('status');
+  let directDemo = new URLSearchParams(location.search).get('media') === 'direct' && location.protocol !== 'file:';
+  const managerDemo = new URLSearchParams(location.search).get('media') === 'manager';
+  const demoHeaders ={ 'X-Ted-Demo': 'media' };
+  let unit = localStorage.getItem('ted-demo-unit') || 'vw';
+
+  textarea.value = localStorage.getItem(KEY) || SAMPLE_HTML;
+  // textarea обновляется редактором — так её видит форма админки
+  textarea.addEventListener('input', () => { out.textContent = textarea.value; });
+
+  async function save(html) {
+    if (directDemo) {
+      const result = await fetch('/ted-demo-media/save', { method: 'POST', headers: demoHeaders, body: html });
+      if (!result.ok) throw new Error('Сервер не сохранил страницу');
+    }
+    localStorage.setItem(KEY, html);
+    status.textContent = `Сохранено в ${new Date().toLocaleTimeString()}`;
+  }
+  // демо провайдера статей CMS (в CMS — поиск по базе статей)
+  const DEMO_ARTICLE_LIST = window.DEMO_ARTICLE_LIST;   // статьи демо-CMS — в sample.js (их же берёт сайт)
+  const DEMO_ARTICLES = {
+    search: async (q) => DEMO_ARTICLE_LIST.filter((a) => a.title.toLowerCase().includes(q.toLowerCase())),
+    get: async (id) => DEMO_ARTICLE_LIST.find((a) => a.id === id),
+  };
+  // Файловый менеджер SimflexCMS (демо запущено с пакетом simflex-file-manager, tools/fm-demo.php): окна и модуль
+  // подключаются один раз; в CMS их выводит шаблон админки. Тема окон следует теме демо.
+  let fileManagerReady = null;
+  function loadFileManager() {
+    return fileManagerReady ||= (async () => {
+      const response = await fetch('/ted-demo-fm/window?theme=' + (DemoUI.isDark() ? 'dark' : 'light'));
+      if (!response.ok) throw new Error('Файловый менеджер не подключён');
+      const box = document.createElement('div');
+      box.innerHTML = await response.text();
+      document.body.append(...box.childNodes);
+      await import('/ted-demo-fm/assets/js/file-manager.js');
+      new MutationObserver(() => document.querySelectorAll('.fm-root').forEach((node) => { node.dataset.fmTheme = DemoUI.isDark() ? 'dark' : 'light'; }))
+        .observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    })().catch((error) => { fileManagerReady = null; throw error; });
+  }
+  // pickFile для редактора — как в README менеджера: выбор с фильтром по виду, null — окно закрыли без выбора
+  const pickFromLibrary = async ({ multiple, extensions }) => {
+    await loadFileManager();
+    const files = await window.fileManager.open({ multiple, select: true, accept: extensions || undefined });
+    return files && files.map((file) => ({ url: file.url, alt: '', name: file.name }));
+  };
+
+  function start() {
+    Ted.destroy(textarea);
+    const library = directDemo && window.TED_DEMO_FILE_MANAGER;
+    if (library) loadFileManager().catch(() => {});
+    const [ed] = Ted.init({
+      selector: '#content',
+      server: window.TED_SERVER,   // папка файлов, лимиты, карточки, сайты iFrame — из ted.config.php (этап 1)
+      unit,
+      theme: DemoUI.isDark() ? 'dark' : 'light',
+      contentCss: ['site-theme.css'],
+      startWithHeading: true,
+      previewMode: false,   // в админке режима просмотра нет — в панели вместо него «Сохранить»
+      onSave: save,
+      mediaPageUrl: '/company/',
+      upload: directDemo ? Ted.createUpload('/ted-demo-media/upload', { headers: demoHeaders }) : null,
+      // загрузка с компьютера и библиотека вместе: в зоне загрузки — «Из библиотеки» (файловый менеджер CMS)
+      pickFile: library ? pickFromLibrary : null,
+      // «Встраивание»: карточка по ссылке — страницу читает сервер демо (php/opengraph.php); статьи CMS — демо-список
+      opengraph: location.protocol !== 'file:' ? Ted.createOpenGraph('/ted-demo-media/og', { headers: demoHeaders }) : null,   // и без ?media=direct: карточку читает демо-сервер
+      articles: DEMO_ARTICLES,
+      // ?media=manager — демо подключения файлового менеджера CMS: pickFile вызывается кнопкой «Из библиотеки» и должен вернуть адреса файлов
+      ...(managerDemo ? { mediaSource: 'manager', pickFile: window.TED_DEMO_FILE_MANAGER ? pickFromLibrary : ({ kind, multiple }) => {
+        const answer = prompt(`Демо файлового менеджера (${kind}). Адрес файла, например /uf/images/company/photo.webp${multiple ? '; несколько — через пробел' : ''}`, '');
+        return answer ? answer.trim().split(/\s+/).map((url) => ({ url })) : [];
+      } } : {}),
+      autosave: true,       // черновик в localStorage: не пропадает при перезагрузке, пока не сохранён
+    });
+    out.textContent = ed.getHTML();
+    window.editor = ed;
+  }
+
+  DemoUI.tabs(document.getElementById('unit'), [['vw', 'Сайт на vw'], ['px', 'Сайт на px']], unit, (v) => {
+    unit = v;
+    localStorage.setItem('ted-demo-unit', unit);
+    window.editor.flush();
+    start();
+  });
+  document.getElementById('reset').onclick = () => {
+    localStorage.removeItem(KEY);
+    window.editor.setHTML(SAMPLE_HTML);
+  };
+  document.getElementById('save-top').onclick = () => window.editor.save();
+  document.getElementById('form').addEventListener('submit', () => window.editor.save());
+
+  // Загрузка работает только при запуске через tools/demo.ps1 (PHP-сервер): если сервер демо найден, включаем её сами
+  const noServer = () => document.getElementById('status').textContent = 'Загрузка файлов выключена: запустите  pwsh -File ted/tools/demo.ps1';
+  if (location.protocol === 'file:') { noServer(); start(); }
+  // сервер демо найден, если он отдал свои настройки (config.js выше) — без пробного запроса, который давал красный 403 в консоли (проверка 22.11)
+  else { directDemo = !!window.TED_SERVER; if (!directDemo) noServer(); start(); }
+</script>
+</body>
+</html>

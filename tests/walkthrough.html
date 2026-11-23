@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ted — обход всех блоков</title>
+<!-- Живой редактор: каждый блок добавлен через меню, наполнен и пройден доступными кнопками панели.
+     ?dark — тёмная тема. Перед каждым результатом — подпись (h6) «блок · что сделано».
+     Справа внизу — сводка автопроверок (переполнение, служебные символы, повторная очистка, ошибки скриптов). -->
+<link rel="stylesheet" href="../examples/site-theme.css">
+<link rel="stylesheet" href="../dist/ted.css">
+<link rel="stylesheet" href="../examples/demo.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  .ted-ui { --ted-editor-min-height: 100vh; }
+  #walk-panel { position: fixed; right: 12px; bottom: 12px; z-index: 99999; width: 340px; max-height: 60vh; overflow: auto; padding: 10px 12px; border-radius: 12px; background: #262626; color: #fff; font: 12px/1.4 Inter, system-ui, sans-serif; box-shadow: 0 4px 24px rgba(0,0,0,.3); }
+  #walk-panel b { display: block; margin-bottom: 4px; font-size: 13px; }
+  #walk-panel .bad { color: #ffa6a6; margin: 2px 0; }
+  #walk-panel .ok { color: #c3e5c3; }
+  #walk-panel button { margin-left: 8px; font: inherit; }
+</style>
+</head>
+<body>
+<textarea id="content"></textarea>
+<div id="walk-panel"><b>Обход блоков…</b></div>
+<script src="../dist/ted.js"></script>
+<script>
+(async function () {
+  var params = new URLSearchParams(location.search);
+  var ed = Ted.init({
+    selector: '#content', unit: 'vw', previewScreen: 'editor', theme: params.has('dark') ? 'dark' : 'light',
+    contentCss: ['../examples/site-theme.css'],
+    authors: [{ id: 'a1', name: 'Анна Петрова', role: 'Главный редактор' }, { id: 'a2', name: 'Иван Смирнов', role: 'Автор' }],
+  })[0];
+  var E = ed.editable;
+  var results = [];
+  var issues = [];
+  var errors = [];
+  window.addEventListener('error', function (e) { errors.push(e.message); });
+  window.addEventListener('unhandledrejection', function (e) { errors.push(String(e.reason)); });
+
+  var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms || 0); }); };
+  var raf = function () { return new Promise(function (r) { setTimeout(r, 30); }); };   // не rAF: в headless с виртуальным временем кадры не идут
+
+  function emptyP() { var p = document.createElement('p'); p.appendChild(document.createElement('br')); return p; }
+  function isEmptyP(el) { return el && el.tagName === 'P' && !el.textContent.replace(/​/g, '').trim() && !el.className; }
+  function tail() {
+    var last = E.lastElementChild;
+    if (!isEmptyP(last)) { last = emptyP(); E.appendChild(last); }
+    return last;
+  }
+  function caretAt(el, end) {
+    ed.focus();
+    var r = document.createRange();
+    var w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    var t = null, n;
+    while ((n = w.nextNode())) t = n;
+    if (t && end) r.setStart(t, t.data.length); else if (t) r.setStart(w.currentNode === t ? t : el.firstChild || el, 0); else r.setStart(el, 0);
+    r.collapse(true);
+    getSelection().removeAllRanges();
+    getSelection().addRange(r);
+    ed.updatePlaceholders(); ed.updateState(); ed.handle.syncItem();
+  }
+  function typeText(s) { document.execCommand('insertText', false, s); }
+  // Клавиша: сначала обработчики редактора; если они не отменили действие — делаем то, что сделал бы браузер
+  function key(k, o) {
+    var ev = new KeyboardEvent('keydown', Object.assign({ key: k, bubbles: true, cancelable: true }, o || {}));
+    E.dispatchEvent(ev);
+    if (ev.defaultPrevented) return;
+    if (k === 'Enter') document.execCommand(o && o.shiftKey ? 'insertLineBreak' : 'insertParagraph');
+    else if (k === 'Backspace') document.execCommand('delete');
+    else if (k === 'Delete') document.execCommand('forwardDelete');
+  }
+  async function fin() { ed.afterChange({ immediate: true }); await raf(); }
+
+  async function label(text) {
+    var t = tail();
+    var h = document.createElement('h6');
+    h.textContent = text;
+    t.replaceWith(h);
+    E.appendChild(emptyP());
+    await fin();
+  }
+
+  async function insert(type) {
+    var t = tail();
+    var before = new Set(Array.from(E.children));
+    caretAt(t);
+    ed.blockMenu.openPicker(t);
+    var tile = ed.blockMenu.picker.panel.querySelector('.ted-ui-tile[data-type="' + type + '"]');
+    if (!tile) throw new Error('нет плитки ' + type);
+    tile.click();
+    await sleep(40);
+    await fin();
+    var added = Array.from(E.children).filter(function (c) { return !before.has(c); });
+    if (!added.length) throw new Error('блок ' + type + ' не появился');
+    return added[0];
+  }
+
+  function selectWord(el, word) {
+    ed.focus();
+    var w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    var n;
+    while ((n = w.nextNode())) {
+      var i = n.data.indexOf(word);
+      if (i >= 0) {
+        var r = document.createRange();
+        r.setStart(n, i); r.setEnd(n, i + word.length);
+        getSelection().removeAllRanges(); getSelection().addRange(r);
+        ed.updateState();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // ----- кнопки панели
+  function toolbarButton(name) {
+    var tb = ed.toolbar;
+    var map = { bold: tb.marks.bold, italic: tb.marks.italic, underline: tb.marks.underline, strike: tb.marks.strike, code: tb.marks.code, link: tb.marks.link, anchor: tb.anchorBtn, style: tb.styleBtn, align: tb.alignBtn, color: tb.colorBtn, magic: tb.magicBtn, more: tb.moreBtn, all: tb.allBlocksBtn };
+    return map[name];
+  }
+  function btnState(name) {
+    var b = toolbarButton(name);
+    if (!b || !b.isConnected) return 'нет';
+    if (b.hidden || b.offsetParent === null) return 'скрыта';
+    if (b.disabled) return 'недоступна';
+    return 'есть';
+  }
+  async function press(name) {
+    var st = btnState(name);
+    if (st !== 'есть') return st;
+    var b = toolbarButton(name);
+    b.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+    b.click();
+    await sleep(30);
+    return 'ok';
+  }
+  async function menuPick(btnName, re) {
+    var st = await press(btnName);
+    if (st !== 'ok') return st;
+    var items = Array.from(document.querySelectorAll('.ted-ui-pop .ted-ui-item'));
+    var it = items.find(function (x) { return re.test(x.textContent); });
+    if (!it) { ed.popover.close(); return 'нет пункта ' + re; }
+    it.click();
+    await sleep(40);
+    await fin();
+    return 'ok';
+  }
+  async function popupInput(value) {
+    await sleep(40);
+    var input = document.querySelector('.ted-ui-pop input[type="text"], .ted-ui-pop input:not([type])');
+    if (!input) return false;
+    input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    await sleep(40);
+    ed.popover.close();
+    await fin();
+    return true;
+  }
+
+  // ----- автопроверки
+  function check(tag) {
+    var bad = [];
+    ed.ui.scrollLeft = 0; ed.toolbar.el.scrollLeft = 0;   // клик по кнопке панели за краем (узкое окно) подкручивает контейнеры — это не раскладка блоков
+    if (ed.ui.scrollWidth > ed.ui.clientWidth + 1) {
+      var edge = ed.ui.getBoundingClientRect().right;
+      var overflow = Array.from(ed.ui.querySelectorAll('*')).filter(function (el) { return !el.closest('.ted-ui-toolbar') && el.getBoundingClientRect().right > edge + 1; }).slice(0, 12);
+      bad.push('горизонтальная прокрутка редактора: ' + ed.ui.scrollWidth + '/' + ed.ui.clientWidth + ' ' + overflow.map(function (el) { return (el.getAttribute('class') || el.tagName) + '+' + Math.round(el.getBoundingClientRect().right - edge); }).join(', '));
+    }
+    var inner = ed.getInnerHTML();
+    if (/data-tedui|​/.test(inner)) bad.push('служебные символы в сохранённом HTML');
+    var again = Ted.clean(inner);
+    if (again !== inner) bad.push('повторная очистка меняет HTML');
+    var cr = E.getBoundingClientRect();
+    Array.from(E.querySelectorAll('*')).forEach(function (el) {
+      if (el.closest('pre, .ted-table__wrap, .ted-tabs__bar')) return;   // код, широкая таблица и ряд вкладок прокручиваются внутри себя
+      var r = el.getBoundingClientRect();
+      if (r.width && (r.right > cr.right + 2 || r.left < cr.left - 2) && !bad.some(function (b) { return /выходит за колонку/.test(b); })) bad.push('выходит за колонку: <' + el.tagName.toLowerCase() + '> ' + (el.textContent || '').slice(0, 20));
+    });
+    // плавающие кнопки (блока, элемента, строки и столбца таблицы) не лежат друг на друге и не обрезаются краем редактора
+    var ui = ed.ui.getBoundingClientRect();
+    var floats = Array.from(ed.ui.querySelectorAll('.ted-ui-controls.is-visible, .ted-ui-itemctl.is-visible')).filter(function (el) { return el.offsetParent !== null && getComputedStyle(el).opacity !== '0'; });
+    floats.forEach(function (a, i) {
+      var ra = a.getBoundingClientRect();
+      if (ra.left < ui.left - 1 || ra.right > ui.right + 1) bad.push('кнопки за краем редактора: ' + (a.className || '').replace(/ted-ui-/g, ''));
+      floats.slice(i + 1).forEach(function (b) {
+        var rb = b.getBoundingClientRect();
+        if (ra.left < rb.right - 1 && rb.left < ra.right - 1 && ra.top < rb.bottom - 1 && rb.top < ra.bottom - 1) bad.push('кнопки друг на друге: ' + (a.className || '').replace(/ted-ui-/g, '') + ' / ' + (b.className || '').replace(/ted-ui-/g, ''));
+      });
+    });
+    if (errors.length) { bad.push('ошибки скрипта: ' + errors.join('; ')); errors.length = 0; }
+    bad.forEach(function (b) { issues.push(tag + ' — ' + b); });
+    return bad;
+  }
+  // ожидание сценария: ложь → замечание (попадает в сводку и роняет автотест)
+  var curName = '';
+  function expect(cond, msg) { if (!cond) issues.push(curName + ' — ожидалось: ' + msg); }
+  async function scenario(name, fn) {
+    curName = name;
+    try {
+      curName = name;
+      await label(name);
+      var log = await fn();
+      var bad = check(name);
+      results.push({ name: name, ok: !bad.length, note: Array.isArray(log) ? log.join(', ') : (log || '') });
+    } catch (e) {
+      issues.push(name + ' — исключение: ' + (e && e.message || e));
+      results.push({ name: name, ok: false, note: String(e && e.message || e) });
+    }
+  }
+  var WORD = 'ВЫДЕЛЕНИЕ';
+  async function textPara(text) {
+    var t = tail();
+    caretAt(t);
+    typeText(text || ('Обычный текст со словом ' + WORD + ' внутри абзаца.'));
+    await fin();
+    return t;
+  }
+
+  // =============== ТЕКСТ ===============
+  await scenario('Текст · пустой абзац: заглушка', async function () {
+    var t = tail(); caretAt(t); await fin();
+    if (!t.getAttribute('data-tedui-ph')) throw new Error('нет заглушки');
+    return 'заглушка есть';
+  });
+  await scenario('Текст · набран', async function () { await textPara(); });
+  var marks = [['bold', 'Жирный'], ['italic', 'Курсив'], ['underline', 'Подчёркнутый'], ['strike', 'Зачёркнутый'], ['code', 'Строчный код']];
+  for (var mi = 0; mi < marks.length; mi++) {
+    await (function (m) { return scenario('Текст · ' + m[1], async function () {
+      var p = await textPara(); selectWord(p, WORD); var s = await press(m[0]); await fin(); var tags = { bold: 'strong,b', italic: 'em,i', underline: 'u', strike: 's,del', code: 'code' }; expect(Ted.clean(p.outerHTML).match(new RegExp('<(' + tags[m[0]].replace(',', '|') + ')[ >]')) !== null, 'в сохранённом абзаце есть <' + tags[m[0]] + '> после «' + m[1] + '»'); return s;
+    }); })(marks[mi]);
+  }
+  await scenario('Текст · ссылка', async function () {
+    var p = await textPara(); selectWord(p, WORD); var s = await press('link');
+    var ok = await popupInput('/catalog');
+    return 'кнопка: ' + s + ', адрес введён: ' + ok;
+  });
+  await scenario('Текст · якорь', async function () {
+    var p = await textPara(); caretAt(p); var s = await press('anchor'); var ok = await popupInput('anchor-test');
+    return 'кнопка: ' + s + ', id: ' + ok;
+  });
+  await scenario('Текст · по центру', async function () { var p = await textPara(); return await menuPick('align', /По центру/); });
+  await scenario('Текст · справа', async function () { var p = await textPara(); return await menuPick('align', /Справа/); });
+  await scenario('Текст · фон стандартный', async function () { var p = await textPara(); return await menuPick('color', /Стандартный/); });
+  await scenario('Текст · фон акцентный', async function () { var p = await textPara(); return await menuPick('color', /Акцентный/); });
+  await scenario('Текст · фон дополнительный', async function () { var p = await textPara(); return await menuPick('color', /Дополнительный/); });
+  await scenario('Текст · фон снят', async function () { var p = await textPara(); await menuPick('color', /Акцентный/); return await menuPick('color', /Удалить фон/); });
+  await scenario('Текст · ✨ форматирование', async function () { var p = await textPara('Привет - мир "в кавычках" 10 штук'); var s = await press('magic'); await sleep(60); ed.popover.close && ed.popover.close(); return s; });
+
+  // заголовки
+  for (var hl = 2; hl <= 6; hl++) {
+    await (async function (level) {
+      await scenario('Заголовок ' + level, async function () {
+        var p = await textPara('Заголовок уровня ' + level);
+        var r = await menuPick('style', new RegExp('Заголовок ' + level));
+        expect(r === 'ok', 'пункт «Заголовок ' + level + '» есть в меню «Стиль текста» (' + r + ')');
+        var hs = Array.from(E.querySelectorAll('h' + level)).filter(function (x) { return x.textContent === 'Заголовок уровня ' + level; });
+        expect(hs.length === 1, 'абзац стал <h' + level + '>');
+        return r;
+      });
+    })(hl);
+  }
+  await scenario('Заголовок 5 (Markdown «#### »)', async function () { var t = tail(); caretAt(t); typeText('####'); typeText(' '); typeText('Заголовок пятого уровня'); await fin(); expect(!!E.querySelector('h5:last-of-type') || Array.from(E.querySelectorAll('h5')).some(function (x) { return /пятого/.test(x.textContent); }), 'Markdown «#### » создаёт h5'); });
+  await scenario('Заголовок 6 (Markdown «##### »)', async function () { var t = tail(); caretAt(t); typeText('#####'); typeText(' '); typeText('Заголовок шестого уровня'); await fin(); expect(Array.from(E.querySelectorAll('h6')).some(function (x) { return /шестого/.test(x.textContent); }), 'Markdown «##### » создаёт h6'); });
+  await scenario('Заголовок 3 · по центру + жирный', async function () {
+    var p = await textPara('Заголовок по центру'); await menuPick('style', /Заголовок 3/); await menuPick('align', /По центру/); var h3 = Array.from(E.querySelectorAll('h3')).pop(); caretAt(h3, true); return await press('bold');
+  });
+
+  // =============== СПИСКИ ===============
+  await scenario('Список · три пункта', async function () {
+    var ul = await insert('ul'); caretAt(ul.querySelector('li')); typeText('Первый'); key('Enter'); typeText('Второй'); key('Enter'); typeText('Третий'); await fin();
+  });
+  await scenario('Список · вложенный (Tab)', async function () {
+    var ul = await insert('ul'); caretAt(ul.querySelector('li')); typeText('Верхний'); key('Enter'); typeText('Вложенный'); key('Tab'); key('Enter'); typeText('Ещё вложенный'); await fin();
+  });
+  await scenario('Список · курсив и ссылка в пункте', async function () {
+    var ul = await insert('ul'); caretAt(ul.querySelector('li')); typeText('Пункт со словом ' + WORD); await fin(); selectWord(ul, WORD); var s = await press('italic'); return s;
+  });
+  await scenario('Нумерованный · три пункта', async function () {
+    var ol = await insert('ol'); caretAt(ol.querySelector('li')); typeText('Раз'); key('Enter'); typeText('Два'); key('Enter'); typeText('Три'); await fin();
+  });
+  await scenario('Нумерованный · по центру', async function () {
+    var ol = await insert('ol'); caretAt(ol.querySelector('li')); typeText('Раз'); key('Enter'); typeText('Два'); await fin(); return await menuPick('align', /По центру/);
+  });
+  await scenario('Список · цветной фон', async function () {
+    var ul = await insert('ul'); caretAt(ul.querySelector('li')); typeText('Пункт'); await fin(); return await menuPick('color', /Акцентный/);
+  });
+
+  // =============== ЧЕК-ЛИСТ ===============
+  await scenario('Чек-лист · пустой (1 пункт)', async function () { var cl = await insert('checklist'); return cl.querySelectorAll('li').length + ' пункт'; });
+  await scenario('Чек-лист · три пункта, два отмечены', async function () {
+    var cl = await insert('checklist'); caretAt(cl.querySelector('li')); typeText('Подготовить'); key('Enter'); typeText('Проверить'); key('Enter'); typeText('Опубликовать');
+    var lis = cl.querySelectorAll('li'); caretAt(lis[0], true); key('Enter', { ctrlKey: true }); caretAt(lis[1], true); key('Enter', { ctrlKey: true }); await fin();
+  });
+  await scenario('Чек-лист · курсив + цветной фон недоступен', async function () {
+    var cl = await insert('checklist'); caretAt(cl.querySelector('li')); typeText('Пункт ' + WORD); await fin(); selectWord(cl, WORD); var a = await press('italic'); var bgState = btnState('color'); return 'курсив: ' + a + ', кнопка фона: ' + bgState;
+  });
+  await scenario('Чек-лист · выравнивания нет (кнопка убрана)', async function () {
+    var cl = await insert('checklist'); caretAt(cl.querySelector('li')); typeText('Пункт'); await fin();
+    var st = btnState('align'); expect(st !== 'есть', 'кнопка «Выравнивание» у чек-листа убрана, а она: ' + st);
+    ed.exec('align:center'); await fin(); expect(!cl.className.includes('ted-align'), 'команда выравнивания не действует');
+    return 'кнопка: ' + st;
+  });
+
+  // =============== ШАГИ ===============
+  await scenario('Шаги · пустой (1 шаг)', async function () { var s = await insert('steps'); return s.querySelectorAll('li').length + ' шаг'; });
+  await scenario('Шаги · три шага с описаниями', async function () {
+    var s = await insert('steps'); caretAt(s.querySelector('li > strong'));
+    typeText('Выберите'); key('Enter'); typeText('Откройте каталог'); key('Enter'); typeText('Оплатите'); key('Enter'); typeText('Выберите способ'); key('Enter'); typeText('Получите'); key('Enter'); typeText('Заберите заказ'); await fin();
+  });
+  await scenario('Шаги · кнопка «Жирный» скрыта в заголовке, курсив в описании', async function () {
+    var s = await insert('steps'); caretAt(s.querySelector('li > strong')); typeText('Заголовок'); ed.updateState(); var bold = btnState('bold'); key('Enter'); typeText('Описание ' + WORD); await fin(); selectWord(s, WORD); var it = await press('italic'); return 'жирный в заголовке: ' + bold + ', курсив: ' + it;
+  });
+  await scenario('Шаги · цветной фон и выравнивание недоступны', async function () {
+    var s = await insert('steps'); caretAt(s.querySelector('li > strong')); typeText('Шаг'); ed.updateState();
+    var bg = btnState('color'), al = btnState('align');
+    expect(bg !== 'есть', 'кнопка фона у шагов убрана'); expect(al !== 'есть', 'кнопка выравнивания у шагов убрана');
+    ed.exec('align:right'); await fin(); expect(!s.className.includes('ted-align'), 'команда выравнивания не действует');
+    return 'фон: ' + bg + ', выравнивание: ' + al;
+  });
+
+  // =============== ЦИТАТА ===============
+  await scenario('Цитата · набрана', async function () { var q = await insert('blockquote'); caretAt(q.querySelector('p')); typeText('Лучший способ предсказать будущее — создавать его.'); await fin(); });
+  await scenario('Цитата · жирный и курсив', async function () {
+    var q = await insert('blockquote'); caretAt(q.querySelector('p')); typeText('Цитата со словом ' + WORD); await fin(); selectWord(q, WORD); var a = await press('bold'); var b = await press('italic'); return a + ', ' + b;
+  });
+  await scenario('Цитата · с автором из списка', async function () {
+    var q = await insert('blockquote'); caretAt(q.querySelector('p')); typeText('Цитата с автором'); await fin(); ed.updateState(); ed.handle.syncItem();
+    var btn = ed.handle.authorBtn; if (btn.classList.contains('is-visible') === false && !btn.offsetParent) throw new Error('кнопка «Добавить автора» не показана');
+    btn.click(); await sleep(60);
+    var it = Array.from(document.querySelectorAll('.ted-ui-pop .ted-ui-item')).find(function (x) { return /Анна/.test(x.textContent); });
+    if (!it) throw new Error('нет автора в списке'); it.click(); await sleep(40); await fin();
+  });
+  await scenario('Цитата · автор вручную, длинное имя', async function () {
+    var q = await insert('blockquote'); caretAt(q.querySelector('p')); typeText('Цитата'); await fin(); ed.updateState(); ed.handle.syncItem();
+    ed.handle.authorBtn.click(); await sleep(60);
+    var it = Array.from(document.querySelectorAll('.ted-ui-pop .ted-ui-item')).find(function (x) { return /вручную/.test(x.textContent); });
+    if (!it) throw new Error('нет «Ввести вручную»'); it.click(); await sleep(40); await fin();
+    var a = q.querySelector('p.ted-author'); if (!a) throw new Error('автор не создан');
+    caretAt(a.querySelector('strong'), true); typeText('Александра Константинопольская-Вишневецкая'); key('Enter'); typeText('Главный редактор по связям с общественностью'); await fin();
+  });
+  await scenario('Цитата · по центру и цветной фон', async function () {
+    var q = await insert('blockquote'); caretAt(q.querySelector('p')); typeText('Цитата'); await fin(); var a = await menuPick('align', /По центру/); var b = await menuPick('color', /Стандартный/); return a + ', ' + b;
+  });
+
+  // =============== ВЫНОСКА ===============
+  await scenario('Выноска · пустая (заглушки)', async function () { var c = await insert('callout'); caretAt(c.querySelector('p')); await fin(); return 'заглушек: ' + c.querySelectorAll('[data-tedui-ph]').length; });
+  await scenario('Выноска · набрана', async function () {
+    var c = await insert('callout'); caretAt(c.querySelector('p')); typeText('Полезно знать'); key('Enter'); typeText('Короткие заметки помогают заметить главное перед следующим шагом.'); await fin();
+  });
+  for (var ci = 0; ci < 3; ci++) {
+    await (async function (re, nm) {
+      await scenario('Выноска · фон ' + nm, async function () {
+        var c = await insert('callout'); caretAt(c.querySelector('p')); typeText('Заголовок'); key('Enter'); typeText('Текст выноски с ' + WORD); await fin(); return await menuPick('color', re);
+      });
+    })([/Стандартный/, /Акцентный/, /Дополнительный/][ci], ['стандартный', 'акцентный', 'дополнительный'][ci]);
+  }
+  await scenario('Выноска · курсив в тексте', async function () {
+    var c = await insert('callout'); caretAt(c.querySelector('p')); typeText('Заголовок'); key('Enter'); typeText('Текст ' + WORD); await fin(); selectWord(c, WORD); return await press('italic');
+  });
+
+  // =============== ЦИФРЫ ===============
+  await scenario('Цифры · пустые (2 плитки, заглушки)', async function () { var f = await insert('facts'); caretAt(f.querySelector('li > strong')); await fin(); return f.querySelectorAll('li').length + ' плитки'; });
+  await scenario('Цифры · две плитки', async function () {
+    var f = await insert('facts'); caretAt(f.querySelector('li > strong')); typeText('120+'); key('Enter'); typeText('стран'); key('Enter'); typeText('4.8'); key('Enter'); typeText('средняя оценка'); await fin();
+  });
+  await scenario('Цифры · пять плиток, длинные значения', async function () {
+    var f = await insert('facts'); caretAt(f.querySelector('li > strong'));
+    var vals = [['120+', 'стран'], ['4.8', 'средняя оценка'], ['24/7', 'поддержка'], ['Очень длинное значение', 'подпись подлиннее предыдущей подписи'], ['1M', 'заказов']];
+    vals.forEach(function (v, i) { typeText(v[0]); key('Enter'); typeText(v[1]); if (i < vals.length - 1) key('Enter'); });
+    await fin();
+    var tops = Array.from(f.querySelectorAll('li')).map(function (li) { return Math.round(li.getBoundingClientRect().top); });
+    var cols = tops.filter(function (t) { return t === tops[0]; }).length;
+    var want = innerWidth <= 811 ? 2 : 4;
+    expect(cols === want, 'плиток в первой строке: ' + cols + ', по макету ' + want + ' при окне ' + innerWidth);
+  });
+  for (var fi = 0; fi < 3; fi++) {
+    await (async function (re, nm) {
+      await scenario('Цифры · фон ' + nm, async function () {
+        var f = await insert('facts'); caretAt(f.querySelector('li > strong')); typeText('99'); key('Enter'); typeText('подпись'); key('Enter'); typeText('77'); key('Enter'); typeText('подпись'); await fin(); return await menuPick('color', re);
+      });
+    })([/Стандартный/, /Акцентный/, /Дополнительный/][fi], ['стандартный', 'акцентный', 'дополнительный'][fi]);
+  }
+  await scenario('Цифры · «Жирный» недоступен', async function () { var f = await insert('facts'); caretAt(f.querySelector('li > strong')); typeText('5'); ed.updateState(); return 'жирный: ' + btnState('bold'); });
+
+  // =============== ПЛЮСЫ И МИНУСЫ ===============
+  await scenario('Плюсы и минусы · пустые (заглушки)', async function () { var p = await insert('proscons'); caretAt(p.querySelector('li > strong')); await fin(); return p.querySelectorAll('li li').length + ' пунктов'; });
+  await scenario('Плюсы и минусы · заполнены, лишний пункт', async function () {
+    var p = await insert('proscons');
+    var cards = Array.from(p.children).map(function (c) { return Math.round(c.getBoundingClientRect().top); });
+    var inRow = cards.filter(function (t) { return t === cards[0]; }).length;
+    var wantRow = innerWidth <= 480 ? 1 : 2;
+    expect(inRow === wantRow, 'карточек плюсов и минусов в ряд: ' + inRow + ', по макету ' + wantRow + ' при окне ' + innerWidth);
+    caretAt(p.querySelector('li > strong')); typeText('Плюсы'); key('Enter'); typeText('Чистый звук'); key('Enter'); typeText('Долгая работа'); key('Enter'); typeText('Удобная посадка'); key('Enter'); typeText('Ещё один пункт');
+    key('Enter'); key('Enter'); typeText('Минусы'); key('Enter'); typeText('Громоздкий кейс'); key('Enter'); typeText('Без провода'); await fin();
+    ed.editable.blur(); getSelection().removeAllRanges(); ed.updatePlaceholders();
+    var bare = Array.from(p.querySelectorAll('li li')).filter(function (li) { return !li.textContent.trim() && !li.hasAttribute('data-tedui-tail') && !li.hasAttribute('data-tedui-empty'); });
+    expect(!bare.length, 'пустые пункты после заполненных скрыты (голых значков: ' + bare.length + ')');
+  });
+  await scenario('Плюсы и минусы · цветной фон недоступен, курсив', async function () {
+    var p = await insert('proscons'); caretAt(p.querySelector('li > strong')); typeText('Плюсы'); key('Enter'); typeText('Пункт ' + WORD); await fin(); selectWord(p, WORD); var it = await press('italic'); return 'фон: ' + btnState('color') + ', курсив: ' + it;
+  });
+
+  // =============== ЦВЕТНОЙ ФОН ===============
+  for (var bi = 0; bi < 3; bi++) {
+    await (async function (cls, nm) {
+      await scenario('Цветной фон · ' + nm + ' (блок из меню)', async function () {
+        var b = await insert('background'); caretAt(b); typeText('Текст на цветной подложке, достаточно длинный, чтобы занять вторую строку и проверить отступы 20.'); await fin(); return await menuPick('color', cls);
+      });
+    })([/Стандартный/, /Акцентный/, /Дополнительный/][bi], ['стандартный', 'акцентный', 'дополнительный'][bi]);
+  }
+  await scenario('Цветной фон · пустой (заглушка)', async function () { var b = await insert('background'); caretAt(b); await fin(); return 'заглушка: ' + (b.getAttribute('data-tedui-ph') || 'нет'); });
+
+  // =============== КОД ===============
+  await scenario('Код · пустой (шапка и заглушки)', async function () { var pre = await insert('pre'); caretAt(pre.querySelector('code')); await fin(); return 'пусто: ' + pre.hasAttribute('data-tedui-empty'); });
+  await scenario('Код · JavaScript', async function () {
+    var pre = await insert('pre'); caretAt(pre.querySelector('code')); typeText('const total = items.reduce((s, i) => s + i.price, 0);'); key('Enter'); typeText('console.log("Итого: " + total); // готово'); await fin(); return 'язык: ' + (pre.getAttribute('data-lang') || 'нет');
+  });
+  await scenario('Код · HTML', async function () {
+    var pre = await insert('pre'); caretAt(pre.querySelector('code')); typeText('<div class="card"><h2>Заголовок</h2><p>Текст</p></div>'); await fin(); return 'язык: ' + (pre.getAttribute('data-lang') || 'нет');
+  });
+  await scenario('Код · выбор языка Python вручную', async function () {
+    var pre = await insert('pre'); caretAt(pre.querySelector('code')); typeText('def hello():'); key('Enter'); typeText('    print("hi")'); await fin(); ed.handle.openLangMenu(pre); await sleep(60);
+    var it = Array.from(document.querySelectorAll('.ted-ui-pop .ted-ui-item')).find(function (x) { return /Python/.test(x.textContent); }); if (!it) throw new Error('нет Python'); it.click(); await sleep(40); await fin(); return 'язык: ' + pre.getAttribute('data-lang');
+  });
+  await scenario('Код · 12 строк, длинная строка', async function () {
+    var pre = await insert('pre'); caretAt(pre.querySelector('code'));
+    for (var i = 1; i <= 12; i++) { typeText(i === 7 ? 'const veryLongVariableName = someFunction(argumentNumberOne, argumentNumberTwo, argumentNumberThree, argumentNumberFour);' : 'let line' + i + ' = ' + i + ';'); if (i < 12) key('Enter'); }
+    await fin();
+  });
+  await scenario('Код · абзац превращён в код кнопкой «Код»', async function () {
+    var p = await textPara('let a = 1;'); var r = document.createRange(); r.selectNodeContents(p); getSelection().removeAllRanges(); getSelection().addRange(r); ed.updateState(); return await press('code');
+  });
+  await scenario('Код · форматирования нет (кнопки скрыты)', async function () {
+    var pre = await insert('pre'); caretAt(pre.querySelector('code')); typeText('x'); ed.updateState(); return 'жирный: ' + btnState('bold') + ', курсив: ' + btnState('italic');
+  });
+
+  // =============== ЛИНИЯ, ЗАГЛУШКИ БУДУЩИХ ЭТАПОВ, СЫРОЙ БЛОК ===============
+  await scenario('Разделитель', async function () { await insert('hr'); });
+  await scenario('Блоки будущих этапов: плитки показывают подсказку', async function () {
+    var t = tail(); caretAt(t); ed.blockMenu.openPicker(t); var tiles = Array.from(ed.blockMenu.picker.panel.querySelectorAll('.ted-ui-tile')); var soon = tiles.filter(function (x) { return x.classList.contains('is-soon') || x.hasAttribute('data-soon'); });
+    var n = tiles.length; ed.blockMenu.closePicker(); return 'плиток в меню: ' + n + ', отмечено «скоро»: ' + soon.length;
+  });
+  await scenario('Таблица', async function () { await insert('table'); var f = E.querySelectorAll('figure.ted-table'); if (!f.length) throw new Error('таблица не вставлена'); return 'строк: ' + f[f.length - 1].querySelectorAll('tr').length; });
+  await scenario('Таблица · формула', async function () {
+    var f = E.querySelectorAll('figure.ted-table'); var fig = f[f.length - 1]; var rows = fig.querySelectorAll('tr');
+    rows[1].cells[0].textContent = '12 500 ₽'; rows[1].cells[1].textContent = '2'; await fin();
+    caretAt(rows[1].cells[2], true); await fin();
+    document.execCommand('insertText', false, '=A2*B2'); await fin();
+    caretAt(rows[2].cells[0], true); await fin();
+    expect(rows[1].cells[2].textContent.replace(/ /g, ' ') === '25 000 ₽', 'результат формулы 25 000 ₽, получено ' + rows[1].cells[2].textContent);
+    expect(ed.getInnerHTML().indexOf('data-formula="=A2*B2"') >= 0, 'формула сохранена');
+    return rows[1].cells[2].textContent;
+  });
+  await scenario('Аккордеон', async function () {
+    await insert('accordion');
+    var accs = E.querySelectorAll('.ted-accordion'); var acc = accs[accs.length - 1];
+    var q = acc.querySelector('.ted-accordion__q'); caretAt(q, true); await fin();
+    document.execCommand('insertText', false, 'Как долго идёт доставка, если заказ оформлен в выходные?'); await fin();
+    ed.editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })); await fin();
+    document.execCommand('insertText', false, 'От одного до трёх рабочих дней.'); await fin();
+    expect(acc.querySelector('.ted-accordion__body p').textContent.indexOf('От одного') === 0, 'ответ набран в теле');
+    expect(/<details class="ted-accordion__item"/.test(ed.getInnerHTML()), 'на сайте — details');
+    var t = tail(); t.after(E.ownerDocument.createElement('p')); E.lastElementChild.appendChild(E.ownerDocument.createElement('br')); await fin();
+    return acc.querySelectorAll('.ted-accordion__item').length + ' вопрос';
+  });
+  await scenario('Вкладки', async function () {
+    await insert('tabs');
+    var all = E.querySelectorAll('.ted-tabs'); var tabs = all[all.length - 1];
+    var ts = tabs.querySelectorAll('.ted-tabs__title');
+    var names = ['Описание', 'Характеристики изделия', 'Доставка и оплата'];
+    for (var i = 0; i < ts.length; i++) { caretAt(ts[i], true); await fin(); document.execCommand('insertText', false, names[i]); await fin(); }
+    caretAt(ts[0], true); await fin();
+    ed.editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })); await fin();
+    document.execCommand('insertText', false, 'Текст первой вкладки.'); await fin();
+    expect(tabs.querySelector('.ted-tabs__body').textContent.indexOf('Текст первой') === 0, 'содержимое набрано');
+    expect(/ted-tabs__panel/.test(ed.getInnerHTML()), 'на сайте — панели');
+    var bar = tabs.querySelector('.ted-tabs__bar');
+    expect(getComputedStyle(bar).overflowX === 'auto', 'ряд вкладок прокручивается вбок');
+    expect(bar.getBoundingClientRect().right <= E.getBoundingClientRect().right + 2, 'ряд вкладок не шире колонки');
+    return ts.length + ' вкладки';
+  });
+  await scenario('Колонки', async function () {
+    await insert('columns');
+    var all = E.querySelectorAll('.ted-columns'); var el = all[all.length - 1];
+    var hs = el.querySelectorAll('.ted-columns__col > h6');
+    caretAt(hs[0], true); await fin(); document.execCommand('insertText', false, 'Доставка по всей России'); await fin();
+    caretAt(hs[1], true); await fin(); document.execCommand('insertText', false, 'Возврат'); await fin();
+    caretAt(el.querySelectorAll('.ted-columns__col > p')[0], true); await fin();
+    document.execCommand('insertText', false, 'От одного до трёх рабочих дней, курьером или в пункт выдачи.'); await fin();
+    ed.columns.addBtn.click(); await fin();
+    expect(el.querySelectorAll('.ted-columns__col').length === 3, 'колонка добавлена');
+    expect(/<div class="ted-columns ted-columns--3">/.test(ed.getInnerHTML()), 'на сайте — колонки');
+    var t = tail(); caretAt(t); await fin();
+    return el.querySelectorAll('.ted-columns__col').length + ' колонки';
+  });
+  await scenario('Кнопка', async function () {
+    await insert('button');
+    var all = E.querySelectorAll('div.ted-button'); var el = all[all.length - 1];
+    expect(ed.popover.isOpen, 'окно «Настройки кнопки» открыто');
+    var pop = document.querySelectorAll('.ted-ui-pop--link'); pop = pop[pop.length - 1];
+    var inp = pop.querySelectorAll('input.ted-ui-input'); inp[0].value = 'Перейти в каталог товаров'; inp[1].value = '/catalog';
+    var tg = Array.from(pop.querySelectorAll('.ted-ui-toggle')).find(function (l) { return /Вторая кнопка/.test(l.textContent); }); tg.querySelector('input').click();
+    pop.querySelector('.ted-ui-action--primary').click(); await fin();
+    expect(el.querySelectorAll(':scope > a').length === 2, 'две кнопки');
+    expect(/<div class="ted-button"><a class="ted-button__btn" href="\/catalog"/.test(ed.getInnerHTML()), 'на сайте — кнопка-ссылка');
+    var t = tail(); caretAt(t); await fin();
+    return el.querySelectorAll(':scope > a').length + ' кнопки';
+  });
+  await scenario('iFrame', async function () {
+    await insert('iframe');
+    var all = E.querySelectorAll('figure.ted-iframe'); var fig = all[all.length - 1];
+    var input = fig.querySelector('.ted-ui-media__url');
+    expect(input && document.activeElement === input, 'курсор в поле адреса');
+    input.value = '<iframe src="https://example.com/widget" height="360"></iframe>';
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })); await fin();
+    all = E.querySelectorAll('figure.ted-iframe'); fig = all[all.length - 1];
+    expect(fig.querySelector('iframe[height="360"]'), 'фрейм с высотой');
+    expect(/<figure class="ted-iframe"><iframe src="https:\/\/example.com\/widget" height="360"/.test(ed.getInnerHTML()), 'на сайте — фрейм');
+    var t = tail(); caretAt(t); await fin();
+    return Math.round(fig.getBoundingClientRect().height) + ' px';
+  });
+  await scenario('Встраивание', async function () {
+    // карточку по ссылке даёт сервер CMS; в обходе — подставной провайдер (без сети)
+    ed.options.opengraph = function (url) { return Promise.resolve({ url: url, title: 'Весенняя коллекция уже здесь: первые десять вещей, которые приехали на склад', text: 'Посмотрите первые десять вещей и скажите, какая нравится больше.', site: 'Simflex Shop', image: '/tiles/image-light.webp' }); };
+    await insert('embed');
+    var all = E.querySelectorAll('div.ted-embed'); var el = all[all.length - 1];
+    var input = el.querySelector('.ted-ui-media__url');
+    expect(input && document.activeElement === input, 'курсор в поле ссылки');
+    input.value = 'https://blog.example.com/spring';
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    await sleep(60); await fin();
+    all = E.querySelectorAll('div.ted-embed'); el = all[all.length - 1];
+    expect(el && !el.hasAttribute('data-tedui-empty'), 'карточка вставлена');
+    expect(/<div class="ted-embed"><div class="ted-embed__head">/.test(ed.getInnerHTML()), 'на сайте — карточка');
+    expect(el.getBoundingClientRect().right <= E.getBoundingClientRect().right + 2, 'карточка не шире колонки');
+    var t = tail(); caretAt(t); await fin();
+    return Math.round(el.getBoundingClientRect().height) + ' px';
+  });
+  await scenario('Товар', async function () {
+    await insert('product');
+    var pops = document.querySelectorAll('.ted-ui-pop--link'); var pop = pops[pops.length - 1];
+    expect(ed.popover.isOpen, 'окно «Настройки товара» открыто');
+    var set = function (label, val) { var i = pop.querySelector('input[aria-label="' + label + '"]'); if (i) i.value = val; };
+    var manual = pop.querySelector('.ted-ui-toggle input'); if (manual && !manual.checked) { manual.click(); }
+    set('Название', 'Беспроводные наушники Studio 5 с шумоподавлением'); set('Цена', '12900'); set('Старая цена', '16900'); set('Ссылка', '/catalog/studio-5/');
+    pop.querySelector('.ted-ui-action--primary').click(); await fin();
+    var all = E.querySelectorAll('div.ted-product'); var el = all[all.length - 1];
+    expect(el && !el.hasAttribute('data-tedui-empty'), 'товар заполнен');
+    expect(/<div class="ted-product"><span class="ted-product__img"><\/span>/.test(ed.getInnerHTML()), 'на сайте — товар');
+    expect(el.getBoundingClientRect().right <= E.getBoundingClientRect().right + 2, 'товар не шире колонки');
+    var t = tail(); caretAt(t); await fin();
+    return Math.round(el.getBoundingClientRect().height) + ' px';
+  });
+  await scenario('Содержание', async function () {
+    var h = E.querySelector('h2'); if (h && !h.id) h.id = 'glava-walk';
+    await insert('toc');
+    var all = E.querySelectorAll('.ted-toc'); var toc = all[all.length - 1];
+    caretAt(toc.querySelector('.ted-toc__title'), true); await fin();
+    document.execCommand('insertText', false, 'Содержание статьи'); await fin();
+    var list = toc.querySelector('.ted-toc__list'); list.appendChild(E.ownerDocument.createRange().createContextualFragment('<li contenteditable="false"><a href="#glava-walk">Очень длинное название главы, которое переносится на вторую строку</a></li>')); await fin();
+    expect(/<nav class="ted-toc">/.test(ed.getInnerHTML()), 'на сайте — nav');
+    return list.children.length + ' глава';
+  });
+  await scenario('Старый сырой блок (таблица с объединёнными ячейками) сохраняется', async function () {
+    var host = document.createElement('div'); host.style.display = 'none'; document.body.appendChild(host);
+    var ed2 = Ted.create(host, { toasts: false });
+    ed2.setHTML('<table><tr><td colspan="2">старая</td></tr><tr><td>таблица</td><td>слита</td></tr></table>', { silent: true });   // простая таблица теперь — блок «Таблица»
+    var raw = ed2.editable.querySelector('.ted-ui-raw');
+    if (!raw) throw new Error('сырой блок не создан');
+    var t = tail(); t.replaceWith(raw.cloneNode(true)); E.appendChild(emptyP()); await fin();
+    Ted.destroy(ed2); host.remove();
+    return 'сырых блоков: ' + E.querySelectorAll('.ted-ui-raw').length;
+  });
+
+  // =============== ИТОГ ===============
+  var inner1 = ed.getInnerHTML();
+  var hostB = document.createElement('div'); hostB.style.display = 'none'; document.body.appendChild(hostB);
+  var edB = Ted.create(hostB, { toasts: false });
+  edB.setHTML(inner1, { silent: true });
+  if (edB.getInnerHTML() !== inner1) issues.push('Весь документ: повторная загрузка меняет HTML');
+  Ted.destroy(edB); hostB.remove();
+  ed.editable.blur(); getSelection().removeAllRanges(); ed.updateState();
+  window.scrollTo(0, 0);
+  var panel = document.getElementById('walk-panel');
+  var okCount = results.filter(function (r) { return r.ok; }).length;
+  panel.innerHTML = '<b>Обход блоков: ' + okCount + ' из ' + results.length + ' без замечаний <button id="walk-close">×</button></b>' +
+    (issues.length ? issues.map(function (i) { return '<div class="bad">• ' + i.replace(/</g, '&lt;') + '</div>'; }).join('') : '<div class="ok">Замечаний автопроверок нет</div>') +
+    '<hr style="border:0;border-top:1px solid #4d4d4d;margin:6px 0">' +
+    results.map(function (r) { return '<div class="' + (r.ok ? 'ok' : 'bad') + '">' + (r.ok ? '✓ ' : '✗ ') + r.name.replace(/</g, '&lt;') + (r.note ? ' — ' + String(r.note).replace(/</g, '&lt;') : '') + '</div>'; }).join('');
+  document.getElementById('walk-close').onclick = function () { panel.style.display = 'none'; };
+  window.__walk = { results: results, issues: issues };
+  document.title = 'Ted — обход: ' + okCount + '/' + results.length;
+})();
+</script>
+</body>
+</html>
