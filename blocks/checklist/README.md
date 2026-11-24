@@ -2,7 +2,7 @@
 
 Список с чек-боксами по макету `block-checklist` (check-box size=s): пункт 32, чек-бокс 24 (значок 20), зазор 8.
 
-<!-- block.json:begin — собрано из block.json при сборке (tools/build.ps1, build.php), не правьте вручную -->
+<!-- block.json:begin — собрано из block.json при сборке (bin/build.php, build.php), не правьте вручную -->
 | Поле | Значение |
 |---|---|
 | Вид | `checklist` |

@@ -20,20 +20,23 @@ texted — блочный редактор статей: `textarea` → блок
 | `resources/fonts/`, `tiles/`, `icons/` | шрифты, картинки меню блоков, значки медиа (сборка копирует их в `dist/`) |
 | `resources/uf.htaccess` | правила папки файлов (Apache) |
 | `src/` | сервер, namespace `Simflex\Texted\` (PSR-4, composer): `Config`, `Sanitizer`, `Presets`, `Blocks`, `MediaStorage`, `OpenGraph`, `RateLimit`, `ServerBlock`, `Exception\AccessDenied` |
-| `bin/` | `check.php` — проверка установки |
-| `tools/` | сборка (PowerShell и PHP дают одинаковый результат), тесты, демо |
+| `bin/` | инструменты на PHP: сборка, тесты, демо (`demo/`), снимки, проверка установки (`check.php`) |
 | `tests/` | автотесты по наборам: `tests/run.html`; PHP — `tests/php/` (классы — `tests/php/bootstrap.php`: composer или та же раскладка без него) |
 | `docs/` | документация |
 | `dist/` | сборка, самодостаточная: `ted.js`, `ted.css`, `ted.vw.css`, `content.js`, `fonts/`, `tiles/`, `icons/` — сайт и CMS публикуют только её; хранится в git |
 
 ## 3. Команды
 
-```powershell
-pwsh -File tools/build.ps1          # сборка dist/ (или: php tools/build.php)
-pwsh -File tools/test.ps1           # сборка + все наборы автотестов + PHP-проверки
-pwsh -File tools/test.ps1 -Full     # + равенство сборок, серверная очистка, загрузка
-pwsh -File tools/demo.ps1           # демо с PHP-сервером: examples/admin.html
-php bin/check.php                   # проверка установки: PHP, расширения, папка файлов, ffmpeg, настройки
+Инструменты — PHP-скрипты в `bin/`, одинаково на Windows, Linux и macOS; для тестов нужен Chrome, Chromium или Edge.
+
+```bash
+php bin/build.php                 # сборка dist/
+php bin/test.php                  # сборка + все наборы автотестов (браузер без окна) + PHP-проверки
+php bin/test.php --full           # + dist/ в git = сборка из исходников, загрузка файлов на демо-сервере
+php bin/test.php --suite=blocks   # один набор; --only="слово" — только тесты с этим словом
+php bin/demo.php                  # демо с PHP-сервером: examples/admin.html
+php bin/snapshot.php css a.txt    # снимок стилей до/после правки CSS (layout — расположение содержимого)
+php bin/check.php                 # проверка установки: PHP, расширения, папка файлов, ffmpeg, настройки
 ```
 
 ## 4. Как добавить блок
@@ -42,7 +45,7 @@ php bin/check.php                   # проверка установки: PHP, 
 2. `<тип>.js`: `registerBlock({ match, create, clean, serialize, fromJson, toMarkdown, … })` — поля описаны в `resources/js/core/registry.js`.
 3. Стили: `<тип>.site.css` (вид на сайте — только внутри `.ted-content`, только переменные), `<тип>.editor.css` (правка).
 4. Поведение на сайте — `<тип>.site.js` через `siteBlock(fn)`; на сервере, если нужно, — класс `Simflex\Texted\Blocks\<Тип>` (`ServerBlock`) в `blocks/<тип>/<Тип>.php`.
-5. Тест `<тип>.test.js`; блок — в `tools/build.json → blocks`; README блока собирается сборкой.
+5. Тест `<тип>.test.js`; блок — в `bin/build.json → blocks`; README блока собирается сборкой.
 6. Каждый новый тег, атрибут, схема адреса — вектор в `tests/security-vectors.json`.
 
 ## 5. Неизменные правила
@@ -65,7 +68,7 @@ CMS даёт редактору: поле `textarea`, адрес загрузк�
 
 ## 8. Готово, когда
 
-Сборка; `tools/test.ps1` и `tools/test.ps1 -Full` без замечаний; проверка в браузере на 320 / 414 / 768 / 1000 / 3840 px в светлой и тёмной теме — в редакторе, на сайте (`examples/site.html`) и в режиме просмотра.
+Сборка; `bin/test.php` и `bin/test.php --full` без замечаний; проверка в браузере на 320 / 414 / 768 / 1000 / 3840 px в светлой и тёмной теме — в редакторе, на сайте (`examples/site.html`) и в режиме просмотра.
 
 ## 9. Чего не делать
 

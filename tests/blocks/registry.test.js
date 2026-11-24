@@ -5,7 +5,7 @@ import { registerBlock, registeredBlocks } from '../../resources/js/core/registr
 import { menuGroups } from '../../resources/js/core/blocks.js';
 import { isBlockTag } from '../../resources/js/core/sanitize.js';
 
-const BUILD = await (await fetch(new URL('../../tools/build.json', import.meta.url), { cache: 'no-store' })).json();
+const BUILD = await (await fetch(new URL('../../bin/build.json', import.meta.url), { cache: 'no-store' })).json();
 const FIELDS = ['type', 'title', 'aliases', 'figma', 'menu', 'object', 'outline', 'handleAt', 'selector', 'markdown', 'hotkey', 'html', 'degrade', 'text', 'style', 'placeholder', 'variants', 'jsonType', 'classes', 'compound', 'inContainers', 'core', 'toolbar', 'neverEmpty', 'caretBelow', 'frames', 'ids', 'wrap', 'insertMenu', 'lineAfter', 'container', 'linePlaceholder', 'noBold', 'narrow', 'inNarrow', 'jsonExample'];
 
 /** Виды блоков папки: у семейства (заголовки, списки) — variants, иначе — type. */
@@ -29,7 +29,7 @@ async function coreSources() {
 }
 
 group('Реестр блоков', () => {
-  test('блоки из tools/build.json зарегистрированы, у каждого папка с block.json, тип = имя папки', async () => {
+  test('блоки из bin/build.json зарегистрированы, у каждого папка с block.json, тип = имя папки', async () => {
     const types = registeredBlocks().map((d) => d.type);
     const expected = [];
     for (const b of BUILD.blocks) expected.push(...await folderTypes(b));

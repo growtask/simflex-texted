@@ -14,6 +14,11 @@
   `tiles/`, `icons/` — стили ссылаются на них относительно (`fonts/…`, а не `../fonts/…`). Сайту и CMS достаточно
   опубликовать одну папку `dist/`. Исходники фронтенда — в `resources/`: `js/` (было `src/`), `css/` (было
   `styles/`), `lang/`, `fonts/`, `tiles/`, `icons/`.
+- Инструменты разработки — PHP-скрипты в `bin/`, одинаково на Windows, Linux и macOS: `bin/build.php` (одна сборка
+  вместо двух), `bin/test.php` (свой `php -S`, Chrome / Chromium / Edge без окна; `--full`, `--suite`, `--only`),
+  `bin/demo.php`, `bin/snapshot.php`, `bin/make-preset-vectors.php`. Скрипты PowerShell (`tools/*.ps1`) и папка
+  `tools/` удалены; тест загрузки файлов — `tests/php/test-upload.php`; `--full` сверяет `dist/` в git со сборкой.
+  Отключённые 19.11 старые наборы (`tests/index.html`, `tests/dist.html`, `tests/walkthrough-all.html`) удалены.
 
 ### Переход
 

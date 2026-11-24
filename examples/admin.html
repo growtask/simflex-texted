@@ -84,7 +84,7 @@
     search: async (q) => DEMO_ARTICLE_LIST.filter((a) => a.title.toLowerCase().includes(q.toLowerCase())),
     get: async (id) => DEMO_ARTICLE_LIST.find((a) => a.id === id),
   };
-  // Файловый менеджер SimflexCMS (демо запущено с пакетом simflex-file-manager, tools/fm-demo.php): окна и модуль
+  // Файловый менеджер SimflexCMS (демо запущено с пакетом simflex-file-manager, bin/demo/fm-demo.php): окна и модуль
   // подключаются один раз; в CMS их выводит шаблон админки. Тема окон следует теме демо.
   let fileManagerReady = null;
   function loadFileManager() {
@@ -150,8 +150,8 @@
   document.getElementById('save-top').onclick = () => window.editor.save();
   document.getElementById('form').addEventListener('submit', () => window.editor.save());
 
-  // Загрузка работает только при запуске через tools/demo.ps1 (PHP-сервер): если сервер демо найден, включаем её сами
-  const noServer = () => document.getElementById('status').textContent = 'Загрузка файлов выключена: запустите  pwsh -File ted/tools/demo.ps1';
+  // Загрузка работает только при запуске через bin/demo.php (PHP-сервер): если сервер демо найден, включаем её сами
+  const noServer = () => document.getElementById('status').textContent = 'Загрузка файлов выключена: запустите  php bin/demo.php';
   if (location.protocol === 'file:') { noServer(); start(); }
   // сервер демо найден, если он отдал свои настройки (config.js выше) — без пробного запроса, который давал красный 403 в консоли (проверка 22.11)
   else { directDemo = !!window.TED_SERVER; if (!directDemo) noServer(); start(); }

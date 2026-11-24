@@ -16,7 +16,7 @@ import { markdownToHtml, htmlToMarkdown } from './core/markdown.js';
 import { registerBlock } from './core/registry.js';
 import { addLang, setLang, getLang } from './core/i18n.js';
 import '../lang/en.js';
-// блоки из папок (этап 5): в исходниках подключаются здесь, сборка берёт их по списку tools/build.json → blocks
+// блоки из папок (этап 5): в исходниках подключаются здесь, сборка берёт их по списку bin/build.json → blocks
 import '../../blocks/hr/hr.js';
 import '../../blocks/p/p.js';
 import '../../blocks/heading/heading.js';

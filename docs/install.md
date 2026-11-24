@@ -64,7 +64,7 @@ $ted->createStorage()->respondToUpload($pagePath);    // маршрут загр
 <?= $page['content'] ?>   <!-- уже обёрнут в <div class="ted-content"> -->
 ```
 
-Чтобы работали аудиоплеер (тот же, что в редакторе, по макету Media/audio) и запуск видео с площадок по клику, добавьте `<script src="/texted/content.js" defer></script>`. Этот файл **собирается** (`tools/build.ps1` или `php tools/build.php`) из `resources/js/core/audio-player.js` и `resources/js/site/content.js`; вручную его не правьте. Без него на сайте остаётся родной `<audio controls>`.
+Чтобы работали аудиоплеер (тот же, что в редакторе, по макету Media/audio) и запуск видео с площадок по клику, добавьте `<script src="/texted/content.js" defer></script>`. Этот файл **собирается** (`bin/build.php` или `php bin/build.php`) из `resources/js/core/audio-player.js` и `resources/js/site/content.js`; вручную его не правьте. Без него на сайте остаётся родной `<audio controls>`.
 
 Посмотреть всё в работе: откройте двойным кликом `examples/index.html` (демо работают прямо с диска, сервер не нужен).
 

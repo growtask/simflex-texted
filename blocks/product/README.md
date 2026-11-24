@@ -2,7 +2,7 @@
 
 Карточка товара из каталога CMS (опция `products`: search / get) или заполненная вручную; «В корзину» или «Перейти». Макет `block-product (Action/product)`, окно `editor-popover kind=product`. Блок целиком в этой папке: ядро его не упоминает (тест набора `blocks`).
 
-<!-- block.json:begin — собрано из block.json при сборке (tools/build.ps1, build.php), не правьте вручную -->
+<!-- block.json:begin — собрано из block.json при сборке (bin/build.php, build.php), не правьте вручную -->
 | Поле | Значение |
 |---|---|
 | Вид | `product` |

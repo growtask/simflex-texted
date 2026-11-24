@@ -1,6 +1,6 @@
 // Ритм содержимого (этап 0): отступы между блоками — одно правило снаружи блоков, значения — как в макете.
 // Окно тестов ≥ 812, поэтому здесь десктопные значения; узкие экраны — снимок расположения в полном прогоне
-// (tools/layout-snapshot.ps1 против tests/rhythm/layout-baseline.txt).
+// (bin/snapshot.php layout против tests/rhythm/layout-baseline.txt).
 import { group, test, eq } from '../harness.js';
 import { make, sandbox } from '../helpers.js';
 

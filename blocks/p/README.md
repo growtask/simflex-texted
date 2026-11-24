@@ -2,7 +2,7 @@
 
 Абзац текста (макет `block-body`, Text/body type main): шрифт и размер текста страницы, цвет text-icon/gray/dark.
 
-<!-- block.json:begin — собрано из block.json при сборке (tools/build.ps1, build.php), не правьте вручную -->
+<!-- block.json:begin — собрано из block.json при сборке (bin/build.php, build.php), не правьте вручную -->
 | Поле | Значение |
 |---|---|
 | Вид | `p` |

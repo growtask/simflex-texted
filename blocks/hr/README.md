@@ -2,7 +2,7 @@
 
 Горизонтальная линия между частями текста (макет `block-line`, компонент библиотеки Layout/line): 2 px, цвет main/gray/lighter, скругление.
 
-<!-- block.json:begin — собрано из block.json при сборке (tools/build.ps1, build.php), не правьте вручную -->
+<!-- block.json:begin — собрано из block.json при сборке (bin/build.php, build.php), не правьте вручную -->
 | Поле | Значение |
 |---|---|
 | Вид | `hr`, другие имена: `separator` |

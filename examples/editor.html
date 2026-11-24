@@ -39,7 +39,7 @@
     theme: params.has('dark') ? 'dark' : 'light',
     contentCss: ['site-theme.css'],
     startWithHeading: true,
-    // загрузка через демо-сервер (tools/demo.ps1): файлы и картинки по ссылке сжимаются, как в админке
+    // загрузка через демо-сервер (bin/demo.php): файлы и картинки по ссылке сжимаются, как в админке
     mediaPageUrl: '/company/',
     upload: location.protocol !== 'file:' ? Ted.createUpload('/ted-demo-media/upload', { headers: { 'X-Ted-Demo': 'media' } }) : null,
     // «Встраивание»: карточку по ссылке читает демо-сервер (src/OpenGraph.php), статьи CMS — демо-список из sample.js

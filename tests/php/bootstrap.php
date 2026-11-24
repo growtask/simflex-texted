@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Подключение классов texted для тестов и инструментов разработки (bin/, tools/).
+ * Подключение классов texted для тестов и инструментов разработки (bin/).
  *
  * После `composer install` в клоне пакета — автозагрузка composer. Без неё (клон без vendor/, у автора нет composer) —
  * та же раскладка вручную: Simflex\Texted\… → src/ (PSR-4), Simflex\Texted\Blocks\<Тип> → blocks/<тип>/<Тип>.php

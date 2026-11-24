@@ -2,7 +2,7 @@
 
 Списки текста (Text/body, type list / list-numb): отступ слева, маркеры по уровню вложенности, цвет маркера, зазор между пунктами.
 
-<!-- block.json:begin — собрано из block.json при сборке (tools/build.ps1, build.php), не правьте вручную -->
+<!-- block.json:begin — собрано из block.json при сборке (bin/build.php, build.php), не правьте вручную -->
 | Поле | Значение |
 |---|---|
 | Вид | `ol`, `ul` |

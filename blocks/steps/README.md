@@ -2,7 +2,7 @@
 
 Инструкция по шагам (макет `block-steps`): номер 40 × 40 r12, линия 2, заголовок 16 / 700, описание 13 / 1.5.
 
-<!-- block.json:begin — собрано из block.json при сборке (tools/build.ps1, build.php), не правьте вручную -->
+<!-- block.json:begin — собрано из block.json при сборке (bin/build.php, build.php), не правьте вручную -->
 | Поле | Значение |
 |---|---|
 | Вид | `steps` |

@@ -2,7 +2,7 @@
 
 Заметка на плашке (макет `block-callout`): плашка r16 цвета main/gray/lighter (тёмная — main/gray/darker), значок «информация» 24, заголовок 16 / 700, текст 13 / 1.5. «Цветной фон» перекрашивает плашку.
 
-<!-- block.json:begin — собрано из block.json при сборке (tools/build.ps1, build.php), не правьте вручную -->
+<!-- block.json:begin — собрано из block.json при сборке (bin/build.php, build.php), не правьте вручную -->
 | Поле | Значение |
 |---|---|
 | Вид | `callout` |

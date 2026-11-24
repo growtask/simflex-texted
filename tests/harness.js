@@ -41,7 +41,7 @@ export const wait = (ms = 0) => new Promise((r) => setTimeout(r, ms));
 export const vis = (s) => String(s).replace(/ /g, '·');
 
 // Быстрый режим: проверки раскладки по матрице «ширина × тема» идут только для 1000 px, light.
-// Остальные 7 сочетаний (860, 768, 414 и тёмная тема) — в полном прогоне (tools/test.ps1 -Full).
+// Остальные 7 сочетаний (860, 768, 414 и тёмная тема) — в полном прогоне (bin/test.php --full).
 export const MATRIX_SKIP = /(?:860|768|414) px, (?:light|dark)|1000 px, dark/;
 
 export async function run(report, only = null, { fast = false } = {}) {

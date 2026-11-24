@@ -26,13 +26,13 @@ $ok = static function (bool $cond, string $name) use (&$fails, &$count): void {
     }
 };
 
-$build = json_decode((string) file_get_contents(dirname(__DIR__, 2) . '/tools/build.json'), true);
+$build = json_decode((string) file_get_contents(dirname(__DIR__, 2) . '/bin/build.json'), true);
 $all = Blocks::all();
 $names = $build['blocks'];
 sort($names);
 $folders = array_map(static fn($f) => basename(dirname($f)), glob(dirname(__DIR__, 2) . '/blocks/*/block.json') ?: []);
 sort($folders);
-$ok($folders === $names, 'папки blocks/ = список tools/build.json → blocks: ' . implode(', ', $folders));
+$ok($folders === $names, 'папки blocks/ = список bin/build.json → blocks: ' . implode(', ', $folders));
 foreach ($all as $type => $def) {
     $ok(is_array($def['html']), "$type: html — белый список");
     $ok(!isset($def['degrade']) || in_array($def['degrade'], ['drop', 'children'], true), "$type: degrade — drop, children или нет");
