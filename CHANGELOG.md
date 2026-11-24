@@ -19,6 +19,9 @@
   `bin/demo.php`, `bin/snapshot.php`, `bin/make-preset-vectors.php`. Скрипты PowerShell (`tools/*.ps1`) и папка
   `tools/` удалены; тест загрузки файлов — `tests/php/test-upload.php`; `--full` сверяет `dist/` в git со сборкой.
   Отключённые 19.11 старые наборы (`tests/index.html`, `tests/dist.html`, `tests/walkthrough-all.html`) удалены.
+- Правила разработки — в пакете: `AGENTS.md` (структура, команды `bin/`, правила PHP Simflex, Figma 1 в 1,
+  безопасность, самопроверка, git), `docs/dev/PRINCIPLES.md` и `docs/dev/LAYOUT.md`. Планы, журналы и отчёты автора —
+  в репозитории `simflex-agents` (`plans/texted/`).
 
 ### Переход
 
