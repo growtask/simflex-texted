@@ -19,9 +19,9 @@ if (-not $FileManager) { $FileManager = Join-Path ([Environment]::GetFolderPath(
 if (Test-Path (Join-Path $FileManager 'src/FileManager/Manager.php')) { $env:TED_DEMO_FILE_MANAGER = (Resolve-Path $FileManager).Path; Write-Host "Файловый менеджер: $env:TED_DEMO_FILE_MANAGER`n" }
 else { $env:TED_DEMO_FILE_MANAGER = ''; Write-Host "Файловый менеджер не найден (-FileManager <папка simflex-file-manager>) — «Из библиотеки» в демо нет`n" }
 Write-Host "Проверка сервера:`n"
-& $php @flags (Join-Path $ted 'php/check.php')
+& $php @flags (Join-Path $ted 'bin/check.php')
 $url = "http://127.0.0.1:$Port/examples/admin.html?media=direct"
-Write-Host "`nДемо: $url   (Ctrl+C — остановить; проверка в браузере: http://127.0.0.1:$Port/php/check.php)"
+Write-Host "`nДемо: $url   (Ctrl+C — остановить; проверка в браузере: http://127.0.0.1:$Port/bin/check.php)"
 # Браузер открываем, когда сервер уже отвечает (иначе «Страница недоступна»)
 if (-not $NoOpen) {
   $wait = "for(`$i=0;`$i -lt 60;`$i++){ try{ `$c=New-Object Net.Sockets.TcpClient; `$c.Connect('127.0.0.1',$Port); `$c.Close(); break }catch{ Start-Sleep -Milliseconds 250 } }; Start-Process '$url'"

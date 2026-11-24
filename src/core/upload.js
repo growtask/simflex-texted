@@ -158,7 +158,7 @@ export async function chooseMedia(editor, kind, { multiple = false, source = nul
   return { source: 'direct', assets };
 }
 
-/** Карточка ссылки для блока «Встраивание»: страницу читает сервер CMS (php/opengraph.php), ответ — { url, title, text, image, site }. */
+/** Карточка ссылки для блока «Встраивание»: страницу читает сервер CMS (src/OpenGraph.php), ответ — { url, title, text, image, site }. */
 export function createOpenGraph(endpoint, { headers = {} } = {}) {
   return async (url) => {
     const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify({ url }) });

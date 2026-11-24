@@ -1,5 +1,5 @@
 // Этап 3 (MODULAR_PLAN.md): безопасность в браузере. Принцип — в редакторе и на сайте не выполняется ничей код из содержимого.
-// Сервер проверяют php/test-sanitize.php (те же векторы и адреса), php/test-security.php, php/test-opengraph.php.
+// Сервер проверяют tests/php/test-sanitize.php (те же векторы и адреса), tests/php/test-security.php, tests/php/test-opengraph.php.
 import { group, test, eq, ok, wait } from '../harness.js';
 import { make, Ted } from '../helpers.js';
 import { urlOk } from '../../src/core/urls.js';

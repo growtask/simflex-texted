@@ -32,7 +32,7 @@
 | `![описание](https://…)` | изображение |
 | `---` | линия |
 
-HTML внутри Markdown не выполняется: всё проходит обычную очистку (`Ted.clean` / `TedSanitizer::clean`).
+HTML внутри Markdown не выполняется: всё проходит обычную очистку (`Ted.clean` / `Sanitizer::clean`).
 
 ## JSON
 

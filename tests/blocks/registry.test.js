@@ -75,7 +75,7 @@ group('Реестр блоков', () => {
       for (const [file, code] of await coreSources()) {
         for (const line of code.split('\n')) {
           if (/basic:\s*\[/.test(line)) continue;   // прежний набор опции blocks называет виды по имени
-          // вид адреса (urlOk(…, 'image'), URL_KINDS — src/core/urls.js = TedSanitizer::urlOk) и вид файла службы загрузки
+          // вид адреса (urlOk(…, 'image'), URL_KINDS — src/core/urls.js = Sanitizer::urlOk) и вид файла службы загрузки
           // (лимиты сервера, поле kind запроса — src/core/server.js, upload.js): слова те же, но это не блоки
           if (/urlOk\(|URL_KINDS|kind === 'image' && IMAGE_DATA|body\.append\('kind'|const KINDS = \[/.test(line)) continue;
           if (re.test(line)) bad.push(`${file}: ${line.trim().slice(0, 100)}`);

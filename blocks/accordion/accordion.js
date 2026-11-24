@@ -1,5 +1,5 @@
 // Блок «Аккордеон» — полностью в папке (этап 5). Контейнер: ответы — «хосты» обычных блоков (общий код — src/core/containers.js).
-// На сайте — <details>/<summary> с разметкой FAQ schema.org; её атрибуты и значения — в общем белом списке (allowlist.js = TedSanitizer).
+// На сайте — <details>/<summary> с разметкой FAQ schema.org; её атрибуты и значения — в общем белом списке (allowlist.js = Sanitizer).
 import ACCORDION_BLOCK from './block.json' with { type: 'json' };
 import { registerBlock } from '../../src/core/registry.js';
 import { HOST_CLASS, stripInHost } from '../../src/core/containers.js';

@@ -1,5 +1,5 @@
 // Этап 2 (MODULAR_PLAN.md): наборы (пресеты) и право на правку.
-// Сервер (php/presets.php, TedConfig::save) проверяет php/test-presets.php — на тех же примерах tests/presets/vectors.json.
+// Сервер (src/Presets.php, Config::save) проверяет tests/php/test-presets.php — на тех же примерах tests/presets/vectors.json.
 import { group, test, eq, ok, wait } from '../harness.js';
 import { make, select, blocks, Ted } from '../helpers.js';
 import { PRESETS, presetTypes, checkPreset, definePreset } from '../../src/core/presets.js';
@@ -83,7 +83,7 @@ group('Наборы: что доступно в редакторе', () => {
     t.destroy();
   });
 
-  test('вложенный запрещённый блок (фрейм в абзаце, таблица и вопрос в пункте, видео в абзаце, фон внутри) не сохраняется — как php/test-presets.php', () => {
+  test('вложенный запрещённый блок (фрейм в абзаце, таблица и вопрос в пункте, видео в абзаце, фон внутри) не сохраняется — как tests/php/test-presets.php', () => {
     for (const forged of [
       '<p>x<figure class="ted-iframe"><iframe src="https://evil.example/"></iframe></figure></p>',
       '<div><figure class="ted-iframe"><iframe src="https://evil.example/"></iframe></figure></div>',
@@ -127,7 +127,7 @@ group('Наборы: что доступно в редакторе', () => {
     m.destroy();
   });
 
-  test('Ted.clean(html, { preset }) — как на сервере TedConfig::clean($html, $preset)', () => {
+  test('Ted.clean(html, { preset }) — как на сервере Config::clean($html, $preset)', () => {
     const out = Ted.clean(RICH, { preset: 'text' });
     ok(!/<h2|ted-callout|<video/.test(out) && out.includes('Совет'), out);
     eq(Ted.clean(RICH, { preset: 'full' }), Ted.clean(RICH), 'full — всё разрешено');

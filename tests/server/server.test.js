@@ -1,5 +1,5 @@
-// Этап 1 (MODULAR_PLAN.md): настройки сервера в редакторе — Ted.init({ server: TedConfig::clientJson() }).
-// Сервер (ted.config.php, PHP) проверяет php/test-config.php; здесь — что браузер берёт из настроек и чего не делает.
+// Этап 1 (MODULAR_PLAN.md): настройки сервера в редакторе — Ted.init({ server: Config::getClientJson() }).
+// Сервер (ted.config.php, PHP) проверяет tests/php/test-config.php; здесь — что браузер берёт из настроек и чего не делает.
 import { group, test, eq, ok, wait } from '../harness.js';
 import { make } from '../helpers.js';
 import { serverOptions, formatLimit } from '../../src/core/server.js';

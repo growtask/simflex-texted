@@ -17,9 +17,11 @@ texted — блочный редактор статей: `textarea` → блок
 | `blocks/<тип>/` | блок целиком: `block.json` (описание, общее для браузера и сервера), код, стили сайта и правки, README, тесты |
 | `styles/` | токены интерфейса (`ui/tokens.css`), тема блоков (`theme.default.css`), общие стили |
 | `lang/` | словари интерфейса (`en.js`) |
-| `php/` | сервер: очистка HTML, настройки, наборы, загрузка файлов, карточки по ссылке, проверка установки |
+| `src/*.php` | сервер, namespace `Simflex\Texted\` (PSR-4, composer): `Config`, `Sanitizer`, `Presets`, `Blocks`, `MediaStorage`, `OpenGraph`, `RateLimit`, `ServerBlock`, `Exception\AccessDenied` |
+| `bin/` | `check.php` — проверка установки |
+| `resources/` | `uf.htaccess` — правила папки файлов (Apache) |
 | `tools/` | сборка (PowerShell и PHP дают одинаковый результат), тесты, демо |
-| `tests/` | автотесты по наборам: `tests/run.html` |
+| `tests/` | автотесты по наборам: `tests/run.html`; PHP — `tests/php/` (классы — `tests/php/bootstrap.php`: composer или та же раскладка без него) |
 | `docs/` | документация |
 | `dist/` | собранные `ted.js`, `ted.css` — подключаются на сайт |
 
@@ -30,7 +32,7 @@ pwsh -File tools/build.ps1          # сборка dist/ (или: php tools/buil
 pwsh -File tools/test.ps1           # сборка + все наборы автотестов + PHP-проверки
 pwsh -File tools/test.ps1 -Full     # + равенство сборок, серверная очистка, загрузка
 pwsh -File tools/demo.ps1           # демо с PHP-сервером: examples/admin.html
-php php/check.php                   # проверка установки: PHP, расширения, папка файлов, ffmpeg, настройки
+php bin/check.php                   # проверка установки: PHP, расширения, папка файлов, ffmpeg, настройки
 ```
 
 ## 4. Как добавить блок
@@ -38,14 +40,14 @@ php php/check.php                   # проверка установки: PHP, 
 1. Папка `blocks/<тип>/`, `block.json`: `type`, `title`, `menu`, `selector`, `html` (теги и атрибуты для белого списка), `degrade` (во что превращается в наборе без него), `jsonExample`.
 2. `<тип>.js`: `registerBlock({ match, create, clean, serialize, fromJson, toMarkdown, … })` — поля описаны в `src/core/registry.js`.
 3. Стили: `<тип>.site.css` (вид на сайте — только внутри `.ted-content`, только переменные), `<тип>.editor.css` (правка).
-4. Поведение на сайте — `<тип>.site.js` через `siteBlock(fn)`; на сервере, если нужно, — `<тип>.php`.
+4. Поведение на сайте — `<тип>.site.js` через `siteBlock(fn)`; на сервере, если нужно, — класс `Simflex\Texted\Blocks\<Тип>` (`ServerBlock`) в `blocks/<тип>/<Тип>.php`.
 5. Тест `<тип>.test.js`; блок — в `tools/build.json → blocks`; README блока собирается сборкой.
 6. Каждый новый тег, атрибут, схема адреса — вектор в `tests/security-vectors.json`.
 
 ## 5. Неизменные правила
 
-- Код из содержимого статьи никогда не выполняется. Клиентской очистке не доверяем: HTML перед сохранением и выводом всегда очищает сервер (`TedSanitizer::clean`).
-- Белые списки — только из `block.json`; JS (`src/core/allowlist.js`) и PHP одинаковы, тесты это сверяют. Адреса — только через `urlOk` (`src/core/urls.js` = `TedSanitizer::urlOk`).
+- Код из содержимого статьи никогда не выполняется. Клиентской очистке не доверяем: HTML перед сохранением и выводом всегда очищает сервер (`Sanitizer::clean`).
+- Белые списки — только из `block.json`; JS (`src/core/allowlist.js`) и PHP одинаковы, тесты это сверяют. Адреса — только через `urlOk` (`src/core/urls.js` = `Sanitizer::urlOk`).
 - Ядро не упоминает конкретные блоки (тест следит): всё, что нужно блоку, — в его папке и `block.json`.
 - Рамки, ручки, кнопки блоков — только слой взаимодействия (`src/ui/handle.js`); свои кнопки и окна не заводить — общие элементы из `src/ui/widgets.js`.
 - Стили сайта — только внутри блоков и только переменные; прямые цвета — только в `styles/ui/tokens.css` и `styles/theme.default.css`. Цвета и шрифты — токены дизайн-системы.

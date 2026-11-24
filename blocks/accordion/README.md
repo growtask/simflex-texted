@@ -30,7 +30,7 @@
 | `canAlign`, `canBg`, `toolbar` | без выравнивания, фона и стиля текста в вопросе |
 | `inContainers: false` | не вставляется в другие контейнеры |
 
-Общие правила, не упоминания блока: атрибуты и значения разметки FAQ (`itemscope`, `itemprop`, `itemtype` у `details`, `summary`, `div`) — в общем белом списке (`src/core/allowlist.js` = `TedSanitizer`), как остальная разметка HTML; ритм блоков в ответе на сайте (`.ted-accordion__body > *`) — `styles/content.css` для всех «хостов».
+Общие правила, не упоминания блока: атрибуты и значения разметки FAQ (`itemscope`, `itemprop`, `itemtype` у `details`, `summary`, `div`) — в общем белом списке (`src/core/allowlist.js` = `Sanitizer`), как остальная разметка HTML; ритм блоков в ответе на сайте (`.ted-accordion__body > *`) — `styles/content.css` для всех «хостов».
 
 ## Файлы
 

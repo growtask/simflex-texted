@@ -1,13 +1,13 @@
-// Белый список разметки — тот же, что на сервере (php/sanitize.php → TedSanitizer), этап 3 MODULAR_PLAN.md.
+// Белый список разметки — тот же, что на сервере (src/Sanitizer.php → Sanitizer), этап 3 MODULAR_PLAN.md.
 // Им чистится «сырой» HTML старых статей (TinyMCE: таблицы, свои вставки, div со стилями), который редактор
 // показывает нередактируемым блоком: в браузере остаётся ровно то, что оставит сервер.
-// Списки между маркерами сверяет тест php/test-sanitize.php (с константами TedSanitizer). На этапе 5 они будут
+// Списки между маркерами сверяет тест tests/php/test-sanitize.php (с константами Sanitizer). На этапе 5 они будут
 // собираться из block.json блоков.
 
 import { urlOk, srcsetOk } from './urls.js';
 import { registeredBlocks } from './registry.js';
 
-/* allowlist:begin — те же списки, что TedSanitizer::ALLOWED, DROP_WITH_CONTENT, ATTRS в php/sanitize.php */
+/* allowlist:begin — те же списки, что Sanitizer::ALLOWED, DROP_WITH_CONTENT, ATTRS в src/Sanitizer.php */
 export const ALLOWED_TAGS = [
   "div", "ul", "ol", "li", "code", "br",
   "strong", "em", "u", "s", "sub", "sup", "mark", "a", "span",
@@ -40,7 +40,7 @@ export const ALLOWED_ATTRS = {
 };
 export const VIDEO_HOSTS = ["www.youtube.com", "youtube.com", "www.youtube-nocookie.com", "player.vimeo.com", "rutube.ru", "vkvideo.ru", "vk.com"];
 /* allowlist:end */
-// Блоки из реестра (этап 5) приносят свои теги и атрибуты сами — block.json → html; сервер читает те же файлы (php/blocks.php).
+// Блоки из реестра (этап 5) приносят свои теги и атрибуты сами — block.json → html; сервер читает те же файлы (src/Blocks.php).
 
 /** Тег разрешён: список ядра или блок из реестра. */
 export function tagAllowed(tag) {
@@ -131,7 +131,7 @@ function cleanAttributes(el, tag) {
 }
 
 /**
- * Очистить содержимое элемента по белому списку (как TedSanitizer::walk): опасные теги — с содержимым,
+ * Очистить содержимое элемента по белому списку (как Sanitizer::walk): опасные теги — с содержимым,
  * неизвестные — без обёртки (текст остаётся), атрибуты — по списку, адреса — по общему правилу, фреймы — в песочнице.
  */
 export function cleanByAllowlist(parent, frameHosts = null) {

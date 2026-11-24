@@ -1,5 +1,15 @@
 <?php
+
 declare(strict_types=1);
+
+namespace Simflex\Texted;
+
+use DOMComment;
+use DOMDocument;
+use DOMDocumentType;
+use DOMElement;
+use DOMNode;
+use DOMProcessingInstruction;
 
 /**
  * Серверная очистка HTML texted. ОБЯЗАТЕЛЬНА перед сохранением и перед выводом на сайт.
@@ -8,7 +18,7 @@ declare(strict_types=1);
  * может отправить на сервер любой HTML мимо редактора. Единственная защита сайта — очистка на сервере по белому списку.
  *
  *   require 'ted/php/sanitize.php';
- *   $clean = TedSanitizer::clean($_POST['content']);     // сохранять и выводить только $clean
+ *   $clean = Sanitizer::clean($_POST['content']);     // сохранять и выводить только $clean
  *
  * Правила: теги и атрибуты — по белому списку; ссылки только http, https, mailto, tel и относительные; картинки —
  * http, https, относительные и data:image растровые; iframe — только https с доверенных видеохостов и с sandbox
@@ -17,21 +27,19 @@ declare(strict_types=1);
  * Классы — только ted-* (оформление блоков); id — латиница, цифры, дефис.
  * Результат идемпотентен: clean(clean(x)) === clean(x).
  */
-require_once __DIR__ . '/blocks.php';
-
-final class TedSanitizer
+final class Sanitizer
 {
     /** Теги белого списка: ядро + блоки из blocks/<тип>/block.json (этап 5). @return string[] */
     private static function allowedTags(): array
     {
         static $tags = null;
-        return $tags ??= array_values(array_unique(array_merge(self::ALLOWED, TedBlocks::tags())));
+        return $tags ??= array_values(array_unique(array_merge(self::ALLOWED, Blocks::tags())));
     }
 
     /** Атрибуты тега: ядро + блоки. @return string[] */
     private static function allowedAttrs(string $tag): array
     {
-        return array_values(array_unique(array_merge(self::ATTRS[$tag] ?? [], TedBlocks::attrs($tag))));
+        return array_values(array_unique(array_merge(self::ATTRS[$tag] ?? [], Blocks::attrs($tag))));
     }
 
     /** Теги, оставляемые как есть (с очисткой атрибутов). */
@@ -74,7 +82,7 @@ final class TedSanitizer
 
     /**
      * Очистить HTML. $allowHosts — свои хосты для iframe (https), если нужны сверх списка видеохостов.
-     * $frameHosts — сайты для блока «iFrame»: null — любой https (по умолчанию), список — только эти (TedConfig::clean).
+     * $frameHosts — сайты для блока «iFrame»: null — любой https (по умолчанию), список — только эти (Config::clean).
      */
     public static function clean(string $html, array $allowHosts = [], ?array $frameHosts = null): string
     {
@@ -95,7 +103,9 @@ final class TedSanitizer
         while (($start = strpos($html, $open, $pos)) !== false) {
             $out .= substr($html, $pos, $start - $pos);
             $end = strpos($html, $close, $start + strlen($open));
-            if ($end === false) return $out;
+            if ($end === false) {
+                return $out;
+            }
             $pos = $end + strlen($close);
         }
         return $out . substr($html, $pos);
@@ -104,7 +114,9 @@ final class TedSanitizer
     private static function cleanDocument(string $html, array $allowHosts): string
     {
         $html = str_replace("\0", '', $html);
-        if (trim($html) === '') return '';
+        if (trim($html) === '') {
+            return '';
+        }
         $doc = new DOMDocument('1.0', 'UTF-8');
         $previous = libxml_use_internal_errors(true);
         // кодировка задаётся явно, иначе libxml читает кириллицу как Latin-1; комментарии и CDATA вырезаем до разбора
@@ -118,11 +130,15 @@ final class TedSanitizer
         libxml_clear_errors();
         libxml_use_internal_errors($previous);
         $body = $doc->getElementsByTagName('body')->item(0);
-        if (!$body) return '';
+        if (!$body) {
+            return '';
+        }
         $hosts = array_merge(self::IFRAME_HOSTS, array_map('strtolower', $allowHosts));
         self::walk($body, $hosts);
         $out = '';
-        foreach (iterator_to_array($body->childNodes) as $node) $out .= $doc->saveHTML($node);
+        foreach (iterator_to_array($body->childNodes) as $node) {
+            $out .= $doc->saveHTML($node);
+        }
         return trim($out);
     }
 
@@ -133,7 +149,9 @@ final class TedSanitizer
                 $parent->removeChild($node);
                 continue;
             }
-            if (!($node instanceof DOMElement)) continue;
+            if (!($node instanceof DOMElement)) {
+                continue;
+            }
             $tag = strtolower($node->localName);
             if (in_array($tag, self::DROP_WITH_CONTENT, true)) {
                 $parent->removeChild($node);
@@ -142,7 +160,9 @@ final class TedSanitizer
             if (!in_array($tag, self::allowedTags(), true)) {
                 // неизвестный тег: оставляем содержимое без обёртки
                 self::walk($node, $hosts);
-                while ($node->firstChild) $parent->insertBefore($node->firstChild, $node);
+                while ($node->firstChild) {
+                    $parent->insertBefore($node->firstChild, $node);
+                }
                 $parent->removeChild($node);
                 continue;
             }
@@ -168,51 +188,92 @@ final class TedSanitizer
             $value = $attr->value;
             $keep = false;
             if ($name === 'class') {
-                $classes = array_filter(preg_split('/\s+/', trim($value)) ?: [], static fn ($c) => preg_match('/\Ated-[a-z0-9_-]{1,40}\z/', $c) === 1);
-                if ($classes) $el->setAttribute('class', implode(' ', array_unique($classes)));
-                else $el->removeAttribute($attr->name);
+                $classes = array_filter(preg_split('/\s+/', trim($value)) ?: [], static fn($c) => preg_match('/\Ated-[a-z0-9_-]{1,40}\z/', $c) === 1);
+                if ($classes) {
+                    $el->setAttribute('class', implode(' ', array_unique($classes)));
+                } else {
+                    $el->removeAttribute($attr->name);
+                }
                 continue;
             }
             if ($name === 'id') {
-                if (preg_match('/\A[A-Za-z][A-Za-z0-9_-]{0,63}\z/', $value) !== 1) $el->removeAttribute($attr->name);
+                if (preg_match('/\A[A-Za-z][A-Za-z0-9_-]{0,63}\z/', $value) !== 1) {
+                    $el->removeAttribute($attr->name);
+                }
                 continue;
             }
-            if (in_array($name, $allowed, true)) $keep = true;
-            if (!$keep) { $el->removeAttribute($attr->name); continue; }
-            if (in_array($name, self::URL_ATTRS, true) && !self::urlOk($value, self::urlKind($tag, $name, $el))) { $el->removeAttribute($attr->name); continue; }
+            if (in_array($name, $allowed, true)) {
+                $keep = true;
+            }
+            if (!$keep) {
+                $el->removeAttribute($attr->name);
+                continue;
+            }
+            if (in_array($name, self::URL_ATTRS, true) && !self::urlOk($value, self::urlKind($tag, $name, $el))) {
+                $el->removeAttribute($attr->name);
+                continue;
+            }
             if ($name === 'srcset') {
                 foreach (explode(',', $value) as $part) {
                     $url = preg_split('/\s+/', trim($part))[0] ?? '';
-                    if ($url === '' || !self::urlOk($url, 'image')) { $el->removeAttribute($attr->name); break; }
+                    if ($url === '' || !self::urlOk($url, 'image')) {
+                        $el->removeAttribute($attr->name);
+                        break;
+                    }
                 }
             }
-            if ($name === 'target' && !in_array($value, ['_blank', '_self'], true)) $el->removeAttribute($attr->name);
+            if ($name === 'target' && !in_array($value, ['_blank', '_self'], true)) {
+                $el->removeAttribute($attr->name);
+            }
             // block.json → ids (id статьи, товара CMS): латиница, цифры, _ и -, как idAttr в JS
-            if (in_array($name, TedBlocks::ids(), true) && preg_match('/\A[\w-]{1,64}\z/', $value) !== 1) $el->removeAttribute($attr->name);
-            if ($name === 'data-cols' && preg_match('/\A(?:[1-9]|10)\z/', $value) !== 1) $el->removeAttribute($attr->name);
+            if (in_array($name, Blocks::ids(), true) && preg_match('/\A[\w-]{1,64}\z/', $value) !== 1) {
+                $el->removeAttribute($attr->name);
+            }
+            if ($name === 'data-cols' && preg_match('/\A(?:[1-9]|10)\z/', $value) !== 1) {
+                $el->removeAttribute($attr->name);
+            }
             // разметка FAQ аккордеона (schema.org microdata): только известные значения, как serializeAccordion в JS
-            if ($name === 'itemscope' && $value !== '' && $value !== 'itemscope') $el->setAttribute('itemscope', '');
-            if ($name === 'itemprop' && !in_array($value, ['mainEntity', 'name', 'acceptedAnswer', 'text'], true)) $el->removeAttribute($attr->name);
-            if ($name === 'itemtype' && !in_array($value, ['https://schema.org/FAQPage', 'https://schema.org/Question', 'https://schema.org/Answer'], true)) $el->removeAttribute($attr->name);
+            if ($name === 'itemscope' && $value !== '' && $value !== 'itemscope') {
+                $el->setAttribute('itemscope', '');
+            }
+            if ($name === 'itemprop' && !in_array($value, ['mainEntity', 'name', 'acceptedAnswer', 'text'], true)) {
+                $el->removeAttribute($attr->name);
+            }
+            if ($name === 'itemtype' && !in_array($value, ['https://schema.org/FAQPage', 'https://schema.org/Question', 'https://schema.org/Answer'], true)) {
+                $el->removeAttribute($attr->name);
+            }
             // формула ячейки: «=» и только знаки формул, не длиннее 500 — как formulaAllowed в JS
-            if ($name === 'data-formula' && preg_match('/\A=[0-9A-Za-zА-Яа-яЁё$:;,.+\-−–—*\/×÷()%#!\s]{0,499}\z/u', $value) !== 1) $el->removeAttribute($attr->name);
-            if (in_array($name, ['width', 'height', 'colspan', 'rowspan', 'span', 'start', 'value'], true) && preg_match('/\A\d{1,5}%?\z/', $value) !== 1) $el->removeAttribute($attr->name);
+            if ($name === 'data-formula' && preg_match('/\A=[0-9A-Za-zА-Яа-яЁё$:;,.+\-−–—*\/×÷()%#!\s]{0,499}\z/u', $value) !== 1) {
+                $el->removeAttribute($attr->name);
+            }
+            if (in_array($name, ['width', 'height', 'colspan', 'rowspan', 'span', 'start', 'value'], true) && preg_match('/\A\d{1,5}%?\z/', $value) !== 1) {
+                $el->removeAttribute($attr->name);
+            }
         }
         if ($tag === 'a') {
-            if ($el->getAttribute('target') === '_blank') $el->setAttribute('rel', 'noopener noreferrer');
-            elseif ($el->hasAttribute('rel')) $el->removeAttribute('rel');
+            if ($el->getAttribute('target') === '_blank') {
+                $el->setAttribute('rel', 'noopener noreferrer');
+            } elseif ($el->hasAttribute('rel')) {
+                $el->removeAttribute('rel');
+            }
             $video = $el->getAttribute('data-ted-video');
-            if ($video !== '' && !self::trustedIframe($video, self::IFRAME_HOSTS)) $el->removeAttribute('data-ted-video');
+            if ($video !== '' && !self::trustedIframe($video, self::IFRAME_HOSTS)) {
+                $el->removeAttribute('data-ted-video');
+            }
         }
         if ($tag === 'iframe') {
             $inBlock = self::frameBlock($el->parentNode);
             // порядок атрибутов постоянный и как у редактора (serializeIframe): очистка идемпотентна, сохранённое редактором не меняется
             $full = $el->hasAttribute('allowfullscreen');
-            foreach (['loading', 'sandbox', 'referrerpolicy', 'allowfullscreen'] as $fixed) $el->removeAttribute($fixed);
+            foreach (['loading', 'sandbox', 'referrerpolicy', 'allowfullscreen'] as $fixed) {
+                $el->removeAttribute($fixed);
+            }
             $el->setAttribute('loading', 'lazy');
             $el->setAttribute('sandbox', $inBlock ? self::BLOCK_SANDBOX : 'allow-scripts allow-same-origin allow-presentation allow-popups');
             $el->setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-            if ($full) $el->setAttribute('allowfullscreen', '');
+            if ($full) {
+                $el->setAttribute('allowfullscreen', '');
+            }
         }
     }
 
@@ -231,13 +292,25 @@ final class TedSanitizer
     public static function urlOk(string $value, string $kind = 'link'): bool
     {
         $v = self::bareUrl($value);
-        if ($v === '') return false;
+        if ($v === '') {
+            return false;
+        }
         $decoded = self::bareUrl(rawurldecode($v));
-        if ($decoded === '') $decoded = $v;
-        if ($kind === 'image' && preg_match(self::IMAGE_DATA, $v) === 1) return true;
-        if (preg_match(self::DANGER, $v) === 1 || preg_match(self::DANGER, $decoded) === 1) return false;
-        if (preg_match('~\A([a-z][a-z0-9+.-]*):~', $v, $m) !== 1) return true;   // без схемы
-        if ($m[1] === 'http' || $m[1] === 'https') return true;
+        if ($decoded === '') {
+            $decoded = $v;
+        }
+        if ($kind === 'image' && preg_match(self::IMAGE_DATA, $v) === 1) {
+            return true;
+        }
+        if (preg_match(self::DANGER, $v) === 1 || preg_match(self::DANGER, $decoded) === 1) {
+            return false;
+        }
+        if (preg_match('~\A([a-z][a-z0-9+.-]*):~', $v, $m) !== 1) {
+            return true;
+        }   // без схемы
+        if ($m[1] === 'http' || $m[1] === 'https') {
+            return true;
+        }
         return $kind === 'link' && ($m[1] === 'mailto' || $m[1] === 'tel');
     }
 
@@ -246,7 +319,9 @@ final class TedSanitizer
     {
         foreach (explode(',', $value) as $part) {
             $url = preg_split('/\s+/', trim($part))[0] ?? '';
-            if ($url === '' || !self::urlOk($url, 'image')) return false;
+            if ($url === '' || !self::urlOk($url, 'image')) {
+                return false;
+            }
         }
         return true;
     }
@@ -254,7 +329,9 @@ final class TedSanitizer
     private static function bareUrl(string $s): string
     {
         $out = preg_replace(self::HIDDEN, '', $s);
-        if ($out === null) $out = (string) preg_replace('/[\x00-\x20\x7F]/', '', $s);   // не UTF-8: убрать хотя бы управляющие знаки
+        if ($out === null) {
+            $out = (string) preg_replace('/[\x00-\x20\x7F]/', '', $s);
+        }   // не UTF-8: убрать хотя бы управляющие знаки
         return strtolower($out);
     }
     /* urls:end */
@@ -262,8 +339,12 @@ final class TedSanitizer
     /** Вид адреса по тегу и атрибуту: картинка (img, source в picture) — 'image', ссылка — 'link', остальное — 'media'. */
     private static function urlKind(string $tag, string $attr, DOMElement $el): string
     {
-        if ($attr === 'href') return 'link';
-        if ($attr === 'src' && ($tag === 'img' || ($tag === 'source' && $el->parentNode instanceof DOMElement && strtolower($el->parentNode->localName) === 'picture'))) return 'image';
+        if ($attr === 'href') {
+            return 'link';
+        }
+        if ($attr === 'src' && ($tag === 'img' || ($tag === 'source' && $el->parentNode instanceof DOMElement && strtolower($el->parentNode->localName) === 'picture'))) {
+            return 'image';
+        }
         return 'media';
     }
 
@@ -271,15 +352,19 @@ final class TedSanitizer
     /** Элемент блока с фреймом (block.json → frames: true, блок «iFrame»), как isFrameBlock в src/core/allowlist.js. */
     private static function frameBlock(mixed $el): bool
     {
-        if (!$el instanceof DOMElement) return false;
-        $def = TedBlocks::of($el);
+        if (!$el instanceof DOMElement) {
+            return false;
+        }
+        $def = Blocks::of($el);
         return $def !== null && !empty($def['frames']);
     }
 
     private static function httpsFrame(string $value): bool
     {
         $v = trim($value);
-        if ($v === '' || preg_match('/[\s<>"\'`]/', $v)) return false;
+        if ($v === '' || preg_match('/[\s<>"\'`]/', $v)) {
+            return false;
+        }
         $parts = parse_url($v);
         return $parts !== false && ($parts['scheme'] ?? '') === 'https' && ($parts['host'] ?? '') !== '' && !isset($parts['user']) && !isset($parts['pass']) && !isset($parts['port']);
     }
@@ -287,7 +372,9 @@ final class TedSanitizer
     private static function trustedIframe(string $value, array $hosts): bool
     {
         $parts = parse_url(trim($value));
-        if ($parts === false || ($parts['scheme'] ?? '') !== 'https' || isset($parts['user']) || isset($parts['pass']) || isset($parts['port'])) return false;
+        if ($parts === false || ($parts['scheme'] ?? '') !== 'https' || isset($parts['user']) || isset($parts['pass']) || isset($parts['port'])) {
+            return false;
+        }
         return in_array(strtolower($parts['host'] ?? ''), $hosts, true);
     }
 }

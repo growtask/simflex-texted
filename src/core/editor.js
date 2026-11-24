@@ -51,7 +51,7 @@ const DEFAULTS = {
   pickFile: null,         // ({ kind, multiple, pagePath, editor }) => Promise<asset | asset[] | null>
   products: null,         // каталог CMS для «Товара»: { search: async (q) => [{ id, name, sku, price, oldPrice, image, url }], get: async (id) => {...} }
   articles: null,         // статьи CMS для «Встраивания»: { search: async (q) => [{ id, title, url, text, image, site, date, views, likes }], get: async (id) => {...} }
-  server: null,           // настройки с сервера (ted.config.php → TedConfig::clientJson()): { filesUrl, limits, opengraph, iframeHosts } — см. core/server.js
+  server: null,           // настройки с сервера (ted.config.php → Config::getClientJson()): { filesUrl, limits, opengraph, iframeHosts } — см. core/server.js
   opengraph: null,        // карточка по ссылке для «Встраивания»: async (url) => { url, title, text, image, site } — читает сервер CMS (Ted.createOpenGraph('/…'))
   toasts: true,           // показывать тостеры («Ссылка скопирована», «Блок удалён»…)
   previewMode: true,      // false — режима просмотра нет (админка): вместо кнопки режима в панели «Сохранить»

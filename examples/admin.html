@@ -123,7 +123,7 @@
       upload: directDemo ? Ted.createUpload('/ted-demo-media/upload', { headers: demoHeaders }) : null,
       // загрузка с компьютера и библиотека вместе: в зоне загрузки — «Из библиотеки» (файловый менеджер CMS)
       pickFile: library ? pickFromLibrary : null,
-      // «Встраивание»: карточка по ссылке — страницу читает сервер демо (php/opengraph.php); статьи CMS — демо-список
+      // «Встраивание»: карточка по ссылке — страницу читает сервер демо (src/OpenGraph.php); статьи CMS — демо-список
       opengraph: location.protocol !== 'file:' ? Ted.createOpenGraph('/ted-demo-media/og', { headers: demoHeaders }) : null,   // и без ?media=direct: карточку читает демо-сервер
       articles: DEMO_ARTICLES,
       // ?media=manager — демо подключения файлового менеджера CMS: pickFile вызывается кнопкой «Из библиотеки» и должен вернуть адреса файлов

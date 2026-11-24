@@ -53,7 +53,7 @@ editor.setHTML(html);
 ```
 
 Типы: `p h2–h6 ul ol checklist steps callout facts proscons quote code hr image gallery video audio file` (список — `Ted.blockJsonTypes`).
-Для готового HTML — `Ted.clean(html, { blocks })` или на сервере `TedSanitizer::clean`.
+Для готового HTML — `Ted.clean(html, { blocks })` или на сервере `Sanitizer::clean`.
 
 ## Горячие клавиши
 

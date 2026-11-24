@@ -42,7 +42,7 @@
     // загрузка через демо-сервер (tools/demo.ps1): файлы и картинки по ссылке сжимаются, как в админке
     mediaPageUrl: '/company/',
     upload: location.protocol !== 'file:' ? Ted.createUpload('/ted-demo-media/upload', { headers: { 'X-Ted-Demo': 'media' } }) : null,
-    // «Встраивание»: карточку по ссылке читает демо-сервер (php/opengraph.php), статьи CMS — демо-список из sample.js
+    // «Встраивание»: карточку по ссылке читает демо-сервер (src/OpenGraph.php), статьи CMS — демо-список из sample.js
     opengraph: location.protocol !== 'file:' ? Ted.createOpenGraph('/ted-demo-media/og', { headers: { 'X-Ted-Demo': 'media' } }) : null,
     articles: { search: async (q) => (window.DEMO_ARTICLE_LIST || []).filter((a) => a.title.toLowerCase().includes(q.toLowerCase())), get: async (id) => (window.DEMO_ARTICLE_LIST || []).find((a) => a.id === id) },
   })[0];

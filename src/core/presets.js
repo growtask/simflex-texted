@@ -4,13 +4,13 @@
 //   mode   — 'edit' (сразу правка), 'view' (просмотр, «Редактировать» включает правку на той же странице),
 //            'readonly' (только просмотр, правки нет).
 //
-// Набор поля задаёт СЕРВЕР CMS: TedConfig::clientJson($preset, $canEdit) → Ted.init({ server }). Он же очищает
-// сохранённый HTML по набору (php/presets.php) — браузеру в этом не доверяем. Опция preset в браузере — для страниц без PHP.
+// Набор поля задаёт СЕРВЕР CMS: Config::getClientJson($preset, $canEdit) → Ted.init({ server }). Он же очищает
+// сохранённый HTML по набору (src/Presets.php) — браузеру в этом не доверяем. Опция preset в браузере — для страниц без PHP.
 // Свои наборы: ted.config.php → 'presets' (сервер передаёт их в браузер сам) или Ted.definePreset(name, { blocks, mode }).
 
 import { registeredBlocks, blockDef } from './registry.js';
 
-/* presets:begin — тот же список в php/presets.php (TedPresets::BASE), тест php/test-presets.php сравнивает */
+/* presets:begin — тот же список в src/Presets.php (Presets::BASE), тест tests/php/test-presets.php сравнивает */
 export const PRESETS = {
   "full": { "blocks": "all", "mode": "edit" },
   "mini": { "blocks": ["p", "h2", "h3", "h4", "ul", "ol", "blockquote", "image"], "mode": "edit" },
@@ -20,7 +20,7 @@ export const PRESETS = {
 };
 /* presets:end */
 
-/* types:begin — виды блоков для наборов; тот же список в php/presets.php (TedPresets::TYPES) */
+/* types:begin — виды блоков для наборов; тот же список в src/Presets.php (Presets::TYPES) */
 export const PRESET_TYPES = [];
 /* types:end */
 // Список пуст: все виды — из реестра блоков (blocks/<тип>/block.json), этап 5.

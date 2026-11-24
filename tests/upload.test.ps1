@@ -5,7 +5,11 @@ $temp = [IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd([IO.Path]::Dire
 $root = Join-Path $temp ('ted-php-smoke-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $root | Out-Null
 $previousRoot = $env:TED_FILES_DIR
+$previousConfig = $env:TED_CONFIG
 $env:TED_FILES_DIR = (Join-Path $root 'uf')   # папка файлов демо (ted.config.php → files.dir) — во временной папке
+# свои настройки теста (не ted.config.php рядом с пакетом: в клоне репозитория его нет, файлы ушли бы в пакет)
+$env:TED_CONFIG = (Join-Path $root 'ted.config.php')
+[IO.File]::WriteAllText($env:TED_CONFIG, "<?php`nreturn ['files' => ['dir' => getenv('TED_FILES_DIR'), 'url' => '/uf']];`n", [Text.UTF8Encoding]::new($false))
 $server = "http://127.0.0.1:$Port"
 $headers = 'X-Ted-Demo: media'
 $proc = $null
@@ -66,7 +70,7 @@ try {
   try {
     $rangeHead = curl.exe --silent --show-error -o NUL -D - -H 'Range: bytes=10-19' "$server/uf/audio/_range-test.mp3"
     if (-not ($rangeHead -match '206') -or -not ($rangeHead -match 'Content-Range: bytes 10-19/200') -or -not ($rangeHead -match 'Accept-Ranges: bytes')) { throw "Range: $rangeHead" }
-    $outside = curl.exe --silent -o NUL -w '%{http_code}' "$server/uf/../php/upload.php.mp3"
+    $outside = curl.exe --silent -o NUL -w '%{http_code}' "$server/uf/../src/MediaStorage.php.mp3"
     if ($outside -eq '206' -or $outside -eq '200') { throw "Range вне uf/ отдал $outside" }
   } finally { Remove-Item -LiteralPath $rangeFile -Force -ErrorAction SilentlyContinue }
   $doc = (curl.exe --fail-with-body --silent --show-error -c $cookie -b $cookie -H $headers -F ('file=@' + $pdf) -F 'kind=file' "$server/ted-demo-media/upload") | ConvertFrom-Json
@@ -78,7 +82,7 @@ try {
   if ($deleted.removed -ne 1 -or (Test-Path -LiteralPath $docPath)) { throw 'File was not deleted' }
   # Названия: кириллица становится латиницей, одинаковые названия получают номер (doc.pdf, doc-2.pdf, doc-3.pdf)
   $slugTest = Join-Path $root 'slug.php'
-  [IO.File]::WriteAllText($slugTest, ('<?php require ' + "'" + ((Join-Path $ted 'php/upload.php') -replace '\\', '/') + "'" + '; foreach (["Октябрь 2026 — ТЗ.pdf", "ТЗ_для_Гротеска_правки_после_приёмки_05_11.pdf", "Щука, ёж.docx", "con.pdf", "....pdf"] as $n) echo TedMediaStorage::slugify($n), "|";'), [Text.UTF8Encoding]::new($false))
+  [IO.File]::WriteAllText($slugTest, ('<?php require ' + "'" + ((Join-Path $ted 'tests/php/bootstrap.php') -replace '\\', '/') + "'" + '; foreach (["Октябрь 2026 — ТЗ.pdf", "ТЗ_для_Гротеска_правки_после_приёмки_05_11.pdf", "Щука, ёж.docx", "con.pdf", "....pdf"] as $n) echo \Simflex\Texted\MediaStorage::slugify($n), "|";'), [Text.UTF8Encoding]::new($false))
   $slugs = (& $Php $slugTest) -join ''
   if ($slugs -ne 'oktyabr-2026-tz|tz-dlya-groteska-pravki-posle-priyomki-05-11|shchuka-yozh|file-con|file|') { throw "Транслитерация: $slugs" }
   $d1 = (curl.exe --fail-with-body --silent --show-error -c $cookie -b $cookie -H $headers -F ('file=@' + $pdf) -F 'kind=file' "$server/ted-demo-media/upload") | ConvertFrom-Json
@@ -158,6 +162,7 @@ try {
 } finally {
   if ($proc) { Stop-Process -Id $proc.Id -ErrorAction SilentlyContinue }
   $env:TED_FILES_DIR = $previousRoot
+  $env:TED_CONFIG = $previousConfig
   $resolved = (Resolve-Path -LiteralPath $root).ProviderPath
   if ([IO.Path]::GetDirectoryName($resolved) -eq $temp -and [IO.Path]::GetFileName($resolved) -match '^ted-php-smoke-[a-f0-9]{32}$') {
     Remove-Item -LiteralPath $resolved -Recurse -Force

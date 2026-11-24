@@ -5,7 +5,33 @@
 
 ## Не выпущено
 
-- Composer-пакет `simflex/texted` (`composer.json`): классы сервера (`TedConfig`, `TedSanitizer`, `TedMediaStorage` и др.) загружаются автозагрузкой composer. Редактор админки Simflex CMS (`simflex/core`) вместо TinyMCE.
+- Composer-пакет `simflex/texted` (`composer.json`). Редактор админки Simflex CMS (`simflex/core`) вместо TinyMCE.
+- ⚠ Сервер — классы в namespace `Simflex\Texted\` (PSR-4, `src/`), только через автозагрузку composer: файлов `php/*.php`
+  и `require` больше нет. Серверная часть блока — класс `Simflex\Texted\Blocks\<Тип>` в папке блока
+  (`blocks/<тип>/<Тип>.php`, интерфейс `ServerBlock`) вместо массива функций. Проверка сервера — `bin/check.php`,
+  правила папки файлов — `resources/uf.htaccess`, тесты PHP — `tests/php/`.
+
+### Переход
+
+| Было | Стало |
+|---|---|
+| `require 'ted/php/config.php'` и другие `require` | `composer require simflex/texted` (автозагрузка) |
+| `TedConfig`, `TedSanitizer`, `TedPresets`, `TedBlocks` | `Simflex\Texted\Config`, `Sanitizer`, `Presets`, `Blocks` |
+| `TedMediaStorage`, `TedOpenGraph`, `TedRateLimit` | `Simflex\Texted\MediaStorage`, `OpenGraph`, `RateLimit` |
+| `TedAccessDenied` | `Simflex\Texted\Exception\AccessDenied` |
+| `tedRespondToUpload($storage, $pagePath, $isReferenced)` | `$storage->respondToUpload($pagePath, $isReferenced)` |
+| `tedRespondToOpenGraph($enabled)` | `OpenGraph::respondToRequest($isEnabled)` |
+| `Config`: `client()`, `clientJson()` | `getClient()`, `getClientJson()` |
+| `Config`: `filesDir()`, `filesUrl()`, `limit()`, `limits()`, `ffmpeg()` | `getFilesDir()`, `getFilesUrl()`, `getLimit()`, `getLimits()`, `getFfmpeg()` |
+| `Config`: `opengraph()`, `iframeHosts()`, `presets()`, `preset()`, `rate()` | `isOpenGraphEnabled()`, `getIframeHosts()`, `getPresets()`, `getPreset()`, `getRates()` |
+| `Config`: `editable()`, `storage()`, `rateLimit()` | `isEditable()`, `createStorage()`, `createRateLimit()` |
+| `MediaStorage`: `filesDir()`, `filesUrl()` | `getFilesDir()`, `getFilesUrl()` |
+| `OpenGraph`: `allowedUrl()`, `publicIp()`, `pinned()` | `isAllowedUrl()`, `isPublicIp()`, `getPinnedTarget()` |
+| `RateLimit::client()` | `RateLimit::getClientKey()` |
+| `blocks/<тип>/<тип>.php` (`return ['degrade' => fn …]`), `TedBlocks::hook()` | класс `Blocks\<Тип> implements ServerBlock`, `Blocks::getServerBlock()` |
+| `php/check.php`, `php/uf.htaccess` | `bin/check.php`, `resources/uf.htaccess` |
+
+`clean()`, `save()`, `respondToUpload()`, `respondToOpenGraph()`, `load()`, `fromArray()` у `Config` — без изменений.
 
 ## 0.1.0 — 22.11.2026 — первая версия
 

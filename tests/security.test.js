@@ -3,7 +3,7 @@ import { Ted, make } from './helpers.js';
 
 // Набор XSS-векторов (по мотивам OWASP XSS Filter Evasion Cheat Sheet и известных обходов санитайзеров).
 // Каждый вектор прогоняется через Ted.clean, setHTML + getHTML и вставку из буфера; в результате не должно быть ничего исполняемого.
-// Векторы лежат в security-vectors.json — их же использует серверный тест PHP (php/test-sanitize.php).
+// Векторы лежат в security-vectors.json — их же использует серверный тест PHP (tests/php/test-sanitize.php).
 const VECTORS = await (await fetch(new URL('./security-vectors.json', import.meta.url))).json();
 
 const UNSAFE_TAGS = /^(script|style|link|meta|base|template|noscript|object|embed|applet|frame|frameset|form|input|button|textarea|select|option|xmp|listing|plaintext|title|svg|math|foreignobject|animate|set|use)$/i;

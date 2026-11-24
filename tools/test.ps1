@@ -72,21 +72,21 @@ try {
   if (-not $Only -and (-not $Suite -or $Suite -match 'config')) {
     Write-Host 'Набор config (PHP: ted.config.php, папка файлов, удаление только внутри папки):'
     $phpConfig = & (Join-Path $PSScriptRoot 'find-php.ps1')
-    if ($phpConfig) { & $phpConfig (Join-Path (Split-Path -Parent $PSScriptRoot) 'php/test-config.php'); if ($LASTEXITCODE -ne 0) { $good = $false } }
+    if ($phpConfig) { & $phpConfig (Join-Path (Split-Path -Parent $PSScriptRoot) 'tests/php/test-config.php'); if ($LASTEXITCODE -ne 0) { $good = $false } }
     else { Write-Host '  PHP не найден — пропущено' -ForegroundColor Yellow }
   }
   # этап 2: наборы и право на правку на сервере (PHP) — те же примеры, что в наборе presets
   if (-not $Only -and (-not $Suite -or $Suite -match 'presets')) {
     Write-Host 'Набор presets на PHP (очистка по набору, право на правку):'
     $phpPresets = & (Join-Path $PSScriptRoot 'find-php.ps1')
-    if ($phpPresets) { & $phpPresets (Join-Path (Split-Path -Parent $PSScriptRoot) 'php/test-presets.php'); if ($LASTEXITCODE -ne 0) { $good = $false } }
+    if ($phpPresets) { & $phpPresets (Join-Path (Split-Path -Parent $PSScriptRoot) 'tests/php/test-presets.php'); if ($LASTEXITCODE -ne 0) { $good = $false } }
     else { Write-Host '  PHP не найден — пропущено' -ForegroundColor Yellow }
   }
   # этап 5: реестр блоков на сервере (blocks/<тип>/block.json)
   if (-not $Only -and (-not $Suite -or $Suite -match 'blocks')) {
     Write-Host 'Набор blocks на PHP (реестр блоков, block.json):'
     $phpBlocks = & (Join-Path $PSScriptRoot 'find-php.ps1')
-    if ($phpBlocks) { & $phpBlocks (Join-Path (Split-Path -Parent $PSScriptRoot) 'php/test-blocks.php'); if ($LASTEXITCODE -ne 0) { $good = $false } }
+    if ($phpBlocks) { & $phpBlocks (Join-Path (Split-Path -Parent $PSScriptRoot) 'tests/php/test-blocks.php'); if ($LASTEXITCODE -ne 0) { $good = $false } }
     else { Write-Host '  PHP не найден — пропущено' -ForegroundColor Yellow }
   }
   # этап 3: безопасность на сервере (PHP, пара секунд) — в каждом прогоне: очистка (векторы XSS, адреса, белый список
@@ -94,7 +94,7 @@ try {
   if (-not $Only -and (-not $Suite -or $Suite -match 'security')) {
     $phpSec = & (Join-Path $PSScriptRoot 'find-php.ps1')
     if ($phpSec) {
-      foreach ($t in @(@('PHP: серверная очистка HTML (векторы XSS, адреса, белый список):', 'php/test-sanitize.php'), @('PHP: запросы сервера наружу (внутренние адреса, закрепление IP):', 'php/test-opengraph.php'), @('PHP: загрузка и лимит частоты:', 'php/test-security.php'), @('PHP: файловый менеджер в демо (пакет simflex-file-manager, пути, выход из корня):', 'tools/test-fm-demo.php'))) {
+      foreach ($t in @(@('PHP: серверная очистка HTML (векторы XSS, адреса, белый список):', 'tests/php/test-sanitize.php'), @('PHP: запросы сервера наружу (внутренние адреса, закрепление IP):', 'tests/php/test-opengraph.php'), @('PHP: загрузка и лимит частоты:', 'tests/php/test-security.php'), @('PHP: файловый менеджер в демо (пакет simflex-file-manager, пути, выход из корня):', 'tools/test-fm-demo.php'))) {
         Write-Host $t[0]
         & $phpSec (Join-Path (Split-Path -Parent $PSScriptRoot) $t[1]); if ($LASTEXITCODE -ne 0) { $good = $false }
       }

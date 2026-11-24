@@ -37,24 +37,24 @@ composer require simflex/texted
 **3. Очистите HTML на сервере перед сохранением** (это обязательно, см. [Безопасность](#безопасность-прочитайте-обязательно)):
 
 ```php
-$clean = TedSanitizer::clean($_POST['content']);   // класс загружает автозагрузка composer; сохраняйте и выводите только $clean
+$clean = Sanitizer::clean($_POST['content']);   // класс загружает автозагрузка composer; сохраняйте и выводите только $clean
 ```
 
-**Настройки сервера — один файл `ted.config.php`** (необязательно: без него папка файлов — `<корень сайта>/uf`, адрес `/uf`, лимиты по умолчанию). Скопируйте `ted.config.example.php` в свой проект (не в `vendor/`) и передайте путь в `TedConfig::load()` или переменной `TED_CONFIG`; настройки можно задать и массивом — `TedConfig::fromArray()`. В файле: папка файлов на диске и её адрес для браузера (два значения — папка может лежать вне сайта или на CDN), лимиты размеров, ffmpeg, карточки по ссылке вкл./выкл., сайты для блока «iFrame». Ошибка в ключе или значении — понятное сообщение, а не тихое значение по умолчанию.
+**Настройки сервера — один файл `ted.config.php`** (необязательно: без него папка файлов — `<корень сайта>/uf`, адрес `/uf`, лимиты по умолчанию). Скопируйте `ted.config.example.php` в свой проект (не в `vendor/`) и передайте путь в `Config::load()` или переменной `TED_CONFIG`; настройки можно задать и массивом — `Config::fromArray()`. В файле: папка файлов на диске и её адрес для браузера (два значения — папка может лежать вне сайта или на CDN), лимиты размеров, ffmpeg, карточки по ссылке вкл./выкл., сайты для блока «iFrame». Ошибка в ключе или значении — понятное сообщение, а не тихое значение по умолчанию.
 
 ```php
-$ted = TedConfig::load('/var/www/site/ted.config.php');   // путь к настройкам (или переменная TED_CONFIG)
-$clean = $ted->clean($_POST['content']);           // то же, что TedSanitizer::clean, плюс сайты iFrame из настроек
-tedRespondToUpload($ted->storage(), $pagePath);    // маршрут загрузки — после проверки входа и CSRF
+$ted = Config::load('/var/www/site/ted.config.php');   // путь к настройкам (или переменная TED_CONFIG)
+$clean = $ted->clean($_POST['content']);           // то же, что Sanitizer::clean, плюс сайты iFrame из настроек
+$ted->createStorage()->respondToUpload($pagePath);    // маршрут загрузки — после проверки входа и CSRF
 ```
 
 Браузеру нужна только часть настроек — передайте её в `Ted.init`; путь на диске, ffmpeg и ключи в неё не входят:
 
 ```html
-<script>Ted.init({ selector: 'textarea[name=content]', server: <?= $ted->clientJson() ?> });</script>
+<script>Ted.init({ selector: 'textarea[name=content]', server: <?= $ted->getClientJson() ?> });</script>
 ```
 
-`server` — `{ filesUrl, limits, opengraph, iframeHosts, preset, presets, canEdit }` (набор поля и право — `clientJson($preset, $canEdit)`, см. «Наборы блоков и право на правку»): по адресу папки редактор узнаёт свои файлы (удаление после сохранения), файл больше лимита не отправляет, при выключенных карточках не предлагает «Встроить карточкой», в «iFrame» принимает только сайты из списка (сервер проверяет то же самое). Проверка настроек и сервера: `php texted/php/check.php`.
+`server` — `{ filesUrl, limits, opengraph, iframeHosts, preset, presets, canEdit }` (набор поля и право — `getClientJson($preset, $canEdit)`, см. «Наборы блоков и право на правку»): по адресу папки редактор узнаёт свои файлы (удаление после сохранения), файл больше лимита не отправляет, при выключенных карточках не предлагает «Встроить карточкой», в «iFrame» принимает только сайты из списка (сервер проверяет то же самое). Проверка настроек и сервера: `php texted/bin/check.php`.
 
 **4. Выведите на сайте.** На странице подключите `ted.css` (и `ted.vw.css`, если сайт на vw-размерах) и выведите сохранённый HTML внутри контейнера:
 
@@ -73,7 +73,7 @@ tedRespondToUpload($ted->storage(), $pagePath);    // маршрут загру�
 |------------------|-----------|
 | Админка (редактор в форме) | `previewMode: false`, `onSave`, `autosave: 'ключ'` |
 | Документация (правка прямо на странице) | набор `docs` (или `mode: 'view'`, `preview: 'inline'`), `onSave` |
-| Доступ без права редактирования | сервер: `clientJson($preset, false)`; без сервера — `readOnly: true` или набор `readonly` |
+| Доступ без права редактирования | сервер: `getClientJson($preset, false)`; без сервера — `readOnly: true` или набор `readonly` |
 | Полноэкранный редактор | без настроек |
 
 ## Подключение к CMS

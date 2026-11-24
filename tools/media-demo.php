@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+use Simflex\Texted\Config;
+use Simflex\Texted\Exception\AccessDenied;
+
 // Run only with php -S 127.0.0.1:<port> -t ted ted/tools/media-demo.php.
 if (PHP_SAPI !== 'cli-server' || !in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'], true)) {
     http_response_code(404);
@@ -8,17 +11,17 @@ if (PHP_SAPI !== 'cli-server' || !in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.
 }
 $route = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 
-// настройки — как на сайте: ted.config.php рядом с папкой пакета (TextEd/ted.config.php) или TED_CONFIG
-require_once dirname(__DIR__) . '/php/config.php';
-$config = TedConfig::load();
+// настройки — как на сайте: ted.config.php рядом с папкой пакета или TED_CONFIG; классы — composer или загрузчик тестов
+require_once dirname(__DIR__) . '/tests/php/bootstrap.php';
+$config = Config::load();
 
 // Папка файлов лежит вне пакета (files.dir), адрес — files.url: отдаём её сами, как веб-сервер сайта.
 // Аудио и видео — частями (HTTP Range), как Apache и nginx: без этого встроенный сервер PHP отдаёт файл целиком,
 // браузер считает запись неперематываемой, и перемотка по волне или полосе видео не работает.
-$filesUrl = $config->filesUrl() . '/';
+$filesUrl = $config->getFilesUrl() . '/';
 if (is_string($route) && str_starts_with($route, $filesUrl)) {
-    $root = realpath($config->filesDir());
-    $file = realpath($config->filesDir() . DIRECTORY_SEPARATOR . rawurldecode(substr($route, strlen($filesUrl))));
+    $root = realpath($config->getFilesDir());
+    $file = realpath($config->getFilesDir() . DIRECTORY_SEPARATOR . rawurldecode(substr($route, strlen($filesUrl))));
     if ($root === false || $file === false || !str_starts_with($file, $root . DIRECTORY_SEPARATOR) || !is_file($file)) { http_response_code(404); return true; }
     $size = filesize($file);
     $types = ['mp3' => 'audio/mpeg', 'wav' => 'audio/wav', 'mp4' => 'video/mp4', 'webm' => 'video/webm', 'ogg' => 'audio/ogg', 'ogv' => 'video/ogg', 'm4a' => 'audio/mp4', 'm4v' => 'video/mp4', 'avi' => 'video/x-msvideo',
@@ -43,8 +46,8 @@ if (is_string($route) && str_starts_with($route, $filesUrl)) {
 }
 // файловый менеджер SimflexCMS (пакет simflex-file-manager, если демо запущено с ним): окно, API, статика
 require_once __DIR__ . '/fm-demo.php';
-if (is_string($route) && ted_demo_file_manager($route, $config->filesDir(), $config->filesUrl())) return true;
-// настройки для браузера (TedConfig::clientJson): как CMS передаёт их в Ted.init({ server: … }) — без путей на диске
+if (is_string($route) && ted_demo_file_manager($route, $config->getFilesDir(), $config->getFilesUrl())) return true;
+// настройки для браузера (Config::getClientJson): как CMS передаёт их в Ted.init({ server: … }) — без путей на диске
 // Набор поля и право на правку (этап 2) в CMS берутся из настройки поля и прав пользователя. В демо их «выбирают»
 // адресом страницы: admin.html?preset=mini&access=ro. Сервер запоминает выбор в сессии и дальше проверяет по ней
 // сохранение и загрузку — так же, как CMS проверяет по своей сессии, а не по данным из браузера.
@@ -52,12 +55,12 @@ if ($route === '/ted-demo-media/config.js') {
     header('Content-Type: text/javascript; charset=utf-8');
     header('Cache-Control: no-store');
     $preset = is_string($_GET['preset'] ?? null) ? $_GET['preset'] : 'full';
-    try { $config->preset($preset); } catch (InvalidArgumentException) { $preset = 'full'; }
+    try { $config->getPreset($preset); } catch (InvalidArgumentException) { $preset = 'full'; }
     $canEdit = ($_GET['access'] ?? '') !== 'ro';
     session_start();
     $_SESSION['tedField'] = ['preset' => $preset, 'canEdit' => $canEdit];
     session_write_close();
-    echo 'window.TED_SERVER = ' . $config->clientJson($preset, $canEdit) . ';';
+    echo 'window.TED_SERVER = ' . $config->getClientJson($preset, $canEdit) . ';';
     // демо: подключён ли файловый менеджер (кнопка «Из библиотеки» в зоне загрузки)
     $fm = getenv('TED_DEMO_FILE_MANAGER') ?: '';
     echo ' window.TED_DEMO_FILE_MANAGER = ' . ($fm !== '' && is_file($fm . '/src/FileManager/Manager.php') ? 'true' : 'false') . ';';
@@ -101,7 +104,7 @@ if ($html === false || strlen($html) > 2_000_000) {
 }
 try {
     $clean = $config->save($html, $field['preset'], $field['canEdit']);   // очистка по набору поля; без права — отказ
-} catch (TedAccessDenied $e) {
+} catch (AccessDenied $e) {
     session_write_close();
     http_response_code(403);
     echo json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);

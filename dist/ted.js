@@ -1,4 +1,4 @@
-/*! Ted 0.1.0 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-23 15:01 */
+/*! Ted 0.1.0 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-24 12:45 */
 (function () {
 'use strict';
 
@@ -517,8 +517,8 @@ const ICONS = {
 
 // ---- src/core/urls.js ----
 // Ссылки и адреса — одно правило для всего редактора (этап 3 MODULAR_PLAN.md, «Безопасность»).
-// Тот же код на сервере: php/sanitize.php → TedSanitizer::urlOk. Общие примеры — tests/security/url-vectors.json
-// (их проверяют оба теста: набор security в tests/run.html и php/test-sanitize.php).
+// Тот же код на сервере: src/Sanitizer.php → Sanitizer::urlOk. Общие примеры — tests/security/url-vectors.json
+// (их проверяют оба теста: набор security в tests/run.html и tests/php/test-sanitize.php).
 //
 // Разрешено:
 //   https:, http:                      — везде;
@@ -569,14 +569,14 @@ function srcsetOk(value) {
 }
 
 // ---- src/core/allowlist.js ----
-// Белый список разметки — тот же, что на сервере (php/sanitize.php → TedSanitizer), этап 3 MODULAR_PLAN.md.
+// Белый список разметки — тот же, что на сервере (src/Sanitizer.php → Sanitizer), этап 3 MODULAR_PLAN.md.
 // Им чистится «сырой» HTML старых статей (TinyMCE: таблицы, свои вставки, div со стилями), который редактор
 // показывает нередактируемым блоком: в браузере остаётся ровно то, что оставит сервер.
-// Списки между маркерами сверяет тест php/test-sanitize.php (с константами TedSanitizer). На этапе 5 они будут
+// Списки между маркерами сверяет тест tests/php/test-sanitize.php (с константами Sanitizer). На этапе 5 они будут
 // собираться из block.json блоков.
 
 
-/* allowlist:begin — те же списки, что TedSanitizer::ALLOWED, DROP_WITH_CONTENT, ATTRS в php/sanitize.php */
+/* allowlist:begin — те же списки, что Sanitizer::ALLOWED, DROP_WITH_CONTENT, ATTRS в src/Sanitizer.php */
 const ALLOWED_TAGS = [
   "div", "ul", "ol", "li", "code", "br",
   "strong", "em", "u", "s", "sub", "sup", "mark", "a", "span",
@@ -609,7 +609,7 @@ const ALLOWED_ATTRS = {
 };
 const VIDEO_HOSTS = ["www.youtube.com", "youtube.com", "www.youtube-nocookie.com", "player.vimeo.com", "rutube.ru", "vkvideo.ru", "vk.com"];
 /* allowlist:end */
-// Блоки из реестра (этап 5) приносят свои теги и атрибуты сами — block.json → html; сервер читает те же файлы (php/blocks.php).
+// Блоки из реестра (этап 5) приносят свои теги и атрибуты сами — block.json → html; сервер читает те же файлы (src/Blocks.php).
 
 /** Тег разрешён: список ядра или блок из реестра. */
 function tagAllowed(tag) {
@@ -700,7 +700,7 @@ function cleanAttributes(el, tag) {
 }
 
 /**
- * Очистить содержимое элемента по белому списку (как TedSanitizer::walk): опасные теги — с содержимым,
+ * Очистить содержимое элемента по белому списку (как Sanitizer::walk): опасные теги — с содержимым,
  * неизвестные — без обёртки (текст остаётся), атрибуты — по списку, адреса — по общему правилу, фреймы — в песочнице.
  */
 function cleanByAllowlist(parent, frameHosts = null) {
@@ -2185,7 +2185,7 @@ async function chooseMedia(editor, kind, { multiple = false, source = null } = {
   return { source: 'direct', assets };
 }
 
-/** Карточка ссылки для блока «Встраивание»: страницу читает сервер CMS (php/opengraph.php), ответ — { url, title, text, image, site }. */
+/** Карточка ссылки для блока «Встраивание»: страницу читает сервер CMS (src/OpenGraph.php), ответ — { url, title, text, image, site }. */
 function createOpenGraph(endpoint, { headers = {} } = {}) {
   return async (url) => {
     const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify({ url }) });
@@ -2203,11 +2203,11 @@ function createOpenGraph(endpoint, { headers = {} } = {}) {
 //   mode   — 'edit' (сразу правка), 'view' (просмотр, «Редактировать» включает правку на той же странице),
 //            'readonly' (только просмотр, правки нет).
 //
-// Набор поля задаёт СЕРВЕР CMS: TedConfig::clientJson($preset, $canEdit) → Ted.init({ server }). Он же очищает
-// сохранённый HTML по набору (php/presets.php) — браузеру в этом не доверяем. Опция preset в браузере — для страниц без PHP.
+// Набор поля задаёт СЕРВЕР CMS: Config::getClientJson($preset, $canEdit) → Ted.init({ server }). Он же очищает
+// сохранённый HTML по набору (src/Presets.php) — браузеру в этом не доверяем. Опция preset в браузере — для страниц без PHP.
 // Свои наборы: ted.config.php → 'presets' (сервер передаёт их в браузер сам) или Ted.definePreset(name, { blocks, mode }).
 
-/* presets:begin — тот же список в php/presets.php (TedPresets::BASE), тест php/test-presets.php сравнивает */
+/* presets:begin — тот же список в src/Presets.php (Presets::BASE), тест tests/php/test-presets.php сравнивает */
 const PRESETS = {
   "full": { "blocks": "all", "mode": "edit" },
   "mini": { "blocks": ["p", "h2", "h3", "h4", "ul", "ol", "blockquote", "image"], "mode": "edit" },
@@ -2217,7 +2217,7 @@ const PRESETS = {
 };
 /* presets:end */
 
-/* types:begin — виды блоков для наборов; тот же список в php/presets.php (TedPresets::TYPES) */
+/* types:begin — виды блоков для наборов; тот же список в src/Presets.php (Presets::TYPES) */
 const PRESET_TYPES = [];
 /* types:end */
 // Список пуст: все виды — из реестра блоков (blocks/<тип>/block.json), этап 5.
@@ -2289,7 +2289,7 @@ function presetNames(serverPresets = null) {
 
 // ---- src/core/server.js ----
 // Настройки с сервера (этап 1 MODULAR_PLAN.md): то, что браузеру нужно знать из ted.config.php.
-// CMS передаёт их в Ted.init({ server: <?= TedConfig::load()->clientJson() ?> }). Пути на диске, ffmpeg и ключи сюда не попадают.
+// CMS передаёт их в Ted.init({ server: <?= Config::load()->getClientJson() ?> }). Пути на диске, ffmpeg и ключи сюда не попадают.
 //   filesUrl    — адрес папки файлов ('/uf' или 'https://cdn…/uf'): по нему редактор узнаёт свои файлы (удаление после сохранения)
 //   limits      — наибольший размер файла по видам, байт: слишком большой файл не отправляется на сервер
 //   opengraph   — false: карточки по ссылке выключены на сервере (опция opengraph не используется)
@@ -2990,7 +2990,7 @@ function enhanceAudio(root = document) {
 // ---- src/core/blocks-json.js ----
 // Описание документа списком блоков (JSON) → HTML редактора. Для агентов и скриптов: не нужно знать классы ted-*.
 // Текст везде простой (экранируется), строчное форматирование — через поле html у абзаца не поддерживается намеренно.
-// Результат всё равно проходит Ted.clean / TedSanitizer::clean, поэтому ошибка в описании не создаёт небезопасную разметку.
+// Результат всё равно проходит Ted.clean / Sanitizer::clean, поэтому ошибка в описании не создаёт небезопасную разметку.
 
 
 const bjEsc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -3526,7 +3526,7 @@ function restrictBlocks(root, set, doc = document) {
     el.replaceWith(...replacement);
   }
   // вложенные блоки (решение 22.11): запрещённый блок внутри разрешённого (абзаца, пункта, ответа аккордеона) тоже превращается в текст,
-  // а «сырые» фрейм, видео, таблица, картинка живут только внутри своего блока — то же на сервере (TedPresets::restrict)
+  // а «сырые» фрейм, видео, таблица, картинка живут только внутри своего блока — то же на сервере (Presets::restrict)
   const check = (c, depth) => {
     const def = defOf(c);
     if (def) {
@@ -4633,7 +4633,7 @@ function keysFor(cmd) {
 // регистрирует себя: Ted.registerBlock({ ...описание, ...функции }). Ядро не знает конкретных блоков — спрашивает реестр.
 // Перенос идёт по одному блоку (решение 18.11); пока не перенесённые блоки живут в ядре по-старому.
 //
-// Описание (block.json — общее для браузера и сервера php/blocks.php):
+// Описание (block.json — общее для браузера и сервера src/Blocks.php):
 //   type        — вид блока ('hr'); aliases — другие имена в наборах и опции blocks ('separator')
 //   title       — название; menu — { group, icon, words, convert, after } — плитка в меню «/» и «Все блоки»
 //   object      — true: блок без текста (линия, медиа): выделяется целиком, панель «line», нет «Превратить в…»
@@ -4664,7 +4664,7 @@ function keysFor(cmd) {
 //                 со своей панелью; ядро узнаёт обёртку через isWrap / wrapSelector, вид — у блока внутри
 //   insertMenu  — 'media': пункт меню кнопки «Медиа ▾» панели (title, menu.icon), вставка — insert
 //   ids         — атрибуты из html, значение которых — идентификатор CMS (латиница, цифры, _ и -, до 64): иначе удаляется
-//                 (JS allowlist.js и PHP TedSanitizer одинаково)
+//                 (JS allowlist.js и PHP Sanitizer одинаково)
 //   create      — может вернуть { el, focus } — куда поставить курсор после вставки
 //   placeholders(editor, root), onKey(editor, e) — заглушки пустых частей и клавиши внутри блока
 //   noBold      — CSS-селектор частей блока, где «Жирный» не действует (название вкладки, заголовок выноски)
@@ -4674,7 +4674,7 @@ function keysFor(cmd) {
 //   caretBelow  — true: после вставки из меню курсор встаёт в строку текста под блоком
 //   lineAfter   — true: последним в тексте под блоком всегда есть строка текста (у caretBelow — тоже), курсор после вставки — по create
 //   frames      — true: <iframe> прямо в элементе блока — фрейм блока: любой https-адрес (или iframe.hosts настроек) и песочница
-//                 блока; вне такого блока — только площадки видео (JS allowlist.js и PHP TedSanitizer одинаково)
+//                 блока; вне такого блока — только площадки видео (JS allowlist.js и PHP Sanitizer одинаково)
 // Функции (только в браузере):
 //   match(el)         — это элемент блока (сохранённый HTML и правка)
 //   create(doc)       — новый пустой блок
@@ -4683,7 +4683,7 @@ function keysFor(cmd) {
 //   clean(node, doc, idOk) — третий аргумент: проверка якоря (id)
 //   serialize(el)     — HTML блока для сохранения (из формы правки), пустая строка — блок не сохраняется
 //   normalize(el, doc) — привести форму правки к порядку (true — что-то поменялось)
-//   toText(el, h)     — блок в наборе без него → массив узлов текста; h = { doc, p, list, text, esc } (то же — <тип>.php → degrade)
+//   toText(el, h)     — блок в наборе без него → массив узлов текста; h = { doc, p, list, text, esc } (то же — <Тип>.php → degrade)
 //   canAlign(el), canBg(el) — можно ли выравнивать / красить фоном этот блок (баннер — нет)
 //   editorUi(editor)  — правка блока в редакторе (<тип>.editor.js): объект с onKey(e), sync(), focusBlock(), destroy();
 //                       editorUiName — имя свойства редактора (editor.buttons)
@@ -9206,7 +9206,7 @@ function caretRect(r) {
 
 // ---- blocks/accordion/accordion.js ----
 // Блок «Аккордеон» — полностью в папке (этап 5). Контейнер: ответы — «хосты» обычных блоков (общий код — src/core/containers.js).
-// На сайте — <details>/<summary> с разметкой FAQ schema.org; её атрибуты и значения — в общем белом списке (allowlist.js = TedSanitizer).
+// На сайте — <details>/<summary> с разметкой FAQ schema.org; её атрибуты и значения — в общем белом списке (allowlist.js = Sanitizer).
 const ACCORDION_BLOCK = {
   "type": "accordion",
   "title": "Аккордеон",
@@ -13900,7 +13900,7 @@ const DEFAULTS = {
   pickFile: null,         // ({ kind, multiple, pagePath, editor }) => Promise<asset | asset[] | null>
   products: null,         // каталог CMS для «Товара»: { search: async (q) => [{ id, name, sku, price, oldPrice, image, url }], get: async (id) => {...} }
   articles: null,         // статьи CMS для «Встраивания»: { search: async (q) => [{ id, title, url, text, image, site, date, views, likes }], get: async (id) => {...} }
-  server: null,           // настройки с сервера (ted.config.php → TedConfig::clientJson()): { filesUrl, limits, opengraph, iframeHosts } — см. core/server.js
+  server: null,           // настройки с сервера (ted.config.php → Config::getClientJson()): { filesUrl, limits, opengraph, iframeHosts } — см. core/server.js
   opengraph: null,        // карточка по ссылке для «Встраивания»: async (url) => { url, title, text, image, site } — читает сервер CMS (Ted.createOpenGraph('/…'))
   toasts: true,           // показывать тостеры («Ссылка скопирована», «Блок удалён»…)
   previewMode: true,      // false — режима просмотра нет (админка): вместо кнопки режима в панели «Сохранить»

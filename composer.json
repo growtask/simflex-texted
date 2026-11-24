@@ -22,14 +22,11 @@
     "ext-openssl": "Карточка и картинка по ссылке (https)"
   },
   "autoload": {
+    "psr-4": {
+      "Simflex\\Texted\\": "src/"
+    },
     "classmap": [
-      "php/blocks.php",
-      "php/config.php",
-      "php/opengraph.php",
-      "php/presets.php",
-      "php/ratelimit.php",
-      "php/sanitize.php",
-      "php/upload.php"
+      "blocks/"
     ]
   }
 }

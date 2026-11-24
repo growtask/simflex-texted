@@ -17,13 +17,13 @@
 Строчное оформление (жирный, курсив, ссылки, якоря) есть во всех наборах.
 
 ```php
-$ted = TedConfig::load();
+$ted = Config::load();
 $canEdit = $user->canEdit($record);                                   // право решает CMS
 // шаблон поля:
-//   <script>Ted.init({ selector: '#content', server: <?= $ted->clientJson('mini', $canEdit) ?> });</script>
+//   <script>Ted.init({ selector: '#content', server: <?= $ted->getClientJson('mini', $canEdit) ?> });</script>
 // сохранение — очистка по набору; без права или в наборе readonly — отказ:
 try { $clean = $ted->save($_POST['content'], 'mini', $canEdit); }
-catch (TedAccessDenied $e) { http_response_code(403); exit; }
+catch (AccessDenied $e) { http_response_code(403); exit; }
 // загрузка файлов поля — тоже с проверкой права (без права — 403, на диск ничего не пишется):
 $ted->respondToUpload($pagePath, 'mini', $canEdit);
 ```

@@ -1,6 +1,6 @@
 // Ссылки и адреса — одно правило для всего редактора (этап 3 MODULAR_PLAN.md, «Безопасность»).
-// Тот же код на сервере: php/sanitize.php → TedSanitizer::urlOk. Общие примеры — tests/security/url-vectors.json
-// (их проверяют оба теста: набор security в tests/run.html и php/test-sanitize.php).
+// Тот же код на сервере: src/Sanitizer.php → Sanitizer::urlOk. Общие примеры — tests/security/url-vectors.json
+// (их проверяют оба теста: набор security в tests/run.html и tests/php/test-sanitize.php).
 //
 // Разрешено:
 //   https:, http:                      — везде;
