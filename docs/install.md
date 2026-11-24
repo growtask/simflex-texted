@@ -4,26 +4,27 @@
 
 ## Быстрый старт
 
-**1. Установите пакет** и опубликуйте его статику в корень веб-сервера (`vendor/` из браузера недоступен), сохранив
-взаимное расположение папок (стили ссылаются на `../fonts/` и `../tiles/`). В Simflex CMS это делает ядро.
+**1. Установите пакет** и опубликуйте папку `dist/` пакета в корень веб-сервера (`vendor/` из браузера недоступен):
+в ней всё нужное, стили ссылаются на шрифты, плитки и значки относительно. В Simflex CMS это делает ядро.
 
 ```bash
 composer require simflex/texted
 ```
 
 ```
-/texted/dist/ted.js      ← скрипт редактора           (vendor/simflex/texted/dist/ted.js)
-/texted/dist/ted.css     ← стили редактора и оформления блоков
-/texted/fonts/           ← шрифты
-/texted/tiles/           ← картинки для меню блоков (нужны только админке)
-/texted/content.js       ← поведение блоков на сайте
+/texted/ted.js       ← скрипт редактора           (vendor/simflex/texted/dist/ted.js)
+/texted/ted.css      ← стили редактора и оформления блоков
+/texted/content.js   ← поведение блоков на сайте
+/texted/fonts/       ← шрифты
+/texted/tiles/       ← картинки для меню блоков (нужны только админке)
+/texted/icons/       ← значки медиа (файл, скачать)
 ```
 
 **2. Подключите в админке** и превратите поле в редактор:
 
 ```html
-<link rel="stylesheet" href="/texted/dist/ted.css">
-<script src="/texted/dist/ted.js"></script>
+<link rel="stylesheet" href="/texted/ted.css">
+<script src="/texted/ted.js"></script>
 
 <textarea name="content"><?= htmlspecialchars($page['content']) ?></textarea>
 
@@ -59,11 +60,11 @@ $ted->createStorage()->respondToUpload($pagePath);    // маршрут загр
 **4. Выведите на сайте.** На странице подключите `ted.css` (и `ted.vw.css`, если сайт на vw-размерах) и выведите сохранённый HTML внутри контейнера:
 
 ```html
-<link rel="stylesheet" href="/texted/dist/ted.css">
+<link rel="stylesheet" href="/texted/ted.css">
 <?= $page['content'] ?>   <!-- уже обёрнут в <div class="ted-content"> -->
 ```
 
-Чтобы работали аудиоплеер (тот же, что в редакторе, по макету Media/audio) и запуск видео с площадок по клику, добавьте `<script src="/texted/content.js" defer></script>`. Этот файл **собирается** (`tools/build.ps1` или `php tools/build.php`) из `src/core/audio-player.js` и `src/site/content.js`; вручную его не правьте. Без него на сайте остаётся родной `<audio controls>`.
+Чтобы работали аудиоплеер (тот же, что в редакторе, по макету Media/audio) и запуск видео с площадок по клику, добавьте `<script src="/texted/content.js" defer></script>`. Этот файл **собирается** (`tools/build.ps1` или `php tools/build.php`) из `resources/js/core/audio-player.js` и `resources/js/site/content.js`; вручную его не правьте. Без него на сайте остаётся родной `<audio controls>`.
 
 Посмотреть всё в работе: откройте двойным кликом `examples/index.html` (демо работают прямо с диска, сервер не нужен).
 

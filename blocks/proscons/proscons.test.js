@@ -1,8 +1,8 @@
 // Тесты блока «Плюсы и минусы» (blocks/proscons, этап 5). Свои — реестр, меню, JSON, наборы; ниже — перенесённые прежние тесты из tests/sizes.test.js.
 import { group, test, eq, ok, wait } from '../../tests/harness.js';
 import { Ted, make, blocks, select, pop, html, tagOf } from '../../tests/helpers.js';
-import { blockDef, defOf } from '../../src/core/registry.js';
-import { menuGroups, styleTypes, kindOf } from '../../src/core/blocks.js';
+import { blockDef, defOf } from '../../resources/js/core/registry.js';
+import { menuGroups, styleTypes, kindOf } from '../../resources/js/core/blocks.js';
 import { insertBlock } from '../../tests/interaction/samples.js';
 
 const WIDTHS = [1000, 860, 768, 414];

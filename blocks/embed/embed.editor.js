@@ -4,8 +4,8 @@
 // Готовый блок: нажатие — «Настройки встраивания» под блоком (как «Якорь»): Ссылка, «В одну строку», Сохранить / Отмена.
 // Если сервер карточку не дал — блок остаётся пустым, автор видит сообщение (поле не очищается).
 
-import { h, icon, smallButton, menuItem } from '../../src/ui/widgets.js';
-import { emptyBlock, isEmptyBlock } from '../../src/core/blocks.js';
+import { h, icon, smallButton, menuItem } from '../../resources/js/ui/widgets.js';
+import { emptyBlock, isEmptyBlock } from '../../resources/js/core/blocks.js';
 import { embedUrlOk, embedData, readEmbed, makeEmbedBlock } from './embed.js';
 
 const fixLink = (v) => {

@@ -2,10 +2,10 @@
 // наборы layer и drag по всем блокам — здесь только своё: меню, вставка, Markdown, клавиша, очистка, наборы, JSON, вид.
 import { group, test, eq, ok, wait } from '../../tests/harness.js';
 import { make, select, blocks, Ted } from '../../tests/helpers.js';
-import { blockDef, defOf } from '../../src/core/registry.js';
-import { menuGroups } from '../../src/core/blocks.js';
-import { HOTKEYS } from '../../src/core/keys.js';
-import { frameKind } from '../../src/ui/handle.js';
+import { blockDef, defOf } from '../../resources/js/core/registry.js';
+import { menuGroups } from '../../resources/js/core/blocks.js';
+import { HOTKEYS } from '../../resources/js/core/keys.js';
+import { frameKind } from '../../resources/js/ui/handle.js';
 import { insertBlock } from '../../tests/interaction/samples.js';
 
 const tags = (ed) => blocks(ed).map((b) => b.tagName.toLowerCase()).join(',');

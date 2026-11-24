@@ -2,8 +2,8 @@
 // Текстовый блок: пункты, Enter, отметка кликом по чек-боксу, Markdown «[] » / «[x] » ведёт текстовый движок ядра;
 // здесь — меню «Списки», «Стиль текста», JSON, стили.
 import CHECKLIST_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
-import { bjLines } from '../../src/core/blocks-json.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
+import { bjLines } from '../../resources/js/core/blocks-json.js';
 
 registerBlock({
   ...CHECKLIST_BLOCK,

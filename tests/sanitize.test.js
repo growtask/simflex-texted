@@ -1,5 +1,5 @@
 import { group, test, eq, ok } from './harness.js';
-import Ted from '../src/index.js';
+import Ted from '../resources/js/index.js';
 
 const clean = (html) => Ted.clean(html);
 

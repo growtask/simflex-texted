@@ -5,7 +5,7 @@
 // Безопасность: только https без логина, пароля и порта; песочница и запрет srcdoc ставятся всегда (и на сервере).
 
 import IFRAME_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
 import { IframeUI } from './iframe.editor.js';
 
 export const IFRAME_SANDBOX = 'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation';

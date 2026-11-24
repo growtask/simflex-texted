@@ -2,9 +2,9 @@
 // Сервер (src/Presets.php, Config::save) проверяет tests/php/test-presets.php — на тех же примерах tests/presets/vectors.json.
 import { group, test, eq, ok, wait } from '../harness.js';
 import { make, select, blocks, Ted } from '../helpers.js';
-import { PRESETS, presetTypes, checkPreset, definePreset } from '../../src/core/presets.js';
-import { menuGroups } from '../../src/core/blocks.js';
-import { serverOptions } from '../../src/core/server.js';
+import { PRESETS, presetTypes, checkPreset, definePreset } from '../../resources/js/core/presets.js';
+import { menuGroups } from '../../resources/js/core/blocks.js';
+import { serverOptions } from '../../resources/js/core/server.js';
 
 const menuTypes = (ed) => ed.blockMenu.groups().flatMap((g) => g.items.map((i) => i.type)).sort().join(',');
 const viewVariant = (ed) => { ed.toolbar.update({ ...ed.state, mode: ed.mode }); return ed.toolbar.variant; };

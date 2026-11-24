@@ -9,7 +9,7 @@ export const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test
 
 export function h(tag, attrs = {}, children = []) {
   const el = document.createElement(tag);
-  // подписи интерфейса — на языке редактора (src/core/i18n.js); русские запоминаются для смены языка на лету
+  // подписи интерфейса — на языке редактора (resources/js/core/i18n.js); русские запоминаются для смены языка на лету
   let ruText;
   let ruAttrs = null;
   for (const [k, v] of Object.entries(attrs)) {

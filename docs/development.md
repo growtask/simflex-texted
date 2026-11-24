@@ -27,9 +27,9 @@ pwsh -File tools/test.ps1 -Only "слово"
 **Структура**
 
 ```
-src/core/     ядро: editor, sanitize, blocks, selection, history, keys, typo, highlight, media, upload
-src/ui/       интерфейс: панель, меню, ручки блоков, предпросмотр, медиа, иконки
-styles/       theme.default.css, content.css (оформление блоков для сайта), ted.vw.css, ui/ — интерфейс по компонентам (порядок — в tools/build.json)
+resources/js/core/     ядро: editor, sanitize, blocks, selection, history, keys, typo, highlight, media, upload
+resources/js/ui/       интерфейс: панель, меню, ручки блоков, предпросмотр, медиа, иконки
+resources/css/       theme.default.css, content.css (оформление блоков для сайта), ted.vw.css, ui/ — интерфейс по компонентам (порядок — в tools/build.json)
 php/          config.php (настройки ted.config.php), sanitize.php (очистка на сервере), upload.php (загрузка), opengraph.php, check.php, uf.htaccess, test-*.php
 ted.config.example.php  образец настроек сервера — копируется рядом с папкой пакета
 tools/        build.*, serve.ps1, test.ps1, check-builds.ps1, css-snapshot.ps1, find-php.ps1

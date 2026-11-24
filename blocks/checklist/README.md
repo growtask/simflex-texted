@@ -21,7 +21,7 @@
 
 ## В редакторе
 
-Текстовый блок: ввод, Enter, Backspace, заглушки и кнопки внутри блока ведёт текстовый движок ядра (`src/core/editor.js`, `src/core/blocks.js`, стили правки — `styles/ui/blocks.css`); превращение в текст в наборе без блока — `src/core/blocks.js` и `src/Presets.php` (одинаково). Отсюда — плитка «Списки → Чек-лист», «Стиль текста → Чек-лист», JSON, стили на сайте.
+Текстовый блок: ввод, Enter, Backspace, заглушки и кнопки внутри блока ведёт текстовый движок ядра (`resources/js/core/editor.js`, `resources/js/core/blocks.js`, стили правки — `resources/css/ui/blocks.css`); превращение в текст в наборе без блока — `resources/js/core/blocks.js` и `src/Presets.php` (одинаково). Отсюда — плитка «Списки → Чек-лист», «Стиль текста → Чек-лист», JSON, стили на сайте.
 
 ## Файлы
 

@@ -7,11 +7,11 @@
 </head>
 <body>
 <p>Собирает <code>tests/presets/vectors.json</code>: сохранённый HTML всех блоков (как его отдаёт редактор) → что остаётся в каждом наборе.
-  Ожидаемый результат — из браузера (src/core/blocks.js → restrictBlocks); тот же файл проверяют набор <code>presets</code> и <code>tests/php/test-presets.php</code>.
+  Ожидаемый результат — из браузера (resources/js/core/blocks.js → restrictBlocks); тот же файл проверяют набор <code>presets</code> и <code>tests/php/test-presets.php</code>.
   Пересобрать: <code>pwsh -File tools/make-preset-vectors.ps1</code>.</p>
 <pre id="out">…</pre>
 <script type="module">
-  import Ted from '../../src/index.js';
+  import Ted from '../../resources/js/index.js';
   import { blockSamples } from '../interaction/samples.js';
 
   const samples = await blockSamples();

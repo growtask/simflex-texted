@@ -2,7 +2,7 @@
 // Сервер (ted.config.php, PHP) проверяет tests/php/test-config.php; здесь — что браузер берёт из настроек и чего не делает.
 import { group, test, eq, ok, wait } from '../harness.js';
 import { make } from '../helpers.js';
-import { serverOptions, formatLimit } from '../../src/core/server.js';
+import { serverOptions, formatLimit } from '../../resources/js/core/server.js';
 import { iframeSrcOk } from '../../blocks/iframe/iframe.js';
 import { mediaUrlsOf } from '../../blocks/media/media.js';
 import { insertBlock } from '../interaction/samples.js';

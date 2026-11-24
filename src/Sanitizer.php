@@ -73,7 +73,7 @@ final class Sanitizer
         'div' => ['data-words', 'data-chars', 'data-minutes', 'data-blocks', 'itemscope', 'itemprop', 'itemtype'],
     ];
     private const URL_ATTRS = ['href', 'src', 'poster'];
-    /** Песочница фрейма блока «iFrame» (как IFRAME_SANDBOX в src/core/iframe.js). */
+    /** Песочница фрейма блока «iFrame» (как IFRAME_SANDBOX в resources/js/core/iframe.js). */
     private const BLOCK_SANDBOX = 'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation';
     private const IFRAME_HOSTS = ['www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com', 'player.vimeo.com', 'rutube.ru', 'vkvideo.ru', 'vk.com'];
 
@@ -277,7 +277,7 @@ final class Sanitizer
         }
     }
 
-    /* urls:begin — то же правило, что src/core/urls.js (urlOk); общие примеры tests/security/url-vectors.json */
+    /* urls:begin — то же правило, что resources/js/core/urls.js (urlOk); общие примеры tests/security/url-vectors.json */
     private const IMAGE_DATA = '~\Adata:image/(?:png|jpe?g|gif|webp|avif|bmp)[;,]~';
     private const DANGER = '~\A(?:javascript|vbscript|livescript|mocha|data|file|blob|about|filesystem|jar|view-source|ms-[a-z-]+):~';
     private const HIDDEN = '/[\x{0000}-\x{0020}\x{007F}-\x{00A0}\x{00AD}\x{1680}\x{180E}\x{2000}-\x{200F}\x{2028}-\x{202F}\x{205F}-\x{2064}\x{3000}\x{FEFF}\x{FFFD}]/u';
@@ -349,7 +349,7 @@ final class Sanitizer
     }
 
     /** Адрес фрейма блока «iFrame»: https, без логина, пароля и порта. */
-    /** Элемент блока с фреймом (block.json → frames: true, блок «iFrame»), как isFrameBlock в src/core/allowlist.js. */
+    /** Элемент блока с фреймом (block.json → frames: true, блок «iFrame»), как isFrameBlock в resources/js/core/allowlist.js. */
     private static function frameBlock(mixed $el): bool
     {
         if (!$el instanceof DOMElement) {

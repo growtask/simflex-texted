@@ -10,6 +10,10 @@
   и `require` больше нет. Серверная часть блока — класс `Simflex\Texted\Blocks\<Тип>` в папке блока
   (`blocks/<тип>/<Тип>.php`, интерфейс `ServerBlock`) вместо массива функций. Проверка сервера — `bin/check.php`,
   правила папки файлов — `resources/uf.htaccess`, тесты PHP — `tests/php/`.
+- ⚠ `dist/` самодостаточна: в ней `ted.js`, `ted.css`, `ted.vw.css`, `content.js` (был в корне пакета), `fonts/`,
+  `tiles/`, `icons/` — стили ссылаются на них относительно (`fonts/…`, а не `../fonts/…`). Сайту и CMS достаточно
+  опубликовать одну папку `dist/`. Исходники фронтенда — в `resources/`: `js/` (было `src/`), `css/` (было
+  `styles/`), `lang/`, `fonts/`, `tiles/`, `icons/`.
 
 ### Переход
 
@@ -30,6 +34,9 @@
 | `RateLimit::client()` | `RateLimit::getClientKey()` |
 | `blocks/<тип>/<тип>.php` (`return ['degrade' => fn …]`), `TedBlocks::hook()` | класс `Blocks\<Тип> implements ServerBlock`, `Blocks::getServerBlock()` |
 | `php/check.php`, `php/uf.htaccess` | `bin/check.php`, `resources/uf.htaccess` |
+| `content.js` (корень пакета) | `dist/content.js` |
+| публикация `dist/`, `fonts/`, `tiles/`, `content.js` | публикация только `dist/` |
+| исходники `src/` (JS), `styles/`, `lang/`, `fonts/`, `tiles/`, `icons/` | `resources/js/`, `resources/css/`, `resources/lang/` и т. д. |
 
 `clean()`, `save()`, `respondToUpload()`, `respondToOpenGraph()`, `load()`, `fromArray()` у `Config` — без изменений.
 

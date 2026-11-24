@@ -10,35 +10,35 @@ import { resolveBlocks, restrictBlocks } from './core/blocks.js';
 import { HOTKEYS } from './core/keys.js';
 import { PRESETS, definePreset, presetNames } from './core/presets.js';
 import { createUpload, createOpenGraph } from './core/upload.js';
-import { enhanceAudio } from '../blocks/media/audio-player.js';
+import { enhanceAudio } from '../../blocks/media/audio-player.js';
 import { blocksToHtml, blockJsonTypes, htmlToBlocks } from './core/blocks-json.js';
 import { markdownToHtml, htmlToMarkdown } from './core/markdown.js';
 import { registerBlock } from './core/registry.js';
 import { addLang, setLang, getLang } from './core/i18n.js';
 import '../lang/en.js';
 // блоки из папок (этап 5): в исходниках подключаются здесь, сборка берёт их по списку tools/build.json → blocks
-import '../blocks/hr/hr.js';
-import '../blocks/p/p.js';
-import '../blocks/heading/heading.js';
-import '../blocks/list/list.js';
-import '../blocks/blockquote/blockquote.js';
-import '../blocks/callout/callout.js';
-import '../blocks/background/background.js';
-import '../blocks/pre/pre.js';
-import '../blocks/checklist/checklist.js';
-import '../blocks/steps/steps.js';
-import '../blocks/facts/facts.js';
-import '../blocks/proscons/proscons.js';
-import '../blocks/button/button.js';
-import '../blocks/iframe/iframe.js';
-import '../blocks/embed/embed.js';
-import '../blocks/product/product.js';
-import '../blocks/media/media.js';
-import '../blocks/table/table.js';
-import '../blocks/accordion/accordion.js';
-import '../blocks/tabs/tabs.js';
-import '../blocks/toc/toc.js';
-import '../blocks/columns/columns.js';
+import '../../blocks/hr/hr.js';
+import '../../blocks/p/p.js';
+import '../../blocks/heading/heading.js';
+import '../../blocks/list/list.js';
+import '../../blocks/blockquote/blockquote.js';
+import '../../blocks/callout/callout.js';
+import '../../blocks/background/background.js';
+import '../../blocks/pre/pre.js';
+import '../../blocks/checklist/checklist.js';
+import '../../blocks/steps/steps.js';
+import '../../blocks/facts/facts.js';
+import '../../blocks/proscons/proscons.js';
+import '../../blocks/button/button.js';
+import '../../blocks/iframe/iframe.js';
+import '../../blocks/embed/embed.js';
+import '../../blocks/product/product.js';
+import '../../blocks/media/media.js';
+import '../../blocks/table/table.js';
+import '../../blocks/accordion/accordion.js';
+import '../../blocks/tabs/tabs.js';
+import '../../blocks/toc/toc.js';
+import '../../blocks/columns/columns.js';
 
 const VERSION = '0.1.0';
 
@@ -95,7 +95,7 @@ const Ted = {
   fromMarkdown(md, { blocks } = {}) { return Ted.clean(markdownToHtml(md), { blocks }); },
   /** Сохранённый HTML → Markdown (блоки без прямого аналога — понятным текстом). */
   toMarkdown(html) { return htmlToMarkdown(Ted.clean(html)); },
-  /** Свой блок (этап 5): Ted.registerBlock({ type, match, create, clean, … }) — см. src/core/registry.js и blocks/hr. */
+  /** Свой блок (этап 5): Ted.registerBlock({ type, match, create, clean, … }) — см. resources/js/core/registry.js и blocks/hr. */
   registerBlock(def) { return registerBlock(def); },
   /** Язык интерфейса (22.11): Ted.addLang('de', { 'Русская строка': 'Перевод' }), Ted.setLang('en') — для новых редакторов; у открытого — editor.setLang. */
   addLang(lang, map) { addLang(lang, map); },

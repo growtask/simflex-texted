@@ -4,10 +4,10 @@
 // Клавиши — по логике шагов: Enter в вопросе → в ответ; Enter на пустой последней строке ответа → новый вопрос;
 // Enter в пустом последнем вопросе → абзац под блоком; Backspace не склеивает вопрос с соседями.
 
-import { h, icon } from '../../src/ui/widgets.js';
-import { getRange, placeCaret } from '../../src/core/selection.js';
-import { objectSelector, wrapSelector } from '../../src/core/registry.js';
-import { normalizeRoot, emptyBlock, isEmptyBlock } from '../../src/core/blocks.js';
+import { h, icon } from '../../resources/js/ui/widgets.js';
+import { getRange, placeCaret } from '../../resources/js/core/selection.js';
+import { objectSelector, wrapSelector } from '../../resources/js/core/registry.js';
+import { normalizeRoot, emptyBlock, isEmptyBlock } from '../../resources/js/core/blocks.js';
 import { makeAccordionItem } from './accordion.js';
 
 export class AccordionUI {

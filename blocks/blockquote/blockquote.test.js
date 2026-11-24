@@ -1,9 +1,9 @@
 // Тесты блока «Цитата» (blocks/blockquote, этап 5.4).
 import { group, test, eq, ok } from '../../tests/harness.js';
 import { make, select, blocks, Ted } from '../../tests/helpers.js';
-import { blockDef, defOf } from '../../src/core/registry.js';
-import { menuGroups, placeholderOf } from '../../src/core/blocks.js';
-import { HOTKEYS } from '../../src/core/keys.js';
+import { blockDef, defOf } from '../../resources/js/core/registry.js';
+import { menuGroups, placeholderOf } from '../../resources/js/core/blocks.js';
+import { HOTKEYS } from '../../resources/js/core/keys.js';
 
 group('Блок «Цитата» (blocks/blockquote)', () => {
   test('в реестре; другое имя quote; выноска — не цитата', () => {

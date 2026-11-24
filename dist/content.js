@@ -1,4 +1,4 @@
-/*! Ted content 0.1.0 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-24 12:45 */
+/*! Ted content 0.1.0 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-24 13:32 */
 (function () {
 'use strict';
 
@@ -249,7 +249,7 @@ function enhanceAudio(root = document) {
   }
 }
 
-// ---- src/site/blocks.js ----
+// ---- resources/js/site/blocks.js ----
 // Поведение блоков на сайте (этап 5): blocks/<тип>/<тип>.site.js регистрирует функцию siteBlock(fn), content.js вызывает
 // её для каждого корня с содержимым (TedContent.mount). Сборка кладёт этот файл перед файлами блоков (build.json → content).
 const SITE_BLOCKS = [];
@@ -257,7 +257,7 @@ function siteBlock(fn) { SITE_BLOCKS.push(fn); }
 
 // ---- blocks/pre/pre.site.js ----
 // Блок «Код» на сайте: в шапке справа кнопка «Копировать код» (как в редакторе). Собирается в content.js
-// (build.json → content → @blocks.content); siteBlock — из src/site/blocks.js.
+// (build.json → content → @blocks.content); siteBlock — из resources/js/site/blocks.js.
 
 const SITE_COPY_ICON = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 3.5v-.5a1.5 1.5 0 0 0-1.5-1.5H3.5A1.5 1.5 0 0 0 2 3v5.5A1.5 1.5 0 0 0 3.5 10H4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
 const SITE_CHECK_ICON = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -305,7 +305,7 @@ function siteCodeCopy(root) {
 siteBlock(siteCodeCopy);
 
 // ---- blocks/iframe/iframe.site.js ----
-// Блок «iFrame» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из src/site/blocks.js.
+// Блок «iFrame» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из resources/js/site/blocks.js.
 
 /** Высота фрейма блока «iFrame» из атрибута height, если браузер не умеет attr() в CSS: сброс сайта (iframe{height:auto}) сильнее атрибута. */
 function siteFrameHeight(root) {
@@ -319,7 +319,7 @@ function siteFrameHeight(root) {
 siteBlock(siteFrameHeight);
 
 // ---- blocks/product/product.site.js ----
-// Блок «Товар» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из src/site/blocks.js.
+// Блок «Товар» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из resources/js/site/blocks.js.
 
 /** Товар: «В корзину» шлёт событие ted:add-to-cart { id, button }; CMS кладёт товар в корзину и вызывает preventDefault() —
  * тогда переход по ссылке отменяется. Без обработчика (или без скрипта) кнопка просто ведёт на страницу товара. */
@@ -337,7 +337,7 @@ function siteCart(root) {
 siteBlock(siteCart);
 
 // ---- blocks/media/media.site.js ----
-// Медиа на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из src/site/blocks.js.
+// Медиа на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из resources/js/site/blocks.js.
 // Плеер (audio-player.js), имена файлов (file-names.js) и кнопка «Смотреть на …» (video-link.js) — те же, что в редакторе.
 
 const SITE_VIDEO_HOSTS = ['www.youtube-nocookie.com', 'rutube.ru', 'vkvideo.ru'];
@@ -366,7 +366,7 @@ siteBlock((root, { embed = true } = {}) => {
 });
 
 // ---- blocks/table/table.site.js ----
-// Блок «Таблица» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из src/site/blocks.js.
+// Блок «Таблица» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из resources/js/site/blocks.js.
 
 /** Таблица шире колонки — data-ted-scroll: 12 до полосы прокрутки, как в редакторе. */
 function siteTableScroll(root) {
@@ -381,7 +381,7 @@ function siteTableScroll(root) {
 siteBlock(siteTableScroll);
 
 // ---- blocks/tabs/tabs.site.js ----
-// Блок «Вкладки» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из src/site/blocks.js.
+// Блок «Вкладки» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из resources/js/site/blocks.js.
 
 let tabsUid = 0;
 let tabsSpring = '';
@@ -462,7 +462,7 @@ function siteTabs(root) {
 siteBlock(siteTabs);
 
 // ---- blocks/toc/toc.site.js ----
-// Блок «Содержание» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из src/site/blocks.js.
+// Блок «Содержание» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из resources/js/site/blocks.js.
 
 /** Содержание: список свёрнут («Показать» / «Скрыть»); полоса прогресса чтения идёт за читателем — прилипает к верху области статьи (окна или прокручиваемой колонки) с отступом 8 px, пока статья не дочитана. */
 function siteToc(root) {
@@ -518,7 +518,7 @@ function siteToc(root) {
 
 siteBlock(siteToc);
 
-// ---- src/site/content.js ----
+// ---- resources/js/site/content.js ----
 // Публичное поведение блоков на сайте: каждый блок подключает своё (blocks/<тип>/<тип>.site.js → siteBlock),
 // здесь — запуск. Без зависимостей, подключается с defer.
 

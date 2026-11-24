@@ -2,7 +2,7 @@
 import './formula.test.js';   // формулы таблицы — отдельным файлом
 // Блок «Таблица» (этап 6.1): разметка, очистка, правка, клавиши, меню ручки, вставка из Excel, вид по макету block-table.
 import { group, test, eq, ok, wait } from '../../tests/harness.js';
-import { blockDef } from '../../src/core/registry.js';
+import { blockDef } from '../../resources/js/core/registry.js';
 import { make, blocks, html, Ted } from '../../tests/helpers.js';
 import { tableRows, moveRow, moveColumn } from './table.js';
 

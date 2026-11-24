@@ -115,15 +115,15 @@ foreach ($good as $i => $html) {
     }
 }
 
-// этап 3: одно правило адресов с браузером (src/core/urls.js) — общие примеры tests/security/url-vectors.json
+// этап 3: одно правило адресов с браузером (resources/js/core/urls.js) — общие примеры tests/security/url-vectors.json
 $urls = json_decode((string) file_get_contents(dirname(__DIR__, 2) . '/tests/security/url-vectors.json'), true, 512, JSON_THROW_ON_ERROR);
 foreach ($urls as [$url, $kind, $expect]) {
     if (Sanitizer::urlOk($url, $kind) !== $expect) {
         $failures[] = 'адрес ' . json_encode($url, JSON_UNESCAPED_UNICODE) . " ($kind): ждали " . ($expect ? 'можно' : 'нельзя');
     }
 }
-// белый список разметки — один в браузере (src/core/allowlist.js) и на сервере
-$js = (string) file_get_contents(dirname(__DIR__, 2) . '/src/core/allowlist.js');
+// белый список разметки — один в браузере (resources/js/core/allowlist.js) и на сервере
+$js = (string) file_get_contents(dirname(__DIR__, 2) . '/resources/js/core/allowlist.js');
 preg_match('~/\* allowlist:begin.*?\*/(.*?)/\* allowlist:end \*/~s', $js, $block);
 $jsLists = [];
 preg_match_all('~export const (\w+) = (.*?);\s*(?=export const|\z)~s', $block[1] ?? '', $mm, PREG_SET_ORDER);

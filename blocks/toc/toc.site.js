@@ -1,4 +1,4 @@
-// Блок «Содержание» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из src/site/blocks.js.
+// Блок «Содержание» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из resources/js/site/blocks.js.
 
 /** Содержание: список свёрнут («Показать» / «Скрыть»); полоса прогресса чтения идёт за читателем — прилипает к верху области статьи (окна или прокручиваемой колонки) с отступом 8 px, пока статья не дочитана. */
 function siteToc(root) {

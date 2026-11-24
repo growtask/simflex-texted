@@ -7,7 +7,7 @@
 <!-- переменные сайта (шрифты, цвета) — нужны и в админке, чтобы текст выглядел как на сайте -->
 <link rel="stylesheet" href="site-theme.css">
 <!-- Ted: собранная версия — открывается даже двойным кликом по файлу, без сервера -->
-<link rel="preload" href="../fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../dist/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../dist/ted.css">
 <link rel="stylesheet" href="demo.css">
 <style>
@@ -52,10 +52,10 @@
 <script src="demo.js"></script>
 <script>document.write('<script src="/ted-demo-media/config.js' + location.search.replace(/"/g, '') + '"><\/script>')</script><!-- настройки сервера (ted.config.php) — только в демо на PHP; без него действуют значения по умолчанию. ?preset=mini&access=ro — набор поля и доступ без права правки (этап 2) -->
 <script src="../dist/ted.js"></script>
-<script src="../content.js"></script>
+<script src="../dist/content.js"></script>
 <script src="sample.js"></script>
 <script>
-  // Для разработки можно подключать исходники: <script type="module" src="../src/index.js">
+  // Для разработки можно подключать исходники: <script type="module" src="../resources/js/index.js">
 
   const KEY = 'ted-demo-html';
   const textarea = document.getElementById('content');

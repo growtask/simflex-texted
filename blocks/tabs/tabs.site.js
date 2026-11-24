@@ -1,4 +1,4 @@
-// Блок «Вкладки» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из src/site/blocks.js.
+// Блок «Вкладки» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из resources/js/site/blocks.js.
 
 let tabsUid = 0;
 let tabsSpring = '';

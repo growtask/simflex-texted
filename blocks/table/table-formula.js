@@ -5,8 +5,8 @@
 // Квадрат в углу ячейки с курсором — протягивание (как в Google Таблицах) вбок, вниз или сразу прямоугольником: маска плавно растёт, формула
 // копируется со сдвигом ссылок ($ не сдвигается), простое значение — как есть.
 
-import { h, menuItem, adminModalOpen } from '../../src/ui/widgets.js';
-import { getRange, placeCaret } from '../../src/core/selection.js';
+import { h, menuItem, adminModalOpen } from '../../resources/js/ui/widgets.js';
+import { getRange, placeCaret } from '../../resources/js/core/selection.js';
 import { tableRows, cellInfo } from './table.js';
 import { computeGrid, resultText, formulaAllowed, shiftFormula, formulaRanges, refName, FORMULA_FUNCS } from './formula.js';
 

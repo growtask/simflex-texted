@@ -2,7 +2,7 @@
 import { group, test, eq, ok, wait } from '../harness.js';
 import { make } from '../helpers.js';
 import { rect, NARROW, WIDE, MENU_TYPES, blockSamples, insertBlock, focusBlock, label, frameOf, outside, dragBy, cancelDrag } from './samples.js';
-import { frameKind } from '../../src/ui/handle.js';
+import { frameKind } from '../../resources/js/ui/handle.js';
 
 
 group('Слой взаимодействия: рамка', () => {
@@ -326,7 +326,7 @@ group('Слой взаимодействия: «Помощь»', () => {
       eq(`${text.fontSize} ${text.lineHeight}`, '13px 19.5px', 'text/t3');
       eq(text.color, theme === 'dark' ? 'rgb(255, 255, 255)' : 'rgb(38, 38, 38)', 'цвет текста шага');
       const img = new Image();
-      img.src = new URL(`../tiles/help-1-${theme}.webp`, location.href).href;
+      img.src = new URL(`../dist/tiles/help-1-${theme}.webp`, location.href).href;
       await new Promise((r) => { img.onload = r; img.onerror = r; });
       eq(`${img.naturalWidth}×${img.naturalHeight}`, '992×240', 'картинка есть, двойной размер 496 × 120');
       ed.popover.close();

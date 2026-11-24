@@ -4,9 +4,9 @@
  *
  *   php tools/build.php
  *
- * Склеивает ES-модули из src/ в один dist/ted.js (обычный <script>, без type="module")
- * и стили в dist/ted.css. dist/ted.vw.css копируется отдельно — он подключается
- * только на vw-сайтах.
+ * Склеивает ES-модули из resources/js/ и blocks/ в один dist/ted.js (обычный <script>, без type="module"),
+ * поведение блоков на сайте — в dist/content.js, стили — в dist/ted.css. dist/ted.vw.css копируется отдельно —
+ * он подключается только на vw-сайтах. Шрифты, плитки и значки копируются в dist/ — сайт и CMS публикуют только dist/.
  *
  * Правила для исходников, чтобы сборка работала:
  *   - импорты однострочные: import { a, b } from './x.js';
@@ -40,7 +40,7 @@ $styles = expandBlocks($cfg['styles'], $blocks, $root);
 $contentModules = expandBlocks($cfg['content'], $blocks, $root);
 
 $version = '0.0.0';
-if (preg_match("/const VERSION = '([^']+)'/", file_get_contents("$root/src/index.js"), $m)) {
+if (preg_match("/const VERSION = '([^']+)'/", file_get_contents("$root/resources/js/index.js"), $m)) {
     $version = $m[1];
 }
 $banner = "/*! Ted $version — блочный редактор SimflexCMS, лицензия MIT. Собрано " . date('Y-m-d H:i') . " */\n";
@@ -132,9 +132,16 @@ foreach ($blocks as $b) {
 replaceBetween("$root/blocks/README.md", 'blocks', $index);
 
 // ---------- CSS ----------
+// dist/ самодостаточна: шрифты, плитки и значки лежат рядом (dist/fonts, dist/tiles, dist/icons) — адреса
+// ../fonts/ и т. п. из исходников (resources/css, blocks/*) становятся fonts/ (от dist/ted.css)
+const ASSET_DIRS = ['fonts', 'tiles', 'icons'];
+function distUrls(string $css): string
+{
+    return (string) preg_replace('~url\((["\']?)(?:\.\./)+(' . implode('|', ASSET_DIRS) . ')/~', 'url($1$2/', $css);
+}
 $css = $banner;
 foreach ($styles as $rel) {
-    $css .= "\n/* ---- $rel ---- */\n" . file_get_contents("$root/$rel");
+    $css .= "\n/* ---- $rel ---- */\n" . distUrls((string) file_get_contents("$root/$rel"));
 }
 
 if (!is_dir("$root/dist")) {
@@ -142,8 +149,27 @@ if (!is_dir("$root/dist")) {
 }
 file_put_contents("$root/dist/ted.js", $js);
 file_put_contents("$root/dist/ted.css", $css);
-file_put_contents("$root/content.js", $contentJs);   // для сайта: плеер аудио и запуск видео по клику
-file_put_contents("$root/dist/ted.vw.css", $banner . file_get_contents("$root/styles/ted.vw.css"));
+file_put_contents("$root/dist/content.js", $contentJs);   // для сайта: плеер аудио, вкладки, содержание и др.
+file_put_contents("$root/dist/ted.vw.css", $banner . distUrls((string) file_get_contents("$root/resources/css/ted.vw.css")));
+// копии resources/fonts, tiles, icons; лишние файлы в dist/<папка> удаляются
+foreach (ASSET_DIRS as $dir) {
+    $from = "$root/resources/$dir";
+    $to = "$root/dist/$dir";
+    if (!is_dir($to)) {
+        mkdir($to, 0775, true);
+    }
+    $names = array_map('basename', glob("$from/*") ?: []);
+    foreach (glob("$to/*") ?: [] as $old) {
+        if (!in_array(basename($old), $names, true)) {
+            unlink($old);
+        }
+    }
+    foreach ($names as $name) {
+        if (!is_file("$to/$name") || md5_file("$to/$name") !== md5_file("$from/$name")) {
+            copy("$from/$name", "$to/$name");
+        }
+    }
+}
 
 printf("dist/ted.js      %6.1f КБ\n", strlen($js) / 1024);
 printf("dist/ted.css     %6.1f КБ\n", strlen($css) / 1024);

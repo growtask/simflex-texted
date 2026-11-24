@@ -5,7 +5,7 @@ $root = Split-Path -Parent $PSScriptRoot
 $php = & (Join-Path $PSScriptRoot 'find-php.ps1')
 if (-not $php) { Write-Host '  PHP не найден — проверка пропущена' -ForegroundColor Yellow; exit 0 }
 $dist = Join-Path $root 'dist'
-$files = @('ted.js', 'ted.css', 'ted.vw.css', '..\content.js', '..\blocks\README.md')
+$files = @('ted.js', 'ted.css', 'ted.vw.css', 'content.js', '..\blocks\README.md')
 # таблицы «Описание» в README блоков тоже собирают оба сборщика (этап 5)
 $cfgBlocks = (Get-Content (Join-Path $PSScriptRoot 'build.json') -Raw -Encoding UTF8 | ConvertFrom-Json).blocks
 foreach ($b in $cfgBlocks) { $files += "..\blocks\$b\README.md" }

@@ -1,6 +1,6 @@
 # Снимок вычисленных стилей интерфейса Ted — страховка при перестановке и чистке CSS.
 #   pwsh -File tools/css-snapshot.ps1 -OutFile before.txt     # до правки CSS (после сборки dist)
-#   ...правка styles/..., сборка...
+#   ...правка resources/css/..., сборка...
 #   pwsh -File tools/css-snapshot.ps1 -OutFile after.txt
 #   fc.exe before.txt after.txt                                # пусто = внешний вид не изменился
 # Страница tests/css-snapshot.html перебирает блоки, состояния (курсор в каждом блоке, перетаскивание, окна, меню, режим просмотра),

@@ -19,15 +19,15 @@ texted превращает обычное поле `textarea` в блочный
 composer require simflex/texted
 ```
 
-1. Опубликуйте статику пакета в корень веб-сервера: `vendor/` не должен быть доступен из браузера. Нужны
-   `dist/`, `fonts/`, `tiles/` и `content.js` с сохранением взаимного расположения (стили ссылаются на `../fonts/`
-   и `../tiles/`) — шагом сборки или деплоя, например в `public/assets/texted/`.
+1. Опубликуйте папку `dist/` пакета в корень веб-сервера: `vendor/` не должен быть доступен из браузера. В `dist/`
+   всё нужное — скрипт, стили, `content.js`, шрифты, плитки и значки (стили ссылаются на них относительно) — шагом
+   сборки или деплоя, например в `public/assets/texted/`.
 2. Подключите стили и скрипт и превратите поле в редактор:
 
 ```html
-<link rel="stylesheet" href="/assets/texted/dist/ted.css">
+<link rel="stylesheet" href="/assets/texted/ted.css">
 <textarea name="content" id="content"><?= htmlspecialchars($page['content']) ?></textarea>
-<script src="/assets/texted/dist/ted.js"></script>
+<script src="/assets/texted/ted.js"></script>
 <script>Ted.init({ selector: '#content', server: <?= $ted->getClientJson('full', $canEdit) ?> });</script>
 ```
 
@@ -42,7 +42,7 @@ echo $ted->clean($page['content']);                       // при выводе
 На страницах сайта подключите оформление и поведение блоков (вкладки, содержание, плеер):
 
 ```html
-<link rel="stylesheet" href="/assets/texted/dist/ted.css">
+<link rel="stylesheet" href="/assets/texted/ted.css">
 <script src="/assets/texted/content.js" defer></script>
 ```
 

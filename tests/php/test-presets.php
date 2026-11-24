@@ -14,7 +14,7 @@ if (PHP_SAPI !== 'cli') {
 }
 
 // Наборы на сервере (этап 2 MODULAR_PLAN.md): php ted/php/test-presets.php — код выхода 0, если всё в порядке.
-//   — базовые наборы и виды блоков совпадают с браузером (src/core/presets.js);
+//   — базовые наборы и виды блоков совпадают с браузером (resources/js/core/presets.js);
 //   — запрещённые блоки превращаются в текст так же, как в браузере (общие примеры tests/presets/vectors.json);
 //   — подделанный запрос не сохранит запрещённый блок; без права правки сохранение и загрузка отклоняются;
 //   — свои наборы в ted.config.php проверяются и уходят в браузер.
@@ -37,7 +37,7 @@ $throws = static function (callable $fn, string $needle): bool {
 };
 
 // --- одно описание с браузером ---
-$js = (string) file_get_contents(dirname(__DIR__, 2) . '/src/core/presets.js');
+$js = (string) file_get_contents(dirname(__DIR__, 2) . '/resources/js/core/presets.js');
 $between = static function (string $src, string $tag): string {
     return preg_match('~/\* ' . $tag . ':begin.*?\*/(.*?)/\* ' . $tag . ':end \*/~s', $src, $m) ? $m[1] : '';
 };

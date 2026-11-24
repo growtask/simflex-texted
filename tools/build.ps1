@@ -30,7 +30,7 @@ $utf8 = New-Object System.Text.UTF8Encoding($false)
 $read = { param($rel) [System.IO.File]::ReadAllText((Join-Path $root $rel), $utf8).TrimStart([char]0xFEFF) }
 
 $version = '0.0.0'
-$m = [regex]::Match((& $read 'src/index.js'), "const VERSION = '([^']+)'")
+$m = [regex]::Match((& $read 'resources/js/index.js'), "const VERSION = '([^']+)'")
 if ($m.Success) { $version = $m.Groups[1].Value }
 $banner = "/*! Ted $version — блочный редактор SimflexCMS, лицензия MIT. Собрано $(Get-Date -Format 'yyyy-MM-dd HH:mm') */`n"
 
@@ -63,8 +63,11 @@ return $banner + "(function () {`n'use strict';`n`n" + ($parts -join "`n") + "`n
 }
 $js = Join-Modules $modules
 $contentJs = (Join-Modules $contentModules).Replace('/*! Ted ', '/*! Ted content ')
+# dist/ самодостаточна: шрифты, плитки и значки рядом (dist/fonts, tiles, icons) — ../fonts/ и т. п. становятся fonts/
+$assetDirs = @('fonts', 'tiles', 'icons')
+$distUrls = { param($text) [regex]::Replace($text, "url\(([`"']?)(?:\.\./)+(" + ($assetDirs -join '|') + ')/', 'url($1$2/') }
 $css = $banner
-foreach ($rel in $styles) { $css += "`n/* ---- $rel ---- */`n" + (& $read $rel) }
+foreach ($rel in $styles) { $css += "`n/* ---- $rel ---- */`n" + (& $distUrls (& $read $rel)) }
 
 # ---------- Документация блоков (этап 5): таблицы в blocks/<тип>/README.md и blocks/README.md — из block.json ----------
 # (та же логика в build.php; сборки сравнивает tools/check-builds.ps1)
@@ -119,9 +122,21 @@ $dist = Join-Path $root 'dist'
 New-Item -ItemType Directory -Force $dist | Out-Null
 [System.IO.File]::WriteAllText((Join-Path $dist 'ted.js'), $js, $utf8)
 [System.IO.File]::WriteAllText((Join-Path $dist 'ted.css'), $css, $utf8)
-# content.js для сайта (плеер аудио и запуск видео по клику) собирается из тех же модулей, что и редактор
-[System.IO.File]::WriteAllText((Join-Path $root 'content.js'), $contentJs, $utf8)
-[System.IO.File]::WriteAllText((Join-Path $dist 'ted.vw.css'), $banner + (& $read 'styles/ted.vw.css'), $utf8)
+# content.js для сайта (плеер аудио, вкладки, содержание и др.) собирается из тех же модулей, что и редактор
+[System.IO.File]::WriteAllText((Join-Path $dist 'content.js'), $contentJs, $utf8)
+[System.IO.File]::WriteAllText((Join-Path $dist 'ted.vw.css'), $banner + (& $distUrls (& $read 'resources/css/ted.vw.css')), $utf8)
+# копии resources/fonts, tiles, icons; лишние файлы в dist/<папка> удаляются
+foreach ($dir in $assetDirs) {
+  $from = Join-Path $root "resources/$dir"
+  $to = Join-Path $dist $dir
+  New-Item -ItemType Directory -Force $to | Out-Null
+  $names = @(Get-ChildItem -LiteralPath $from -File | ForEach-Object Name)
+  Get-ChildItem -LiteralPath $to -File | Where-Object { $names -notcontains $_.Name } | Remove-Item -Force
+  foreach ($name in $names) {
+    $src = Join-Path $from $name; $dst = Join-Path $to $name
+    if (-not (Test-Path -LiteralPath $dst) -or (Get-FileHash -LiteralPath $src).Hash -ne (Get-FileHash -LiteralPath $dst).Hash) { Copy-Item -LiteralPath $src -Destination $dst -Force }
+  }
+}
 
 '{0,-16} {1,6:N1} КБ' -f 'dist/ted.js', ($js.Length / 1024)
 '{0,-16} {1,6:N1} КБ' -f 'dist/ted.css', ($css.Length / 1024)

@@ -1,10 +1,10 @@
 // Блок «Таблица» — полностью в папке (этап 5): разметка, очистка, строки и столбцы, формулы (formula.js), правка (table.editor.js,
 // table-formula.js), меню блока, превращение в текст. HTML-теги таблицы и правила data-cols / data-formula — в общем белом списке.
 import TABLE_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
-import { cleanInlineChildren } from '../../src/core/sanitize.js';
-import { normalizeRoot } from '../../src/core/blocks.js';
-import { h, menuItem } from '../../src/ui/widgets.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
+import { cleanInlineChildren } from '../../resources/js/core/sanitize.js';
+import { normalizeRoot } from '../../resources/js/core/blocks.js';
+import { h, menuItem } from '../../resources/js/ui/widgets.js';
 import { TableUI } from './table.editor.js';
 // Блок «Таблица» (этап 6.1, макет block-table, библиотека Table/table).
 // Разметка: <figure class="ted-table [ted-table--plain]" [id]>

@@ -2,9 +2,9 @@
 // Сервер проверяют tests/php/test-sanitize.php (те же векторы и адреса), tests/php/test-security.php, tests/php/test-opengraph.php.
 import { group, test, eq, ok, wait } from '../harness.js';
 import { make, Ted } from '../helpers.js';
-import { urlOk } from '../../src/core/urls.js';
-import { menuGroups } from '../../src/core/blocks.js';
-import { ALLOWED_TAGS } from '../../src/core/allowlist.js';
+import { urlOk } from '../../resources/js/core/urls.js';
+import { menuGroups } from '../../resources/js/core/blocks.js';
+import { ALLOWED_TAGS } from '../../resources/js/core/allowlist.js';
 
 const VECTORS = await (await fetch(new URL('../security-vectors.json', import.meta.url))).json();
 const URLS = await (await fetch(new URL('./url-vectors.json', import.meta.url))).json();

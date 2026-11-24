@@ -1,9 +1,9 @@
 // Тесты блока «Текст» (blocks/p, этап 5.2): описание из папки — меню, «Стиль текста», клавиша, подсказка, JSON, вид.
 import { group, test, eq, ok } from '../../tests/harness.js';
 import { make, select, blocks, Ted } from '../../tests/helpers.js';
-import { blockDef } from '../../src/core/registry.js';
-import { menuGroups, styleTypes, placeholderOf } from '../../src/core/blocks.js';
-import { HOTKEYS } from '../../src/core/keys.js';
+import { blockDef } from '../../resources/js/core/registry.js';
+import { menuGroups, styleTypes, placeholderOf } from '../../resources/js/core/blocks.js';
+import { HOTKEYS } from '../../resources/js/core/keys.js';
 
 group('Блок «Текст» (blocks/p)', () => {
   test('в реестре: текстовый блок, меню «Текст» после h4, первый в «Стиле текста»', () => {

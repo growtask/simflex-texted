@@ -1,6 +1,6 @@
-/*! Ted 0.1.0 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-24 12:45 */
+/*! Ted 0.1.0 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-24 13:32 */
 
-/* ---- styles/fonts.css ---- */
+/* ---- resources/css/fonts.css ---- */
 /* ==========================================================================
    Ted — локальные шрифты (без внешних запросов).
    Inter (variable, 100–900, латиница + кириллица) — шрифт макета и интерфейса.
@@ -11,7 +11,7 @@
 
 @font-face {
   font-family: "Ted Inter";
-  src: url("../fonts/InterVariable.woff2") format("woff2");
+  src: url("fonts/InterVariable.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -19,7 +19,7 @@
 
 @font-face {
   font-family: "Ted Roboto Mono";
-  src: url("../fonts/RobotoMono-latin.woff2") format("woff2");
+  src: url("fonts/RobotoMono-latin.woff2") format("woff2");
   font-weight: 100 700;
   font-style: normal;
   font-display: swap;
@@ -28,14 +28,14 @@
 
 @font-face {
   font-family: "Ted Roboto Mono";
-  src: url("../fonts/RobotoMono-cyrillic.woff2") format("woff2");
+  src: url("fonts/RobotoMono-cyrillic.woff2") format("woff2");
   font-weight: 100 700;
   font-style: normal;
   font-display: swap;
   unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 
-/* ---- styles/theme.default.css ---- */
+/* ---- resources/css/theme.default.css ---- */
 /* ==========================================================================
    Ted — тема контента по умолчанию (макет TextEd, библиотека «Симфлекс АИ»).
    Шрифты, цвета и скругления берутся из CSS-переменных сайта (имена как в
@@ -84,7 +84,7 @@
   .ted-content { --ted-motion-fast: 1ms; --ted-motion-base: 1ms; --ted-motion-slow: 1ms; }
 }
 
-/* ---- styles/content.css ---- */
+/* ---- resources/css/content.css ---- */
 /* ==========================================================================
    Ted — стили контента (макет TextEd: block-heading, block-body, block-quote,
    block-code, block-line; библиотека: Text/heading, Text/body, Layout/line).
@@ -1056,11 +1056,11 @@
 .ted-content .ted-media a[data-ted-video] { padding: calc(12 * var(--ted-u, 1px)) calc(16 * var(--ted-u, 1px)); border-radius: calc(12 * var(--ted-u, 1px)); background: var(--ted-c-code-bg); }
 .ted-content .ted-media a[data-ted-video] { display: block; overflow-wrap: anywhere; }
 .ted-content .ted-media--file > a { display: grid; grid-template-columns: calc(48 * var(--ted-u, 1px)) minmax(0, 1fr) calc(24 * var(--ted-u, 1px)); align-items: center; gap: calc(12 * var(--ted-u, 1px)); padding: calc(12 * var(--ted-u, 1px)) calc(24 * var(--ted-u, 1px)) calc(12 * var(--ted-u, 1px)) calc(12 * var(--ted-u, 1px)); overflow-wrap: anywhere; text-decoration: none; color: var(--ted-media-link, var(--color-text-icon-color1-dark, #1461cc)); }
-.ted-content .ted-media--file > a::before { content: ''; width: calc(48 * var(--ted-u, 1px)); height: calc(48 * var(--ted-u, 1px)); border-radius: calc(12 * var(--ted-u, 1px)); background: url('../icons/media-file.svg') center / calc(24 * var(--ted-u, 1px)) calc(24 * var(--ted-u, 1px)) no-repeat var(--color-main-color1-lighter, #d2e2f7); }
-.ted-content .ted-media--file > a::after { content: ''; width: calc(24 * var(--ted-u, 1px)); height: calc(24 * var(--ted-u, 1px)); background: var(--ted-media-download, url('../icons/media-download.svg')) center / contain no-repeat; }
+.ted-content .ted-media--file > a::before { content: ''; width: calc(48 * var(--ted-u, 1px)); height: calc(48 * var(--ted-u, 1px)); border-radius: calc(12 * var(--ted-u, 1px)); background: url('icons/media-file.svg') center / calc(24 * var(--ted-u, 1px)) calc(24 * var(--ted-u, 1px)) no-repeat var(--color-main-color1-lighter, #d2e2f7); }
+.ted-content .ted-media--file > a::after { content: ''; width: calc(24 * var(--ted-u, 1px)); height: calc(24 * var(--ted-u, 1px)); background: var(--ted-media-download, url('icons/media-download.svg')) center / contain no-repeat; }
 /* название файла: две строки и многоточие (для этого текст оборачивается в span.ted-media__name, высота у него авто; по центру плитки в одну строку тоже) */
 .ted-content .ted-media--file > a > .ted-media__name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; min-width: 0; }
-.ted-ui[data-ted-theme='dark'] .ted-media--file { --ted-media-download: url('../icons/media-download-dark.svg'); --ted-media-link: var(--color-text-icon-color1-light, #63a1f7); }
+.ted-ui[data-ted-theme='dark'] .ted-media--file { --ted-media-download: url('icons/media-download-dark.svg'); --ted-media-link: var(--color-text-icon-color1-light, #63a1f7); }
 .ted-content .ted-media--file > a:hover { background: var(--ui-hover, var(--color-main-gray-light, #dadfe5)); }
 @media (width <= 480px) { .ted-content .ted-media--file { grid-template-columns: minmax(0, 1fr); } }
 
@@ -1250,7 +1250,7 @@
 @container ted (width <= 812px) { .ted-content .ted-columns { gap: calc(12 * var(--ted-u)); --ted-cols: 2; } }
 @container ted (width <= 480px) { .ted-content .ted-columns { gap: calc(20 * var(--ted-u)); --ted-cols: 1; } }
 
-/* ---- styles/ui/tokens.css ---- */
+/* ---- resources/css/ui/tokens.css ---- */
 /* ==========================================================================
    Токены: переменные интерфейса (светлая и тёмная тема)
    Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
@@ -1373,7 +1373,7 @@
   --sb-thumb-press: rgba(210, 226, 247, 0.5);
 }
 
-/* ---- styles/ui/shell.css ---- */
+/* ---- resources/css/ui/shell.css ---- */
 /* ==========================================================================
    Оболочка редактора, холст и колонка
    Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
@@ -1542,7 +1542,7 @@ textarea.ted-editor[data-ted-theme="dark"],
 /* редактор в фокусе после Esc (дальше Tab — к панели): своей рамки нет, видимый фокус — у кнопок (22.11) */
 .ted-ui:focus { outline: none; }
 
-/* ---- styles/ui/tabs.css ---- */
+/* ---- resources/css/ui/tabs.css ---- */
 /* ==========================================================================
    Tabs/main soft — кнопка панели (editor-button)
    Общий элемент интерфейса (этап 4): кнопки шапки и меню. Цвета — токены --ui-* (tokens.css).
@@ -1587,7 +1587,7 @@ textarea.ted-editor[data-ted-theme="dark"],
 
 .ted-ui-btn.is-soon { cursor: default; }
 
-/* ---- styles/ui/toolbar.css ---- */
+/* ---- resources/css/ui/toolbar.css ---- */
 /* ==========================================================================
    Панель инструментов и кнопки
    Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
@@ -1666,7 +1666,7 @@ textarea.ted-editor[data-ted-theme="dark"],
 /* кнопка недоступна (например, «Цветной фон» у шагов и чек-листа) */
 .ted-ui-btn:disabled { opacity: 0.4; cursor: default; pointer-events: none; }
 
-/* ---- styles/ui/tooltip.css ---- */
+/* ---- resources/css/ui/tooltip.css ---- */
 /* ==========================================================================
    Подсказки (Tooltip)
    Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
@@ -1722,7 +1722,7 @@ textarea.ted-editor[data-ted-theme="dark"],
   opacity: 0.6;
 }
 
-/* ---- styles/ui/dropdown.css ---- */
+/* ---- resources/css/ui/dropdown.css ---- */
 /* ==========================================================================
    Dropdown/main — выпадающие панели и пункты меню
    Общий элемент интерфейса (этап 4): уголок 8×4, контейнер r 24, p 12, тень m.
@@ -1875,7 +1875,7 @@ textarea.ted-editor[data-ted-theme="dark"],
 /* подменю открылось слева (не хватило места справа) — стрелка пункта смотрит влево (22.11) */
 .ted-ui-item.is-sub-left > svg:last-child { transform: scaleX(-1); }
 
-/* ---- styles/ui/input.css ---- */
+/* ---- resources/css/ui/input.css ---- */
 /* ==========================================================================
    Inputs/main — поля, поиск, подписи и подсказки полей
    Общий элемент интерфейса (этап 4): окна «Ссылка», «Якорь», поиск меню «/» и «Все блоки».
@@ -1955,7 +1955,7 @@ textarea.ted-editor[data-ted-theme="dark"],
 
 .ted-ui-pop__field .ted-ui-input { width: 100%; box-sizing: border-box; }
 
-/* ---- styles/ui/popover.css ---- */
+/* ---- resources/css/ui/popover.css ---- */
 /* ==========================================================================
    Окна (Popover): ссылка, якорь, помощь, проверка правок ✨, подменю
    Общий элемент интерфейса (этап 4): шапка с крестиком, поля 16, промежуток 8; содержимое — кнопки, поля, переключатели.
@@ -2025,14 +2025,14 @@ textarea.ted-editor[data-ted-theme="dark"],
 
 .ted-ui-help__shot { height: 120px; overflow: hidden; border-radius: var(--ui-radius-medium); background: var(--ui-field) no-repeat left top / 496px 120px; }
 
-.ted-ui-help__shot[data-step="1"] { background-image: url(../tiles/help-1-light.webp); }
-.ted-ui-help__shot[data-step="2"] { background-image: url(../tiles/help-2-light.webp); }
-.ted-ui-help__shot[data-step="3"] { background-image: url(../tiles/help-3-light.webp); }
-.ted-ui-help__shot[data-step="4"] { background-image: url(../tiles/help-4-light.webp); }
-.ted-ui[data-ted-theme="dark"] .ted-ui-help__shot[data-step="1"] { background-image: url(../tiles/help-1-dark.webp); }
-.ted-ui[data-ted-theme="dark"] .ted-ui-help__shot[data-step="2"] { background-image: url(../tiles/help-2-dark.webp); }
-.ted-ui[data-ted-theme="dark"] .ted-ui-help__shot[data-step="3"] { background-image: url(../tiles/help-3-dark.webp); }
-.ted-ui[data-ted-theme="dark"] .ted-ui-help__shot[data-step="4"] { background-image: url(../tiles/help-4-dark.webp); }
+.ted-ui-help__shot[data-step="1"] { background-image: url(tiles/help-1-light.webp); }
+.ted-ui-help__shot[data-step="2"] { background-image: url(tiles/help-2-light.webp); }
+.ted-ui-help__shot[data-step="3"] { background-image: url(tiles/help-3-light.webp); }
+.ted-ui-help__shot[data-step="4"] { background-image: url(tiles/help-4-light.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-help__shot[data-step="1"] { background-image: url(tiles/help-1-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-help__shot[data-step="2"] { background-image: url(tiles/help-2-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-help__shot[data-step="3"] { background-image: url(tiles/help-3-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-help__shot[data-step="4"] { background-image: url(tiles/help-4-dark.webp); }
 
 /* ==========================================================================
    Холст: отступ 24 сверху, колонка 700 / 628 / 480 / 382
@@ -2067,7 +2067,7 @@ textarea.ted-editor[data-ted-theme="dark"],
 /* Ряд кнопок в окне (выравнивание кнопок блока «Кнопка»): те же кнопки, что в панели */
 .ted-ui-pop__row { display: flex; gap: 4px; }
 
-/* ---- styles/ui/button.css ---- */
+/* ---- resources/css/ui/button.css ---- */
 /* ==========================================================================
    Buttons/main (xs, s; primary, gray, secondary, icon) и Buttons/icon-small
    Общий элемент интерфейса (этап 4): высота 32 / 40, r 8 / 12, ui/s 600 14/1.4; маленькие кнопки 24, r 8.
@@ -2150,7 +2150,7 @@ textarea.ted-editor[data-ted-theme="dark"],
 
 .ted-ui .ted-ui-action--icon.ted-ui-action--s svg { width: 24px; height: 24px; }
 
-/* ---- styles/ui/toggle.css ---- */
+/* ---- resources/css/ui/toggle.css ---- */
 /* ==========================================================================
    Switches/toggle size s — переключатель
    Общий элемент интерфейса (этап 4): дорожка 44 × 24, p 4, ползунок 16, подпись text/t3.
@@ -2194,7 +2194,7 @@ textarea.ted-editor[data-ted-theme="dark"],
 
 .ted-ui-toggle__input:checked + .ted-ui-toggle__track .ted-ui-toggle__knob svg { opacity: 1; }
 
-/* ---- styles/ui/slash-menu.css ---- */
+/* ---- resources/css/ui/slash-menu.css ---- */
 /* ==========================================================================
    Меню блоков по «/»
    Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
@@ -2245,7 +2245,7 @@ textarea.ted-editor[data-ted-theme="dark"],
   font-size: 14px;
 }
 
-/* ---- styles/ui/block-picker.css ---- */
+/* ---- resources/css/ui/block-picker.css ---- */
 /* ==========================================================================
    Меню всех блоков (editor-block-picker)
    Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
@@ -2382,84 +2382,84 @@ textarea.ted-editor[data-ted-theme="dark"],
 
 /* картинки плиток ещё не готовых блоков — из макета (tiles/<тип>-light|dark.webp, 352 × 224) */
 
-.ted-ui-tile[data-type="background"] .is-image { background-image: url(../tiles/background-light.webp); }
+.ted-ui-tile[data-type="background"] .is-image { background-image: url(tiles/background-light.webp); }
 
-.ted-ui-tile[data-type="facts"] .is-image { background-image: url(../tiles/facts-light.webp); }
+.ted-ui-tile[data-type="facts"] .is-image { background-image: url(tiles/facts-light.webp); }
 
-.ted-ui-tile[data-type="proscons"] .is-image { background-image: url(../tiles/proscons-light.webp); }
+.ted-ui-tile[data-type="proscons"] .is-image { background-image: url(tiles/proscons-light.webp); }
 
-.ted-ui-tile[data-type="checklist"] .is-image { background-image: url(../tiles/checklist-light.webp); }
+.ted-ui-tile[data-type="checklist"] .is-image { background-image: url(tiles/checklist-light.webp); }
 
-.ted-ui-tile[data-type="steps"] .is-image { background-image: url(../tiles/steps-light.webp); }
+.ted-ui-tile[data-type="steps"] .is-image { background-image: url(tiles/steps-light.webp); }
 
-.ted-ui-tile[data-type="image"] .is-image { background-image: url(../tiles/image-light.webp); }
+.ted-ui-tile[data-type="image"] .is-image { background-image: url(tiles/image-light.webp); }
 
-.ted-ui-tile[data-type="gallery"] .is-image { background-image: url(../tiles/gallery-light.webp); }
+.ted-ui-tile[data-type="gallery"] .is-image { background-image: url(tiles/gallery-light.webp); }
 
-.ted-ui-tile[data-type="video"] .is-image { background-image: url(../tiles/video-light.webp); }
+.ted-ui-tile[data-type="video"] .is-image { background-image: url(tiles/video-light.webp); }
 
-.ted-ui-tile[data-type="audio"] .is-image { background-image: url(../tiles/audio-light.webp); }
+.ted-ui-tile[data-type="audio"] .is-image { background-image: url(tiles/audio-light.webp); }
 
-.ted-ui-tile[data-type="embed"] .is-image { background-image: url(../tiles/embed-light.webp); }
+.ted-ui-tile[data-type="embed"] .is-image { background-image: url(tiles/embed-light.webp); }
 
-.ted-ui-tile[data-type="iframe"] .is-image { background-image: url(../tiles/iframe-light.webp); }
+.ted-ui-tile[data-type="iframe"] .is-image { background-image: url(tiles/iframe-light.webp); }
 
-.ted-ui-tile[data-type="file"] .is-image { background-image: url(../tiles/file-light.webp); }
+.ted-ui-tile[data-type="file"] .is-image { background-image: url(tiles/file-light.webp); }
 
-.ted-ui-tile[data-type="table"] .is-image { background-image: url(../tiles/table-light.webp); }
+.ted-ui-tile[data-type="table"] .is-image { background-image: url(tiles/table-light.webp); }
 
-.ted-ui-tile[data-type="columns"] .is-image { background-image: url(../tiles/columns-light.webp); }
+.ted-ui-tile[data-type="columns"] .is-image { background-image: url(tiles/columns-light.webp); }
 
-.ted-ui-tile[data-type="toc"] .is-image { background-image: url(../tiles/toc-light.webp); }
+.ted-ui-tile[data-type="toc"] .is-image { background-image: url(tiles/toc-light.webp); }
 
-.ted-ui-tile[data-type="accordion"] .is-image { background-image: url(../tiles/accordion-light.webp); }
+.ted-ui-tile[data-type="accordion"] .is-image { background-image: url(tiles/accordion-light.webp); }
 
-.ted-ui-tile[data-type="tabs"] .is-image { background-image: url(../tiles/tabs-light.webp); }
+.ted-ui-tile[data-type="tabs"] .is-image { background-image: url(tiles/tabs-light.webp); }
 
-.ted-ui-tile[data-type="button"] .is-image { background-image: url(../tiles/button-light.webp); }
+.ted-ui-tile[data-type="button"] .is-image { background-image: url(tiles/button-light.webp); }
 
-.ted-ui-tile[data-type="product"] .is-image { background-image: url(../tiles/product-light.webp); }
+.ted-ui-tile[data-type="product"] .is-image { background-image: url(tiles/product-light.webp); }
 
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="background"] .is-image { background-image: url(../tiles/background-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="background"] .is-image { background-image: url(tiles/background-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="facts"] .is-image { background-image: url(../tiles/facts-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="facts"] .is-image { background-image: url(tiles/facts-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="proscons"] .is-image { background-image: url(../tiles/proscons-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="proscons"] .is-image { background-image: url(tiles/proscons-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="checklist"] .is-image { background-image: url(../tiles/checklist-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="checklist"] .is-image { background-image: url(tiles/checklist-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="steps"] .is-image { background-image: url(../tiles/steps-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="steps"] .is-image { background-image: url(tiles/steps-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="image"] .is-image { background-image: url(../tiles/image-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="image"] .is-image { background-image: url(tiles/image-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="gallery"] .is-image { background-image: url(../tiles/gallery-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="gallery"] .is-image { background-image: url(tiles/gallery-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="video"] .is-image { background-image: url(../tiles/video-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="video"] .is-image { background-image: url(tiles/video-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="audio"] .is-image { background-image: url(../tiles/audio-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="audio"] .is-image { background-image: url(tiles/audio-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="embed"] .is-image { background-image: url(../tiles/embed-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="embed"] .is-image { background-image: url(tiles/embed-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="iframe"] .is-image { background-image: url(../tiles/iframe-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="iframe"] .is-image { background-image: url(tiles/iframe-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="file"] .is-image { background-image: url(../tiles/file-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="file"] .is-image { background-image: url(tiles/file-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="table"] .is-image { background-image: url(../tiles/table-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="table"] .is-image { background-image: url(tiles/table-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="columns"] .is-image { background-image: url(../tiles/columns-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="columns"] .is-image { background-image: url(tiles/columns-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="toc"] .is-image { background-image: url(../tiles/toc-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="toc"] .is-image { background-image: url(tiles/toc-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="accordion"] .is-image { background-image: url(../tiles/accordion-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="accordion"] .is-image { background-image: url(tiles/accordion-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="tabs"] .is-image { background-image: url(../tiles/tabs-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="tabs"] .is-image { background-image: url(tiles/tabs-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="button"] .is-image { background-image: url(../tiles/button-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="button"] .is-image { background-image: url(tiles/button-dark.webp); }
 
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="product"] .is-image { background-image: url(../tiles/product-dark.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="product"] .is-image { background-image: url(tiles/product-dark.webp); }
 
-/* ---- styles/ui/interaction.css ---- */
+/* ---- resources/css/ui/interaction.css ---- */
 /* ==========================================================================
    Ручки блоков, «Добавить блок», перетаскивание
    Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
@@ -2672,7 +2672,7 @@ textarea.ted-editor[data-ted-theme="dark"],
 
 .ted-ui-controls.is-visible { transition: opacity 0.12s ease, top 0.14s cubic-bezier(0.2, 0.8, 0.2, 1), left 0.14s cubic-bezier(0.2, 0.8, 0.2, 1); }
 
-/* ---- styles/ui/preview.css ---- */
+/* ---- resources/css/ui/preview.css ---- */
 /* ==========================================================================
    Предпросмотр
    Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
@@ -2794,7 +2794,7 @@ textarea.ted-editor[data-ted-theme="dark"],
 
 .ted-ui-canvas:not([hidden]), .ted-ui-view:not([hidden]) { animation: ted-fade-in 0.18s ease; }
 
-/* ---- styles/ui/toasts.css ---- */
+/* ---- resources/css/ui/toasts.css ---- */
 /* ==========================================================================
    Тостеры
    Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
@@ -2908,7 +2908,7 @@ textarea.ted-editor[data-ted-theme="dark"],
 .ted-ui-toast[data-back] > * { opacity: 0; transition: opacity var(--ui-motion-fast, 120ms) ease; }
 .ted-ui-toast.is-closing { transform: translateY(calc(var(--toast-y, 0px) + 4px)) scale(var(--toast-scale, 1)); }
 
-/* ---- styles/ui/editing.css ---- */
+/* ---- resources/css/ui/editing.css ---- */
 /* ==========================================================================
    Правка: выделение, заглушки, сырые блоки
    Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
@@ -2981,7 +2981,7 @@ textarea.ted-editor[data-ted-theme="dark"],
   pointer-events: none;
 }
 
-/* ---- styles/ui/blocks.css ---- */
+/* ---- resources/css/ui/blocks.css ---- */
 /* ==========================================================================
    Блоки этапа 4 и код в правке
    Порядок правил внутри файла сохранён из прежнего ui.css (каскад).
@@ -3281,8 +3281,8 @@ textarea.ted-editor[data-ted-theme="dark"],
 
 .ted-ui-editable blockquote.ted-callout > p[data-tedui-ph]::before { color: var(--ui-color-text-icon-gray-medium); }
 
-.ted-ui-tile[data-type="callout"] .is-image { background-image: url(../tiles/callout-light.webp); }
-.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="callout"] .is-image { background-image: url(../tiles/callout-dark.webp); }
+.ted-ui-tile[data-type="callout"] .is-image { background-image: url(tiles/callout-light.webp); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-tile[data-type="callout"] .is-image { background-image: url(tiles/callout-dark.webp); }
 .ted-ui-editable blockquote.ted-callout > p[data-tedui-phline]::before { color: var(--ui-color-text-icon-gray-medium); }
 
 /* ---- blocks/background/background.editor.css ---- */
@@ -3372,7 +3372,7 @@ textarea.ted-editor[data-ted-theme="dark"],
 .ted-ui-editable div.ted-product[data-tedui-loading] .ted-product__img { opacity: 0.5; }
 /* пустая картинка ручного товара — скрепка, как у зоны загрузки медиа: нажатие загружает картинку */
 .ted-ui-editable div.ted-product[data-tedui-inline] span.ted-product__img { display: grid; place-items: center; }
-.ted-ui-editable div.ted-product[data-tedui-inline] span.ted-product__img::after { content: ""; width: 24px; height: 24px; background: center / contain no-repeat url('../icons/media-paperclip.svg'); }
+.ted-ui-editable div.ted-product[data-tedui-inline] span.ted-product__img::after { content: ""; width: 24px; height: 24px; background: center / contain no-repeat url('icons/media-paperclip.svg'); }
 
 /* ---- blocks/media/media.editor.css ---- */
 /* Медиа — правка в редакторе (бывш. styles/ui/media.css). */
@@ -3385,8 +3385,8 @@ textarea.ted-editor[data-ted-theme="dark"],
   --ted-media-link: var(--ui-color-text-icon-color1-dark);
   --ted-media-link-hover: var(--ui-color-text-icon-color1-main);   /* Buttons/main flat l: hover, press */
   --ted-media-link-press: var(--ui-color-text-icon-color1-darker);
-  --ted-media-paperclip: url('../icons/media-paperclip.svg');
-  --ted-media-info: url('../icons/media-info.svg');
+  --ted-media-paperclip: url('icons/media-paperclip.svg');
+  --ted-media-info: url('icons/media-info.svg');
   position: relative;
   margin-bottom: calc(var(--ted-gap) * var(--ted-u));
 }
@@ -3398,8 +3398,8 @@ textarea.ted-editor[data-ted-theme="dark"],
   --ted-media-link: var(--ui-color-text-icon-color1-light);
   --ted-media-link-hover: var(--ui-color-text-icon-color1-lighter);
   --ted-media-link-press: var(--ui-color-text-icon-color1-main);
-  --ted-media-paperclip: url('../icons/media-paperclip-dark.svg');
-  --ted-media-info: url('../icons/media-info-dark.svg');
+  --ted-media-paperclip: url('icons/media-paperclip-dark.svg');
+  --ted-media-info: url('icons/media-info-dark.svg');
 }
 
 .ted-ui-media[data-media-ready="false"] > .ted-media { display: none; }
@@ -3449,7 +3449,7 @@ textarea.ted-editor[data-ted-theme="dark"],
 .ted-ui-media__tools { position: absolute; z-index: 2; inset: 8px 8px auto auto; display: flex; gap: 4px; opacity: 0; transition: opacity 0.12s ease; }
 .ted-ui-media:hover .ted-ui-media__tools,
 .ted-ui-media:focus-within .ted-ui-media__tools { opacity: 1; }
-.ted-ui-media__refresh-icon { display: block; width: 16px; height: 16px; background: center / contain no-repeat url('../icons/media-refresh.svg'); }
+.ted-ui-media__refresh-icon { display: block; width: 16px; height: 16px; background: center / contain no-repeat url('icons/media-refresh.svg'); }
 /* Кнопки плитки галереи: правый верхний угол плитки (поле 4), между кнопками 2, значки 16 — как item-controls у шагов и плиток цифр */
 .ted-ui-media__tile-tools {
   position: absolute;
@@ -3755,7 +3755,7 @@ textarea.ted-editor[data-ted-theme="dark"],
 .ted-ui.is-dragging .ted-ui-editable div.ted-columns > .ted-columns__col[data-tedui-drag] { transition: none; }
 .ted-ui.is-dropping .ted-ui-editable div.ted-columns > .ted-columns__col { transition: none !important; }
 
-/* ---- styles/ui/motion.css ---- */
+/* ---- resources/css/ui/motion.css ---- */
 /* ==========================================================================
    Анимации и полосы прокрутки
    Порядок правил внутри файла сохранён из прежнего ui.css (каскад).

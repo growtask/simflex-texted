@@ -1,4 +1,4 @@
-// Блок «Товар» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из src/site/blocks.js.
+// Блок «Товар» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из resources/js/site/blocks.js.
 
 /** Товар: «В корзину» шлёт событие ted:add-to-cart { id, button }; CMS кладёт товар в корзину и вызывает preventDefault() —
  * тогда переход по ссылке отменяется. Без обработчика (или без скрипта) кнопка просто ведёт на страницу товара. */

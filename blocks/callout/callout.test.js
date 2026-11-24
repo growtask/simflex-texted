@@ -1,8 +1,8 @@
 // Тесты блока «Выноска» (blocks/callout, этап 5.5).
 import { group, test, eq, ok } from '../../tests/harness.js';
 import { make, blocks, Ted } from '../../tests/helpers.js';
-import { blockDef, defOf } from '../../src/core/registry.js';
-import { menuGroups } from '../../src/core/blocks.js';
+import { blockDef, defOf } from '../../resources/js/core/registry.js';
+import { menuGroups } from '../../resources/js/core/blocks.js';
 import { placeCaret, insertBlock } from '../../tests/interaction/samples.js';
 
 const key = (ed, k) => ed.editable.dispatchEvent(new KeyboardEvent('keydown', { key: k, code: k, bubbles: true, cancelable: true }));

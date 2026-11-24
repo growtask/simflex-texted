@@ -2,10 +2,10 @@
 // Внутри — абзацы (их ведёт текстовый движок ядра); своё — вставка, Enter в заголовке и в пустом последнем абзаце,
 // заглушки, JSON. В наборе без выноски — её абзацы (block.json → degrade: children; так же на сервере).
 import CALLOUT_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
-import { emptyBlock, isEmptyBlock, normalizeRoot } from '../../src/core/blocks.js';
-import { getRange, placeCaret } from '../../src/core/selection.js';
-import { bjEsc, bjLines } from '../../src/core/blocks-json.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
+import { emptyBlock, isEmptyBlock, normalizeRoot } from '../../resources/js/core/blocks.js';
+import { getRange, placeCaret } from '../../resources/js/core/selection.js';
+import { bjEsc, bjLines } from '../../resources/js/core/blocks-json.js';
 
 const CALLOUT_ZW = new RegExp(String.fromCharCode(0x200b), 'g');
 

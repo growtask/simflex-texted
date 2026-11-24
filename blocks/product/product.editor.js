@@ -4,8 +4,8 @@
 // «Настройки товара» под блоком: ссылка (куда ведёт «Перейти»), а с каталогом CMS — поиск товара (options.products.search):
 // выбор подставляет название, цены, картинку и ссылку (товар из каталога правится только выбором).
 
-import { h, icon, smallButton, menuItem } from '../../src/ui/widgets.js';
-import { emptyBlock, isEmptyBlock } from '../../src/core/blocks.js';
+import { h, icon, smallButton, menuItem } from '../../resources/js/ui/widgets.js';
+import { emptyBlock, isEmptyBlock } from '../../resources/js/core/blocks.js';
 import { readProduct, productData, productPrice, makeProductBlock } from './product.js';
 
 /** Поле цены — по ширине текста (как цена на сайте: старая цена сразу за новой). */

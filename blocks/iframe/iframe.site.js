@@ -1,4 +1,4 @@
-// Блок «iFrame» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из src/site/blocks.js.
+// Блок «iFrame» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из resources/js/site/blocks.js.
 
 /** Высота фрейма блока «iFrame» из атрибута height, если браузер не умеет attr() в CSS: сброс сайта (iframe{height:auto}) сильнее атрибута. */
 function siteFrameHeight(root) {

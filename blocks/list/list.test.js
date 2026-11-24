@@ -2,9 +2,9 @@
 // ниже — перенесённые прежние тесты списков из tests/sizes.test.js.
 import { group, test, eq, ok } from '../../tests/harness.js';
 import { Ted, make, blocks, select, pop, html } from '../../tests/helpers.js';
-import { blockDef, defOf } from '../../src/core/registry.js';
-import { menuGroups, styleTypes, kindOf } from '../../src/core/blocks.js';
-import { HOTKEYS } from '../../src/core/keys.js';
+import { blockDef, defOf } from '../../resources/js/core/registry.js';
+import { menuGroups, styleTypes, kindOf } from '../../resources/js/core/blocks.js';
+import { HOTKEYS } from '../../resources/js/core/keys.js';
 
 const el = (h) => { const d = document.createElement('div'); d.innerHTML = h; return d.firstElementChild; };
 

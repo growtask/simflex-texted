@@ -1,8 +1,8 @@
-/*! Ted 0.1.0 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-24 12:45 */
+/*! Ted 0.1.0 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-24 13:32 */
 (function () {
 'use strict';
 
-// ---- src/core/i18n.js ----
+// ---- resources/js/core/i18n.js ----
 // Язык интерфейса редактора (решение заказчика 22.11: английский, смена — в «Ещё»). Строки в коде — русские;
 // t() возвращает перевод из словаря (lang/<язык>.js), а если его нет — русскую строку. Содержимое статьи не переводится.
 // Элементы, созданные через h(), помнят русские подписи — relabel() переводит уже показанный интерфейс без перезагрузки.
@@ -50,7 +50,7 @@ function relabel(root) {
   }
 }
 
-// ---- lang/en.js ----
+// ---- resources/lang/en.js ----
 // Английский интерфейс редактора (решение заказчика 22.11). Ключ — русская строка из кода, значение — перевод.
 // Новая строка интерфейса без перевода показывается по-русски; тест «Английский интерфейс» напоминает о ней.
 
@@ -440,7 +440,7 @@ addLang('en', {
   'Осторожно': 'Caution',
 });
 
-// ---- src/ui/icons.js ----
+// ---- resources/js/ui/icons.js ----
 // Иконки из макета Figma (editor-icons). Сгенерировано автоматически, цвет — currentColor.
 const ICONS = {
   'bold': '<svg viewBox="24 24 24 24" width="24" height="24" fill="none" aria-hidden="true"><path d="M42 40C42 39.2044 41.6837 38.4415 41.1211 37.8789C40.5585 37.3163 39.7956 37 39 37H31V43H39C39.7956 43 40.5585 42.6837 41.1211 42.1211C41.6837 41.5585 42 40.7956 42 40ZM44 40C44 41.3261 43.4728 42.5975 42.5352 43.5352C41.5975 44.4728 40.3261 45 39 45H31C30.4696 45 29.961 44.7891 29.5859 44.4141C29.2109 44.039 29 43.5304 29 43V29C29 28.4696 29.2109 27.961 29.5859 27.5859C29.961 27.2109 30.4696 27 31 27H38C39.3261 27 40.5975 27.5272 41.5352 28.4648C42.4728 29.4025 43 30.6739 43 32C43 33.3261 42.4728 34.5975 41.5352 35.5352C41.5016 35.5688 41.4661 35.6003 41.4316 35.6328C41.8327 35.8561 42.2048 36.1345 42.5352 36.4648C43.4728 37.4025 44 38.6739 44 40ZM31 35H38C38.7956 35 39.5585 34.6837 40.1211 34.1211C40.6837 33.5585 41 32.7956 41 32C41 31.2044 40.6837 30.4415 40.1211 29.8789C39.5585 29.3163 38.7956 29 38 29H31V35Z" fill="currentColor"/></svg>',
@@ -515,7 +515,7 @@ const ICONS = {
   'dots-horizontal': '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true"><path d="M3 12C3 10.8954 3.89543 10 5 10C6.10457 10 7 10.8954 7 12C7 13.1046 6.10457 14 5 14C3.89543 14 3 13.1046 3 12ZM10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12ZM17 12C17 10.8954 17.8954 10 19 10C20.1046 10 21 10.8954 21 12C21 13.1046 20.1046 14 19 14C17.8954 14 17 13.1046 17 12Z" fill="currentColor"/></svg>',
 };
 
-// ---- src/core/urls.js ----
+// ---- resources/js/core/urls.js ----
 // Ссылки и адреса — одно правило для всего редактора (этап 3 MODULAR_PLAN.md, «Безопасность»).
 // Тот же код на сервере: src/Sanitizer.php → Sanitizer::urlOk. Общие примеры — tests/security/url-vectors.json
 // (их проверяют оба теста: набор security в tests/run.html и tests/php/test-sanitize.php).
@@ -568,7 +568,7 @@ function srcsetOk(value) {
   });
 }
 
-// ---- src/core/allowlist.js ----
+// ---- resources/js/core/allowlist.js ----
 // Белый список разметки — тот же, что на сервере (src/Sanitizer.php → Sanitizer), этап 3 MODULAR_PLAN.md.
 // Им чистится «сырой» HTML старых статей (TinyMCE: таблицы, свои вставки, div со стилями), который редактор
 // показывает нередактируемым блоком: в браузере остаётся ровно то, что оставит сервер.
@@ -722,7 +722,7 @@ function cleanByAllowlist(parent, frameHosts = null) {
   return parent;
 }
 
-// ---- src/core/highlight.js ----
+// ---- resources/js/core/highlight.js ----
 // Подсветка синтаксиса кода — своя, без библиотек и внешних запросов.
 // tokenize(text, lang) → [{ t: 'kw' | 'str' | 'num' | 'com' | 'fn' | 'tag' | 'attr' | 'prop' | 'var' | null, s }]
 // В сохранённом HTML токены — <span class="ted-k"> (короткие классы); в правке — CSS Custom Highlight API (без изменения DOM).
@@ -1017,7 +1017,7 @@ function releaseEditorHighlight(root) {
   }
 }
 
-// ---- src/core/sanitize.js ----
+// ---- resources/js/core/sanitize.js ----
 // Очистка HTML: из любого входа (старый контент TinyMCE, вставка из Word /
 // Google Docs, DOM редактора) получаем чистую семантическую разметку.
 //
@@ -1767,7 +1767,7 @@ function escapeText(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/ /g, '&nbsp;');
 }
 
-// ---- src/core/selection.js ----
+// ---- resources/js/core/selection.js ----
 // Работа с выделением: сохранение/восстановление позиции курсора через
 // «смещение в символах» от начала редактора. Так курсор переживает любые
 // перестройки DOM (смена типа блока, undo/redo, нормализация).
@@ -1933,7 +1933,7 @@ function placeCaret(el, atEnd = false) {
   sel.addRange(range);
 }
 
-// ---- src/core/history.js ----
+// ---- resources/js/core/history.js ----
 // Своя история изменений (Ctrl+Z / Ctrl+Y).
 // Браузерный undo ломается, как только DOM меняется скриптом, поэтому
 // храним снимки содержимого вместе с позицией курсора.
@@ -2024,7 +2024,7 @@ class History {
   }
 }
 
-// ---- src/core/upload.js ----
+// ---- resources/js/core/upload.js ----
 // Прямая загрузка: XHR даёт реальный прогресс отправки и поддерживает отмену.
 function createUpload(endpoint, { headers = {} } = {}) {
   // maxSide — картинку уменьшить до этой стороны (товар: размер карточки с запасом для ретины, 22.11); сервер ограничивает 160…2560
@@ -2196,7 +2196,7 @@ function createOpenGraph(endpoint, { headers = {} } = {}) {
   };
 }
 
-// ---- src/core/presets.js ----
+// ---- resources/js/core/presets.js ----
 // Наборы (пресеты) — этап 2 MODULAR_PLAN.md. Набор = какие блоки доступны + как открывается редактор.
 //
 //   blocks — 'all' или список видов блоков ('p', 'h2', 'ul', 'image'…); абзац разрешён всегда;
@@ -2287,7 +2287,7 @@ function presetNames(serverPresets = null) {
   return [...new Set([...Object.keys(PRESETS), ...Object.keys(serverPresets || {}), ...Object.keys(defined)])];
 }
 
-// ---- src/core/server.js ----
+// ---- resources/js/core/server.js ----
 // Настройки с сервера (этап 1 MODULAR_PLAN.md): то, что браузеру нужно знать из ted.config.php.
 // CMS передаёт их в Ted.init({ server: <?= Config::load()->getClientJson() ?> }). Пути на диске, ffmpeg и ключи сюда не попадают.
 //   filesUrl    — адрес папки файлов ('/uf' или 'https://cdn…/uf'): по нему редактор узнаёт свои файлы (удаление после сохранения)
@@ -2332,7 +2332,7 @@ function formatLimit(bytes) {
   return `${(Math.round(mb * 10) / 10).toString().replace('.', ',')} МБ`;
 }
 
-// ---- src/core/containers.js ----
+// ---- resources/js/core/containers.js ----
 // Блоки-контейнеры этапа 6: внутри — обычные блоки (абзацы, списки, медиа, таблица …), кроме цветного фона и других контейнеров.
 // В редакторе тело контейнера — «хост» блоков (.ted-ui-host): определение текущего блока, «/», медиа и Enter работают в нём,
 // как в корне. На сайте — своя разметка без скриптов (аккордеон — <details>/<summary> с разметкой FAQ schema.org).
@@ -2987,7 +2987,7 @@ function enhanceAudio(root = document) {
   }
 }
 
-// ---- src/core/blocks-json.js ----
+// ---- resources/js/core/blocks-json.js ----
 // Описание документа списком блоков (JSON) → HTML редактора. Для агентов и скриптов: не нужно знать классы ted-*.
 // Текст везде простой (экранируется), строчное форматирование — через поле html у абзаца не поддерживается намеренно.
 // Результат всё равно проходит Ted.clean / Sanitizer::clean, поэтому ошибка в описании не создаёт небезопасную разметку.
@@ -3041,7 +3041,7 @@ function htmlToBlocks(html, doc = document) {
   });
 }
 
-// ---- src/core/markdown.js ----
+// ---- resources/js/core/markdown.js ----
 // Markdown ⇄ блоки texted (решение заказчика 22.11: загрузка и выгрузка .md, вставка Markdown-текста, меню «Нейросети»).
 // markdownToHtml — Markdown → HTML блоков; результат всегда проходит обычную очистку (sanitizeHTML / Ted.clean),
 // поэтому здесь нет своих белых списков. htmlToMarkdown — сохранённый (чистый) HTML → Markdown.
@@ -3274,7 +3274,7 @@ function htmlToMarkdown(html, doc = document) {
   return blocksMd(root).replace(/\n{3,}/g, '\n\n').trim() + '\n';
 }
 
-// ---- src/core/presence.js ----
+// ---- resources/js/core/presence.js ----
 // Один документ в двух вкладках браузера (решение заказчика 22.11): вкладки узнают друг о друге через BroadcastChannel.
 // Открыли вторую — обе предупреждают; в другой вкладке сохранили — сохранение здесь сначала спрашивает подтверждение,
 // чтобы не перезаписать чужие правки молча. Без BroadcastChannel (старый браузер) — ничего не делает.
@@ -3324,7 +3324,7 @@ class Presence {
   }
 }
 
-// ---- src/core/blocks.js ----
+// ---- resources/js/core/blocks.js ----
 // Операции с блоками верхнего уровня: тип блока, превращение одного типа
 // в другой, выравнивание, нормализация DOM редактора.
 
@@ -4138,7 +4138,7 @@ function emptyStepsBlock(doc) {
   return ol;
 }
 
-// ---- src/core/yo.js ----
+// ---- resources/js/core/yo.js ----
 // Ted — ёфикатор: «е» → «ё» там, где ё не вызывает сомнений.
 // Словарь встроенный (без внешних запросов) и намеренно осторожный: в него входят только корни,
 // где «е» вместо «ё» не бывает во всех формах, поэтому нет «все/всё», «моем», «берем», «счета» и т. п.
@@ -4202,7 +4202,7 @@ function registerYo(words) {
   }
 }
 
-// ---- src/core/typo.js ----
+// ---- resources/js/core/typo.js ----
 // Правила разбиты на категории (TYPO_CATEGORIES): каждую можно отключить, для каждой считается число правок.
 // Работает по текстовым узлам блоков, не трогает код (<code>, <pre>), адреса и слова-исключения. Регистр не меняет.
 
@@ -4570,7 +4570,7 @@ function typografBlocks(blocks, opts = {}) {
   return { changed: edits.length, edits, stats };
 }
 
-// ---- src/core/keys.js ----
+// ---- resources/js/core/keys.js ----
 // Горячие клавиши. Сравниваем по физической клавише (event.code), поэтому
 // сочетания работают и в русской раскладке (Ctrl+B = Ctrl+И).
 // Mod = Ctrl на Windows/Linux, ⌘ на macOS.
@@ -4628,7 +4628,7 @@ function keysFor(cmd) {
   return k ? k.keys : '';
 }
 
-// ---- src/core/registry.js ----
+// ---- resources/js/core/registry.js ----
 // Реестр блоков (этап 5 MODULAR_PLAN.md). Блок — папка blocks/<тип>/: описание block.json и код <тип>.js, который
 // регистрирует себя: Ted.registerBlock({ ...описание, ...функции }). Ядро не знает конкретных блоков — спрашивает реестр.
 // Перенос идёт по одному блоку (решение 18.11); пока не перенесённые блоки живут в ядре по-старому.
@@ -9205,7 +9205,7 @@ function caretRect(r) {
 }
 
 // ---- blocks/accordion/accordion.js ----
-// Блок «Аккордеон» — полностью в папке (этап 5). Контейнер: ответы — «хосты» обычных блоков (общий код — src/core/containers.js).
+// Блок «Аккордеон» — полностью в папке (этап 5). Контейнер: ответы — «хосты» обычных блоков (общий код — resources/js/core/containers.js).
 // На сайте — <details>/<summary> с разметкой FAQ schema.org; её атрибуты и значения — в общем белом списке (allowlist.js = Sanitizer).
 const ACCORDION_BLOCK = {
   "type": "accordion",
@@ -9607,7 +9607,7 @@ function atEnd(el, r) {
 }
 
 // ---- blocks/tabs/tabs.js ----
-// Блок «Вкладки» — полностью в папке (этап 5). Контейнер: тела вкладок — «хосты» обычных блоков (общий код — src/core/containers.js).
+// Блок «Вкладки» — полностью в папке (этап 5). Контейнер: тела вкладок — «хосты» обычных блоков (общий код — resources/js/core/containers.js).
 const TABS_BLOCK = {
   "type": "tabs",
   "title": "Вкладки",
@@ -10411,7 +10411,7 @@ class TocUI {
 }
 
 // ---- blocks/columns/columns.js ----
-// Блок «Колонки» — полностью в папке (этап 5). Контейнер: колонки — «хосты» обычных блоков (общий код — src/core/containers.js).
+// Блок «Колонки» — полностью в папке (этап 5). Контейнер: колонки — «хосты» обычных блоков (общий код — resources/js/core/containers.js).
 const COLUMNS_BLOCK = {
   "type": "columns",
   "title": "Колонки",
@@ -10726,7 +10726,7 @@ class ColumnsUI {
   }
 }
 
-// ---- src/ui/widgets.js ----
+// ---- resources/js/ui/widgets.js ----
 // Элементы интерфейса по библиотеке «Симфлекс АИ»: кнопка панели (Tabs/main soft),
 // маленькая кнопка (Buttons/icon-small), подсказка (Tooltip/main),
 // выпадающая панель (Dropdown/main) с уголком.
@@ -10736,7 +10736,7 @@ const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(naviga
 
 function h(tag, attrs = {}, children = []) {
   const el = document.createElement(tag);
-  // подписи интерфейса — на языке редактора (src/core/i18n.js); русские запоминаются для смены языка на лету
+  // подписи интерфейса — на языке редактора (resources/js/core/i18n.js); русские запоминаются для смены языка на лету
   let ruText;
   let ruAttrs = null;
   for (const [k, v] of Object.entries(attrs)) {
@@ -11200,7 +11200,7 @@ class Toaster {
   }
 }
 
-// ---- src/ui/exchange.js ----
+// ---- resources/js/ui/exchange.js ----
 // Перенос статей и нейросети (решения заказчика 22.11): выгрузка и загрузка JSON и Markdown, промт для нейросети.
 // Меню «Ещё ⋯» → «Скопировать промт», «Загрузить .md или .json», «Выгрузить в Markdown», «Выгрузить в JSON». Загрузка заменяет статью — после предупреждения;
 // «Отменить» в уведомлении возвращает прежнюю. Всё загруженное проходит обычную очистку и набор блоков поля.
@@ -11392,7 +11392,7 @@ ${css.map((u) => `<link rel="stylesheet" href="${esc(u)}">`).join('\n')}
   if (doc.readyState === 'complete') setTimeout(ready, 300); else frame.addEventListener('load', () => setTimeout(ready, 100), { once: true });
 }
 
-// ---- src/ui/toolbar.js ----
+// ---- resources/js/ui/toolbar.js ----
 // Верхняя панель (макет editor-toolbar). Кнопки по центру; не помещаются —
 // панель прокручивается по горизонтали. Набор зависит от выбранного:
 //   default — ничего не выбрано: стиль ▾, выравнивание ▾, цвет ▾ | вставка блоков | помощь, режим
@@ -11708,7 +11708,7 @@ class Toolbar {
   }
 }
 
-// ---- src/ui/handle.js ----
+// ---- resources/js/ui/handle.js ----
 // Строка блока (макет editor-row, block-controls, editor-block-menu).
 //
 //  • наведение — слева от колонки «+» и ⠿ (gap 4, pt 4, в 8 px от текста);
@@ -12801,7 +12801,7 @@ function itemOwner(ed, li) {
   return (li && ed.blockUis.find((u) => u.ownsItem && u.ownsItem(li))) || null;
 }
 
-// ---- src/ui/blockmenu.js ----
+// ---- resources/js/ui/blockmenu.js ----
 // Меню блоков (макет editor-menu): открывается по «/», кнопкой «+» у строки,
 // строкой «Добавить блок» под последним блоком и кнопкой «Все блоки» в панели.
 // Поиск, группы библиотеки, стрелки ↑↓, Enter / Tab — вставить, Esc — закрыть.
@@ -13322,7 +13322,7 @@ class BlockMenu {
   }
 }
 
-// ---- src/ui/preview.js ----
+// ---- resources/js/ui/preview.js ----
 // Предпросмотр «как на сайте».
 // Контент рендерится в iframe нужной ширины (1920 / 1366 / 768 / 414) и
 // масштабируется под панель. Внутри iframe работают настоящие медиа-запросы
@@ -13852,7 +13852,7 @@ function caretText(cell, r, side) {
   return t.toString().replace(/​/g, '');
 }
 
-// ---- src/core/editor.js ----
+// ---- resources/js/core/editor.js ----
 // Ted — главный класс редактора.
 
 
@@ -16555,7 +16555,7 @@ function escapeHTML(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// ---- src/index.js ----
+// ---- resources/js/index.js ----
 // Ted — точка входа. Подключение как у TinyMCE:
 //
 //   Ted.init({ selector: 'textarea.editor', unit: 'vw' });
@@ -16650,7 +16650,7 @@ const Ted = {
   fromMarkdown(md, { blocks } = {}) { return Ted.clean(markdownToHtml(md), { blocks }); },
   /** Сохранённый HTML → Markdown (блоки без прямого аналога — понятным текстом). */
   toMarkdown(html) { return htmlToMarkdown(Ted.clean(html)); },
-  /** Свой блок (этап 5): Ted.registerBlock({ type, match, create, clean, … }) — см. src/core/registry.js и blocks/hr. */
+  /** Свой блок (этап 5): Ted.registerBlock({ type, match, create, clean, … }) — см. resources/js/core/registry.js и blocks/hr. */
   registerBlock(def) { return registerBlock(def); },
   /** Язык интерфейса (22.11): Ted.addLang('de', { 'Русская строка': 'Перевод' }), Ted.setLang('en') — для новых редакторов; у открытого — editor.setLang. */
   addLang(lang, map) { addLang(lang, map); },

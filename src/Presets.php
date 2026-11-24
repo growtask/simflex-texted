@@ -16,7 +16,7 @@ use InvalidArgumentException;
  * Набор = какие блоки доступны + как открывается редактор (mode: edit, view, readonly).
  * Набор поля задаёт СЕРВЕР (по настройке поля в CMS), а не браузер: перед сохранением HTML очищается по набору,
  * запрещённые блоки превращаются в обычный текст (абзацы и списки) — подделанный запрос не сохранит запрещённый блок.
- * Правила превращения — те же, что в браузере (src/core/blocks.js → restrictBlocks); общий набор примеров —
+ * Правила превращения — те же, что в браузере (resources/js/core/blocks.js → restrictBlocks); общий набор примеров —
  * tests/presets/vectors.json, его проверяют оба теста (php/test-presets.php и набор presets в tests/run.html).
  *
  *   $ted = Config::load();
@@ -24,7 +24,7 @@ use InvalidArgumentException;
  */
 final class Presets
 {
-    /* presets:begin — тот же список в src/core/presets.js (PRESETS) */
+    /* presets:begin — тот же список в resources/js/core/presets.js (PRESETS) */
     public const BASE = [
         'full' => ['blocks' => 'all', 'mode' => 'edit'],
         'mini' => ['blocks' => ['p', 'h2', 'h3', 'h4', 'ul', 'ol', 'blockquote', 'image'], 'mode' => 'edit'],
@@ -34,7 +34,7 @@ final class Presets
     ];
     /* presets:end */
 
-    /* types:begin — виды блоков, тот же список в src/core/presets.js (PRESET_TYPES) */
+    /* types:begin — виды блоков, тот же список в resources/js/core/presets.js (PRESET_TYPES) */
     public const TYPES = [];
     /* types:end */
     // Список пуст: все виды — из реестра блоков (blocks/<тип>/block.json), этап 5.
@@ -145,7 +145,7 @@ final class Presets
             $body->removeChild($el);
         }
         // вложенные блоки (решение 22.11): запрещённый блок внутри разрешённого тоже превращается в текст,
-        // «сырые» фрейм, видео, таблица, картинка — только внутри своего блока (как restrictBlocks в src/core/blocks.js)
+        // «сырые» фрейм, видео, таблица, картинка — только внутри своего блока (как restrictBlocks в resources/js/core/blocks.js)
         foreach (self::elements($body) as $el) {
             self::inner($el, 0, $allowed, $doc);
         }
@@ -202,7 +202,7 @@ final class Presets
         }
     }
 
-    /** Вложенный элемент: блок проверяется по набору, «сырой» тег — по владельцу (как check в restrictBlocks, src/core/blocks.js). */
+    /** Вложенный элемент: блок проверяется по набору, «сырой» тег — по владельцу (как check в restrictBlocks, resources/js/core/blocks.js). */
     private static function checkInner(DOMElement $c, int $depth, array $allowed, DOMDocument $doc): void
     {
         $def = Blocks::of($c);
@@ -255,7 +255,7 @@ final class Presets
     /** @var array<string, string[]> */
     private static array $ownTags = [];
 
-    /** Своя разметка блока: теги из block.json → html и образца меню (как ownTags в src/core/blocks.js). */
+    /** Своя разметка блока: теги из block.json → html и образца меню (как ownTags в resources/js/core/blocks.js). */
     private static function ownTags(array $def): array
     {
         $type = (string) $def['type'];
@@ -280,7 +280,7 @@ final class Presets
         return self::$ownTags[$type] = array_values(array_unique($tags));
     }
 
-    /** Элемент без своего вида на своём месте (как ownedNested в src/core/blocks.js). */
+    /** Элемент без своего вида на своём месте (как ownedNested в resources/js/core/blocks.js). */
     private static function ownedNested(DOMElement $c): bool
     {
         $tag = strtolower($c->localName);
@@ -297,7 +297,7 @@ final class Presets
         return in_array($tag, self::PHRASING, true);
     }
 
-    /** Вид блока сохранённого HTML — как restrictKind / kindOf в src/core/blocks.js. */
+    /** Вид блока сохранённого HTML — как restrictKind / kindOf в resources/js/core/blocks.js. */
     private static function kind(DOMElement $el): string
     {
         $def = Blocks::of($el);   // блок из реестра (этап 5)
@@ -308,7 +308,7 @@ final class Presets
         return $tag;
     }
 
-    /** Блок запрещённого вида → обычный текст (абзацы / списки), как degradeBlock в src/core/blocks.js. @return DOMNode[] */
+    /** Блок запрещённого вида → обычный текст (абзацы / списки), как degradeBlock в resources/js/core/blocks.js. @return DOMNode[] */
     private static function degrade(DOMElement $el, string $kind, DOMDocument $doc): array
     {
         $def = Blocks::get($kind);   // блок из реестра: как превращать в текст — block.json → degrade (то же в браузере)

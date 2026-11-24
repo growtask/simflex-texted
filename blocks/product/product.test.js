@@ -2,7 +2,7 @@
 // Товар (этап 6.5, макет block-product, окно kind=product): каталог CMS и ручной режим, скидка, безопасность, событие корзины, вид.
 import { group, test, eq, ok, wait } from '../../tests/harness.js';
 import { make, html, blocks, Ted } from '../../tests/helpers.js';
-import { cleanByAllowlist } from '../../src/core/allowlist.js';
+import { cleanByAllowlist } from '../../resources/js/core/allowlist.js';
 
 const CAT = [{ id: 'p5', name: 'Наушники Studio 5', sku: 'ST-5', price: 12900, oldPrice: 16900, image: '/uf/images/studio5.webp', url: '/catalog/studio-5/' }];
 const products = { search: async (q) => CAT.filter((p) => (p.name + p.sku).toLowerCase().includes(q.toLowerCase())), get: async (id) => CAT.find((p) => p.id === id) };

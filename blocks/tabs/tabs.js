@@ -1,9 +1,9 @@
-// Блок «Вкладки» — полностью в папке (этап 5). Контейнер: тела вкладок — «хосты» обычных блоков (общий код — src/core/containers.js).
+// Блок «Вкладки» — полностью в папке (этап 5). Контейнер: тела вкладок — «хосты» обычных блоков (общий код — resources/js/core/containers.js).
 import TABS_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
-import { HOST_CLASS, stripInHost } from '../../src/core/containers.js';
-import { sanitizeNodes, serializeBlocks, cleanInlineChildren } from '../../src/core/sanitize.js';
-import { normalizeRoot } from '../../src/core/blocks.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
+import { HOST_CLASS, stripInHost } from '../../resources/js/core/containers.js';
+import { sanitizeNodes, serializeBlocks, cleanInlineChildren } from '../../resources/js/core/sanitize.js';
+import { normalizeRoot } from '../../resources/js/core/blocks.js';
 import { TabsUI } from './tabs.editor.js';
 
 // Сайт: <div class="ted-tabs"><div class="ted-tabs__panel"><p class="ted-tabs__title">Название</p><div class="ted-tabs__body">блоки</div></div>…</div>

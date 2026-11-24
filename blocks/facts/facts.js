@@ -1,9 +1,9 @@
 // Блок «Ключевые цифры» (макет block-facts) — этап 5.11. <ul class="ted-facts"><li><strong>120+</strong><br>подпись</li></ul>
 // Текстовый блок: плитки, Enter, заглушки ведёт текстовый движок ядра; здесь — меню «Акцент», новый блок, JSON, стили.
 import FACTS_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
-import { emptyStepItem } from '../../src/core/blocks.js';
-import { bjEsc, bjLines } from '../../src/core/blocks-json.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
+import { emptyStepItem } from '../../resources/js/core/blocks.js';
+import { bjEsc, bjLines } from '../../resources/js/core/blocks-json.js';
 
 registerBlock({
   ...FACTS_BLOCK,

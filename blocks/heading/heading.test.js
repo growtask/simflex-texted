@@ -1,9 +1,9 @@
 // Тесты блока «Заголовок» (blocks/heading, этап 5.3): семейство h2–h6 — меню, «Стиль текста», клавиши, подсказка, JSON, вид.
 import { group, test, eq, ok } from '../../tests/harness.js';
 import { make, select, blocks, Ted } from '../../tests/helpers.js';
-import { blockDef } from '../../src/core/registry.js';
-import { menuGroups, placeholderOf } from '../../src/core/blocks.js';
-import { HOTKEYS } from '../../src/core/keys.js';
+import { blockDef } from '../../resources/js/core/registry.js';
+import { menuGroups, placeholderOf } from '../../resources/js/core/blocks.js';
+import { HOTKEYS } from '../../resources/js/core/keys.js';
 
 const LEVELS = ['h2', 'h3', 'h4', 'h5', 'h6'];
 

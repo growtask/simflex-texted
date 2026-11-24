@@ -1,8 +1,8 @@
 // Блок «Текст» (абзац, макет block-body / Text/body) — этап 5.2. Текстовый блок: ввод, Enter, Backspace, Markdown и
 // превращение ведёт текстовый движок ядра; здесь — описание (меню, «Стиль текста», Ctrl+Shift+0, подсказка), JSON и стили.
 import P_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
-import { bjCls, bjBg, bjAlign, bjLines } from '../../src/core/blocks-json.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
+import { bjCls, bjBg, bjAlign, bjLines } from '../../resources/js/core/blocks-json.js';
 
 registerBlock({
   ...P_BLOCK,

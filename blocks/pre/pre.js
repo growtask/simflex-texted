@@ -2,8 +2,8 @@
 // Текстовый блок: ввод, Enter, вставку, подсветку и шапку (язык, копирование) ведёт текстовый движок ядра; здесь — меню,
 // «Стиль текста», Markdown ```, другое имя code, белый список атрибутов, JSON, стили; на сайте — pre.site.js.
 import PRE_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
-import { bjEsc } from '../../src/core/blocks-json.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
+import { bjEsc } from '../../resources/js/core/blocks-json.js';
 
 registerBlock({
   ...PRE_BLOCK,

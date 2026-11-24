@@ -1,8 +1,8 @@
 // Блок «Заголовок» h2–h6 (макет block-heading / Text/heading) — этап 5.3. Семейство: одна папка, пять видов (variants).
 // Текстовый блок: правку ведёт текстовый движок ядра; здесь — меню (h2–h4), «Стиль текста», Ctrl+Shift+2…6, подсказка, JSON, стили.
 import HEADING_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
-import { bjCls, bjBg, bjAlign, bjLines } from '../../src/core/blocks-json.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
+import { bjCls, bjBg, bjAlign, bjLines } from '../../resources/js/core/blocks-json.js';
 
 const { variants: HEADING_VARIANTS, ...HEADING_BASE } = HEADING_BLOCK;
 for (const v of HEADING_VARIANTS) {

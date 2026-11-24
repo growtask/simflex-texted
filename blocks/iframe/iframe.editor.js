@@ -5,8 +5,8 @@
 // Подпись — строкой под фреймом прямо в блоке, как у медиа (решение 22.11), не в окне.
 // Фрейм в правке не перехватывает нажатия (pointer-events: none): первое нажатие выбирает блок.
 
-import { h, smallButton, button } from '../../src/ui/widgets.js';
-import { emptyBlock, isEmptyBlock } from '../../src/core/blocks.js';
+import { h, smallButton, button } from '../../resources/js/ui/widgets.js';
+import { emptyBlock, isEmptyBlock } from '../../resources/js/core/blocks.js';
 import { iframeSrcOk, parseIframeInput, makeIframeBlock, readIframe, IFRAME_RATIOS } from './iframe.js';
 
 /** Сайт не из списка в настройках сервера (ted.config.php → iframe.hosts). */

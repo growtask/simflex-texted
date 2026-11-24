@@ -28,7 +28,7 @@ Get-ChildItem $root -Recurse -File | ForEach-Object {
   Copy-Item $_.FullName $dest
 }
 
-$version = ([regex]::Match((Get-Content (Join-Path $root 'src/index.js') -Raw), "const VERSION = '([^']+)'")).Groups[1].Value
+$version = ([regex]::Match((Get-Content (Join-Path $root 'resources/js/index.js') -Raw), "const VERSION = '([^']+)'")).Groups[1].Value
 $count = (Get-ChildItem $out -Recurse -File).Count
 Write-Host "Опубликовано: texted $version, файлов: $count → $out" -ForegroundColor Green
 if (-not (Test-Path (Join-Path $root 'LICENSE'))) { Write-Host 'Нет файла LICENSE — выберите лицензию до публикации' -ForegroundColor Yellow }

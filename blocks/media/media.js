@@ -2,9 +2,9 @@
 // в папке (этап 5): разметка, очистка, сохранение, загрузка и окна (media.editor.js), плеер, имена файлов, кнопка «Смотреть на …».
 // В редакторе блок живёт в обёртке правки <div class="ted-ui-media" contenteditable="false"> (block.json → wrap).
 import MEDIA_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
-import { urlOk } from '../../src/core/urls.js';
-import { bjEsc, bjUrl } from '../../src/core/blocks-json.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
+import { urlOk } from '../../resources/js/core/urls.js';
+import { bjEsc, bjUrl } from '../../resources/js/core/blocks-json.js';
 import { MediaBlocks } from './media.editor.js';
 export const MEDIA_KINDS = new Set(['image', 'gallery', 'video', 'audio', 'file']);
 

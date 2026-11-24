@@ -1,8 +1,8 @@
 // Тесты блока «Цветной фон» (blocks/background, этап 5.6).
 import { group, test, eq, ok } from '../../tests/harness.js';
 import { make, blocks, Ted } from '../../tests/helpers.js';
-import { blockDef, defOf } from '../../src/core/registry.js';
-import { menuGroups, kindOf } from '../../src/core/blocks.js';
+import { blockDef, defOf } from '../../resources/js/core/registry.js';
+import { menuGroups, kindOf } from '../../resources/js/core/blocks.js';
 import { insertBlock } from '../../tests/interaction/samples.js';
 
 group('Блок «Цветной фон» (blocks/background)', () => {

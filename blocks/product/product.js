@@ -12,8 +12,8 @@
 // «В корзину» без скрипта — ссылка на товар; content.js шлёт событие ted:add-to-cart (CMS кладёт товар в корзину и отменяет переход).
 
 import PRODUCT_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
-import { urlOk } from '../../src/core/urls.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
+import { urlOk } from '../../resources/js/core/urls.js';
 import { ProductUI } from './product.editor.js';
 
 const PRODUCT_URL_RE = /^(https?:\/\/|\/(?!\/))/i;
