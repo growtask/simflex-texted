@@ -1,4 +1,4 @@
-/*! Ted 0.1.0 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-24 09:41 */
+/*! Ted 1.0.0 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-24 14:04 */
 (function () {
 'use strict';
 
@@ -16595,7 +16595,7 @@ function escapeHTML(s) {
 
 
 
-const VERSION = '0.1.0';
+const VERSION = '1.0.0';
 
 const Ted = {
   version: VERSION,
