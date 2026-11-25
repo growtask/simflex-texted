@@ -2,7 +2,7 @@
 
 Кнопка, две кнопки или баннер (заголовок, текст, кнопка) по макету `block-button` (Action/button). Блок целиком в этой папке: ядро его не упоминает (тест набора `blocks`).
 
-<!-- block.json:begin — собрано из block.json при сборке (tools/build.ps1, build.php), не правьте вручную -->
+<!-- block.json:begin — собрано из block.json при сборке (bin/build.php, build.php), не правьте вручную -->
 | Поле | Значение |
 |---|---|
 | Вид | `button` |

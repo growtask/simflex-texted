@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TextEd — редактор на всю ширину (сверка с макетом)</title>
 <link rel="stylesheet" href="site-theme.css">
-<link rel="preload" href="../fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../dist/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../dist/ted.css">
 <link rel="stylesheet" href="demo.css">
 <style>
@@ -23,7 +23,7 @@
 
 <script src="demo-icons.js"></script><script src="demo.js"></script>
 <script src="../dist/ted.js"></script>
-<script src="../content.js"></script>
+<script src="../dist/content.js"></script>
 <script src="sample.js"></script>
 <script>
   var params = new URLSearchParams(location.search);
@@ -39,10 +39,10 @@
     theme: params.has('dark') ? 'dark' : 'light',
     contentCss: ['site-theme.css'],
     startWithHeading: true,
-    // загрузка через демо-сервер (tools/demo.ps1): файлы и картинки по ссылке сжимаются, как в админке
+    // загрузка через демо-сервер (bin/demo.php): файлы и картинки по ссылке сжимаются, как в админке
     mediaPageUrl: '/company/',
     upload: location.protocol !== 'file:' ? Ted.createUpload('/ted-demo-media/upload', { headers: { 'X-Ted-Demo': 'media' } }) : null,
-    // «Встраивание»: карточку по ссылке читает демо-сервер (php/opengraph.php), статьи CMS — демо-список из sample.js
+    // «Встраивание»: карточку по ссылке читает демо-сервер (src/OpenGraph.php), статьи CMS — демо-список из sample.js
     opengraph: location.protocol !== 'file:' ? Ted.createOpenGraph('/ted-demo-media/og', { headers: { 'X-Ted-Demo': 'media' } }) : null,
     articles: { search: async (q) => (window.DEMO_ARTICLE_LIST || []).filter((a) => a.title.toLowerCase().includes(q.toLowerCase())), get: async (id) => (window.DEMO_ARTICLE_LIST || []).find((a) => a.id === id) },
   })[0];

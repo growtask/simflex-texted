@@ -6,7 +6,7 @@
 <title>TextEd — так текст выглядит на сайте</title>
 <!-- На сайте нужны только стили: переменные сайта + dist/ted.css (+ ted.vw.css для vw-сайтов) -->
 <link rel="stylesheet" href="site-theme.css">
-<link rel="preload" href="../fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../dist/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../dist/ted.css">
 <link rel="stylesheet" href="../dist/ted.vw.css" id="vw">
 <link rel="stylesheet" href="demo.css">
@@ -74,6 +74,6 @@
   function w() { document.getElementById('w').textContent = 'ширина окна: ' + innerWidth + 'px'; }
   addEventListener('resize', w); w();
 </script>
-<script src="../content.js" defer></script>
+<script src="../dist/content.js" defer></script>
 </body>
 </html>

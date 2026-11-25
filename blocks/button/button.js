@@ -6,9 +6,9 @@
 // баннера — строки текста. Без скрипта: ссылки-кнопки. Не больше двух кнопок; у баннера одна.
 
 import BUTTON_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
 import { ButtonUI } from './button.editor.js';
-import { urlOk } from '../../src/core/urls.js';
+import { urlOk } from '../../resources/js/core/urls.js';
 
 const BUTTON_ZW = new RegExp(String.fromCharCode(0x200b), 'g');
 

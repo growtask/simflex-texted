@@ -2,7 +2,7 @@
 // Кнопка (этап 6.5, макет block-button, окно kind=button): разметка, очистка, окно настроек, вид (одна, две, баннер), клавиши баннера.
 import { group, test, eq, ok, wait } from '../../tests/harness.js';
 import { make, html, blocks, Ted } from '../../tests/helpers.js';
-import { alignAllowed } from '../../src/core/blocks.js';
+import { alignAllowed } from '../../resources/js/core/blocks.js';
 
 const ONE = '<div class="ted-button"><a class="ted-button__btn" href="/catalog">Перейти в каталог</a></div>';
 const pop = () => { const all = document.querySelectorAll('.ted-ui-pop--link'); return all[all.length - 1]; };

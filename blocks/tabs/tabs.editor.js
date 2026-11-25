@@ -5,10 +5,10 @@
 // Клавиши: Enter в названии → в содержимое; Enter на пустой последней строке содержимого → абзац под блоком;
 // Backspace в пустом названии пустой вкладки — удаляет её; на краях содержимого — не склеивает с названием.
 
-import { h, icon } from '../../src/ui/widgets.js';
-import { getRange, placeCaret } from '../../src/core/selection.js';
-import { objectSelector, wrapSelector } from '../../src/core/registry.js';
-import { normalizeRoot, emptyBlock, isEmptyBlock } from '../../src/core/blocks.js';
+import { h, icon } from '../../resources/js/ui/widgets.js';
+import { getRange, placeCaret } from '../../resources/js/core/selection.js';
+import { objectSelector, wrapSelector } from '../../resources/js/core/registry.js';
+import { normalizeRoot, emptyBlock, isEmptyBlock } from '../../resources/js/core/blocks.js';
 import { makeTab, normalizeTabs, TABS_MAX } from './tabs.js';
 
 const keyOf = (el) => el.getAttribute('data-tedui-key');

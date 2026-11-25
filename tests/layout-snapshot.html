@@ -6,7 +6,7 @@
 <title>Ted — снимок расположения</title>
 <!-- Снимок расположения содержимого: где стоит каждая строка текста, картинка, таблица, линия — на сайте и в редакторе.
      Нужен, когда меняется устройство отступов (этап 0 MODULAR_PLAN.md): снимок до и после должен совпасть.
-     Запуск: pwsh -File tools/layout-snapshot.ps1 -OutFile before.txt (окна 320 / 414 / 768 / 1000 / 1920). -->
+     Запуск: php bin/snapshot.php layout before.txt (окна 320 / 414 / 768 / 1000 / 1920). -->
 <link rel="stylesheet" href="../dist/ted.css">
 <style>* { transition: none !important; animation: none !important; } body { margin: 0; } #site, #ed { width: 100%; }</style>
 </head>
@@ -51,7 +51,7 @@
     '<pre data-lang="js" data-nums="1\n2"><code>let a = 1;\nlet b = 2;</code></pre><hr><h5>Пятый</h5><p class="ted-align-center">По центру</p><h6>Шестой</h6>' +
     '<figure class="ted-table"><div class="ted-table__wrap"><table data-cols="2"><thead><tr><th>А</th><th>Б</th></tr></thead><tbody><tr><td>1</td><td>2</td></tr></tbody></table></div><figcaption>Подпись таблицы</figcaption></figure>' +
     '<h2>После таблицы</h2>' +
-    '<figure class="ted-media ted-media--image"><img src="../tiles/p.webp" alt="" width="1200" height="600"><figcaption>Подпись картинки</figcaption></figure>' +
+    '<figure class="ted-media ted-media--image"><img src="../dist/tiles/p.webp" alt="" width="1200" height="600"><figcaption>Подпись картинки</figcaption></figure>' +
     '<div class="ted-columns ted-columns--2"><div class="ted-columns__col"><h6>Колонка</h6><p>Текст колонки</p></div><div class="ted-columns__col"><h6>Вторая</h6><p>Текст</p></div></div>' +
     '<div class="ted-button"><a class="ted-button__btn" href="/a">Кнопка</a></div>' +
     '<div class="ted-button ted-button--banner"><div class="ted-button__text"><p class="ted-button__title">Баннер</p><p class="ted-button__desc">Текст баннера</p></div><a class="ted-button__btn" href="/a">Кнопка</a></div>' +

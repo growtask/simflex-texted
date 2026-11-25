@@ -2,8 +2,8 @@
 // Текстовый блок: шаги, Enter, заглушки, кнопки шага, «Добавить шаг» ведёт текстовый движок ядра; здесь — меню «Списки»,
 // «Стиль текста», JSON, стили.
 import STEPS_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
-import { bjEsc, bjLines } from '../../src/core/blocks-json.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
+import { bjEsc, bjLines } from '../../resources/js/core/blocks-json.js';
 
 registerBlock({
   ...STEPS_BLOCK,

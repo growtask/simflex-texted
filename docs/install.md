@@ -4,26 +4,27 @@
 
 ## Быстрый старт
 
-**1. Установите пакет** и опубликуйте его статику в корень веб-сервера (`vendor/` из браузера недоступен), сохранив
-взаимное расположение папок (стили ссылаются на `../fonts/` и `../tiles/`). В Simflex CMS это делает ядро.
+**1. Установите пакет** и опубликуйте папку `dist/` пакета в корень веб-сервера (`vendor/` из браузера недоступен):
+в ней всё нужное, стили ссылаются на шрифты, плитки и значки относительно. В Simflex CMS это делает ядро.
 
 ```bash
 composer require simflex/texted
 ```
 
 ```
-/texted/dist/ted.js      ← скрипт редактора           (vendor/simflex/texted/dist/ted.js)
-/texted/dist/ted.css     ← стили редактора и оформления блоков
-/texted/fonts/           ← шрифты
-/texted/tiles/           ← картинки для меню блоков (нужны только админке)
-/texted/content.js       ← поведение блоков на сайте
+/texted/ted.js       ← скрипт редактора           (vendor/simflex/texted/dist/ted.js)
+/texted/ted.css      ← стили редактора и оформления блоков
+/texted/content.js   ← поведение блоков на сайте
+/texted/fonts/       ← шрифты
+/texted/tiles/       ← картинки для меню блоков (нужны только админке)
+/texted/icons/       ← значки медиа (файл, скачать)
 ```
 
 **2. Подключите в админке** и превратите поле в редактор:
 
 ```html
-<link rel="stylesheet" href="/texted/dist/ted.css">
-<script src="/texted/dist/ted.js"></script>
+<link rel="stylesheet" href="/texted/ted.css">
+<script src="/texted/ted.js"></script>
 
 <textarea name="content"><?= htmlspecialchars($page['content']) ?></textarea>
 
@@ -37,33 +38,33 @@ composer require simflex/texted
 **3. Очистите HTML на сервере перед сохранением** (это обязательно, см. [Безопасность](#безопасность-прочитайте-обязательно)):
 
 ```php
-$clean = TedSanitizer::clean($_POST['content']);   // класс загружает автозагрузка composer; сохраняйте и выводите только $clean
+$clean = Sanitizer::clean($_POST['content']);   // класс загружает автозагрузка composer; сохраняйте и выводите только $clean
 ```
 
-**Настройки сервера — один файл `ted.config.php`** (необязательно: без него папка файлов — `<корень сайта>/uf`, адрес `/uf`, лимиты по умолчанию). Скопируйте `ted.config.example.php` в свой проект (не в `vendor/`) и передайте путь в `TedConfig::load()` или переменной `TED_CONFIG`; настройки можно задать и массивом — `TedConfig::fromArray()`. В файле: папка файлов на диске и её адрес для браузера (два значения — папка может лежать вне сайта или на CDN), лимиты размеров, ffmpeg, карточки по ссылке вкл./выкл., сайты для блока «iFrame». Ошибка в ключе или значении — понятное сообщение, а не тихое значение по умолчанию.
+**Настройки сервера — один файл `ted.config.php`** (необязательно: без него папка файлов — `<корень сайта>/uf`, адрес `/uf`, лимиты по умолчанию). Скопируйте `ted.config.example.php` в свой проект (не в `vendor/`) и передайте путь в `Config::load()` или переменной `TED_CONFIG`; настройки можно задать и массивом — `Config::fromArray()`. В файле: папка файлов на диске и её адрес для браузера (два значения — папка может лежать вне сайта или на CDN), лимиты размеров, ffmpeg, карточки по ссылке вкл./выкл., сайты для блока «iFrame». Ошибка в ключе или значении — понятное сообщение, а не тихое значение по умолчанию.
 
 ```php
-$ted = TedConfig::load('/var/www/site/ted.config.php');   // путь к настройкам (или переменная TED_CONFIG)
-$clean = $ted->clean($_POST['content']);           // то же, что TedSanitizer::clean, плюс сайты iFrame из настроек
-tedRespondToUpload($ted->storage(), $pagePath);    // маршрут загрузки — после проверки входа и CSRF
+$ted = Config::load('/var/www/site/ted.config.php');   // путь к настройкам (или переменная TED_CONFIG)
+$clean = $ted->clean($_POST['content']);           // то же, что Sanitizer::clean, плюс сайты iFrame из настроек
+$ted->createStorage()->respondToUpload($pagePath);    // маршрут загрузки — после проверки входа и CSRF
 ```
 
 Браузеру нужна только часть настроек — передайте её в `Ted.init`; путь на диске, ffmpeg и ключи в неё не входят:
 
 ```html
-<script>Ted.init({ selector: 'textarea[name=content]', server: <?= $ted->clientJson() ?> });</script>
+<script>Ted.init({ selector: 'textarea[name=content]', server: <?= $ted->getClientJson() ?> });</script>
 ```
 
-`server` — `{ filesUrl, limits, opengraph, iframeHosts, preset, presets, canEdit }` (набор поля и право — `clientJson($preset, $canEdit)`, см. «Наборы блоков и право на правку»): по адресу папки редактор узнаёт свои файлы (удаление после сохранения), файл больше лимита не отправляет, при выключенных карточках не предлагает «Встроить карточкой», в «iFrame» принимает только сайты из списка (сервер проверяет то же самое). Проверка настроек и сервера: `php texted/php/check.php`.
+`server` — `{ filesUrl, limits, opengraph, iframeHosts, preset, presets, canEdit }` (набор поля и право — `getClientJson($preset, $canEdit)`, см. «Наборы блоков и право на правку»): по адресу папки редактор узнаёт свои файлы (удаление после сохранения), файл больше лимита не отправляет, при выключенных карточках не предлагает «Встроить карточкой», в «iFrame» принимает только сайты из списка (сервер проверяет то же самое). Проверка настроек и сервера: `php texted/bin/check.php`.
 
 **4. Выведите на сайте.** На странице подключите `ted.css` (и `ted.vw.css`, если сайт на vw-размерах) и выведите сохранённый HTML внутри контейнера:
 
 ```html
-<link rel="stylesheet" href="/texted/dist/ted.css">
+<link rel="stylesheet" href="/texted/ted.css">
 <?= $page['content'] ?>   <!-- уже обёрнут в <div class="ted-content"> -->
 ```
 
-Чтобы работали аудиоплеер (тот же, что в редакторе, по макету Media/audio) и запуск видео с площадок по клику, добавьте `<script src="/texted/content.js" defer></script>`. Этот файл **собирается** (`tools/build.ps1` или `php tools/build.php`) из `src/core/audio-player.js` и `src/site/content.js`; вручную его не правьте. Без него на сайте остаётся родной `<audio controls>`.
+Чтобы работали аудиоплеер (тот же, что в редакторе, по макету Media/audio) и запуск видео с площадок по клику, добавьте `<script src="/texted/content.js" defer></script>`. Этот файл **собирается** (`bin/build.php` или `php bin/build.php`) из `resources/js/core/audio-player.js` и `resources/js/site/content.js`; вручную его не правьте. Без него на сайте остаётся родной `<audio controls>`.
 
 Посмотреть всё в работе: откройте двойным кликом `examples/index.html` (демо работают прямо с диска, сервер не нужен).
 
@@ -73,7 +74,7 @@ tedRespondToUpload($ted->storage(), $pagePath);    // маршрут загру�
 |------------------|-----------|
 | Админка (редактор в форме) | `previewMode: false`, `onSave`, `autosave: 'ключ'` |
 | Документация (правка прямо на странице) | набор `docs` (или `mode: 'view'`, `preview: 'inline'`), `onSave` |
-| Доступ без права редактирования | сервер: `clientJson($preset, false)`; без сервера — `readOnly: true` или набор `readonly` |
+| Доступ без права редактирования | сервер: `getClientJson($preset, false)`; без сервера — `readOnly: true` или набор `readonly` |
 | Полноэкранный редактор | без настроек |
 
 ## Подключение к CMS

@@ -1,6 +1,6 @@
 import { group, test, eq, ok, deepEq, vis } from './harness.js';
-import { typografText, typografBlocks, diffRanges, protectRegExp, TYPO_CATEGORIES } from '../src/core/typo.js';
-import { yofy } from '../src/core/yo.js';
+import { typografText, typografBlocks, diffRanges, protectRegExp, TYPO_CATEGORIES } from '../resources/js/core/typo.js';
+import { yofy } from '../resources/js/core/yo.js';
 
 const ru = (s, ctx) => vis(typografText(s, 'ru', { depth: 0 }, 'P', ctx || {}));
 const en = (s) => vis(typografText(s, 'en', { depth: 0 }, 'P', {}));

@@ -1,9 +1,9 @@
-// Блок «Колонки» — полностью в папке (этап 5). Контейнер: колонки — «хосты» обычных блоков (общий код — src/core/containers.js).
+// Блок «Колонки» — полностью в папке (этап 5). Контейнер: колонки — «хосты» обычных блоков (общий код — resources/js/core/containers.js).
 import COLUMNS_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
-import { HOST_CLASS, stripInHost } from '../../src/core/containers.js';
-import { sanitizeNodes, serializeBlocks } from '../../src/core/sanitize.js';
-import { normalizeRoot, isEmptyBlock } from '../../src/core/blocks.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
+import { HOST_CLASS, stripInHost } from '../../resources/js/core/containers.js';
+import { sanitizeNodes, serializeBlocks } from '../../resources/js/core/sanitize.js';
+import { normalizeRoot, isEmptyBlock } from '../../resources/js/core/blocks.js';
 import { ColumnsUI } from './columns.editor.js';
 
 // Сайт: <div class="ted-columns ted-columns--2"><div class="ted-columns__col">блоки</div>…</div> — 2–4 колонки;

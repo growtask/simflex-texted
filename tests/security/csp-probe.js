@@ -10,7 +10,7 @@
   const root = document.getElementById('content');
   root.innerHTML = data.vectors.map((v) => v.html).join('\n');
   const script = document.createElement('script');
-  script.src = '../../content.js';
+  script.src = '../../dist/content.js';
   await new Promise((resolve) => { script.onload = resolve; script.onerror = resolve; document.body.append(script); });
   await new Promise((r) => setTimeout(r, 300));
   const inlineHandlers = [...document.querySelectorAll('*')].filter((el) => [...el.attributes].some((a) => /^on/i.test(a.name))).length;

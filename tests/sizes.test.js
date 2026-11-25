@@ -312,7 +312,7 @@ group('Меню блоков: поведение', () => {
 
   test('картинки ещё не готовых блоков есть и для светлой, и для тёмной темы', async () => {
     const SOON_TYPES = ['image', 'gallery', 'video', 'audio', 'embed', 'iframe', 'file', 'table', 'columns', 'toc', 'accordion', 'tabs', 'button', 'product'];
-    const base = new URL('../tiles/', import.meta.url).href;
+    const base = new URL('../dist/tiles/', import.meta.url).href;
     for (const t of SOON_TYPES) {
       for (const th of ['light', 'dark']) {
         const res = await fetch(`${base}${t}-${th}.webp`);

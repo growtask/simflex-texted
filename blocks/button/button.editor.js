@@ -8,9 +8,9 @@
 // Всё, что меняют в окне, сразу видно на кнопке (живой предпросмотр, решение 22.11); «Отмена», Escape и нажатие мимо окна
 // возвращают как было, «Сохранить» оставляет — одним шагом истории.
 
-import { h, icon, smallButton, button } from '../../src/ui/widgets.js';
-import { getRange, placeCaret } from '../../src/core/selection.js';
-import { emptyBlock, isEmptyBlock } from '../../src/core/blocks.js';
+import { h, icon, smallButton, button } from '../../resources/js/ui/widgets.js';
+import { getRange, placeCaret } from '../../resources/js/core/selection.js';
+import { emptyBlock, isEmptyBlock } from '../../resources/js/core/blocks.js';
 import { buttonHrefOk, makeButtonLink } from './button.js';
 
 const fixUrl = (v) => {

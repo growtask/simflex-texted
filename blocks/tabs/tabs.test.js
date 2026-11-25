@@ -2,7 +2,7 @@
 // Вкладки (этап 6.3, макет block-tabs): разметка сайта, очистка, правка, клавиши, кнопки вкладки, сайт со скриптом, вид.
 import { group, test, eq, ok, wait } from '../../tests/harness.js';
 import { make, html, blocks, Ted } from '../../tests/helpers.js';
-import { normalizeRoot } from '../../src/core/blocks.js';
+import { normalizeRoot } from '../../resources/js/core/blocks.js';
 
 const PANEL = (t, b) => `<div class="ted-tabs__panel"><p class="ted-tabs__title">${t}</p><div class="ted-tabs__body">\n${b}\n</div></div>`;
 const SAVED = (...p) => `<div class="ted-tabs">\n${p.join('\n')}\n</div>`;

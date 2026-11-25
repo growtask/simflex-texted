@@ -3,8 +3,8 @@
 // Текстовый блок: пункты, Enter, Delete, Backspace, смена мест ведёт текстовый движок ядра; здесь — меню «Акцент»,
 // новый блок, JSON, стили.
 import PROSCONS_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
-import { bjEsc, bjLines } from '../../src/core/blocks-json.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
+import { bjEsc, bjLines } from '../../resources/js/core/blocks-json.js';
 
 registerBlock({
   ...PROSCONS_BLOCK,

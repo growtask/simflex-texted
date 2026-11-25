@@ -3,11 +3,11 @@
 // на узком экране, где справа места нет, кнопки строки лежат поверх правого края строки (как у шагов).
 // Под таблицей — «+ Добавить строку» и «+ Добавить столбец». Строки и столбцы перетаскиваются за ⠿.
 
-import { h, smallButton, icon, adminModalOpen } from '../../src/ui/widgets.js';
+import { h, smallButton, icon, adminModalOpen } from '../../resources/js/ui/widgets.js';
 import { TableFormulas } from './table-formula.js';
-import { getRange, placeCaret } from '../../src/core/selection.js';
-import { normalizeRoot, emptyBlock, isEmptyBlock } from '../../src/core/blocks.js';
-import { sanitizeNodes } from '../../src/core/sanitize.js';
+import { getRange, placeCaret } from '../../resources/js/core/selection.js';
+import { normalizeRoot, emptyBlock, isEmptyBlock } from '../../resources/js/core/blocks.js';
+import { sanitizeNodes } from '../../resources/js/core/sanitize.js';
 import {
   isTableBlock, tableRows, colCount, cellInfo, addRow, addColumn, removeRow, removeColumn, moveRow, moveColumn,
   parseClipboardTable, TABLE_MAX_COLS, TABLE_MAX_ROWS,

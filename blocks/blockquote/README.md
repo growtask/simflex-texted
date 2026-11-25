@@ -2,7 +2,7 @@
 
 Цитата (макет `block-quote`, Text/quote): линия 3 px main/color1/main, отступ 20, текст t1 (20 / 1.5) цвета text-icon/gray/darker. С автором (`type=author`): аватар 40 с инициалами, имя 16 / 600, должность 11.
 
-<!-- block.json:begin — собрано из block.json при сборке (tools/build.ps1, build.php), не правьте вручную -->
+<!-- block.json:begin — собрано из block.json при сборке (bin/build.php, build.php), не правьте вручную -->
 | Поле | Значение |
 |---|---|
 | Вид | `blockquote`, другие имена: `quote` |

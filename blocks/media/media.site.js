@@ -1,4 +1,4 @@
-// Медиа на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из src/site/blocks.js.
+// Медиа на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из resources/js/site/blocks.js.
 // Плеер (audio-player.js), имена файлов (file-names.js) и кнопка «Смотреть на …» (video-link.js) — те же, что в редакторе.
 
 const SITE_VIDEO_HOSTS = ['www.youtube-nocookie.com', 'rutube.ru', 'vkvideo.ru'];

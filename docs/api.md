@@ -33,7 +33,7 @@ Ted.fromBlocks(list, { blocks }); // JSON-блоки → HTML; Ted.toBlocks(html
 Ted.addLang('de', { 'Строка': 'Übersetzung' }); Ted.setLang('en');   // языки интерфейса
 ```
 
-**Блоки — папки `blocks/<тип>/`** (этап 5): `block.json` (описание — общее для браузера и сервера: меню, Markdown, клавиша, белый список тегов и атрибутов, превращение в текст), код регистрации, стили сайта и правки, README и тесты. Список блоков сборки — `tools/build.json` → `blocks`; ядро не знает конкретных блоков. Перенос идёт по одному блоку; первым перенесён «Разделитель» (`blocks/hr`). Как устроена папка и как добавить блок — `blocks/README.md`.
+**Блоки — папки `blocks/<тип>/`** (этап 5): `block.json` (описание — общее для браузера и сервера: меню, Markdown, клавиша, белый список тегов и атрибутов, превращение в текст), код регистрации, стили сайта и правки, README и тесты. Список блоков сборки — `bin/build.json` → `blocks`; ядро не знает конкретных блоков. Перенос идёт по одному блоку; первым перенесён «Разделитель» (`blocks/hr`). Как устроена папка и как добавить блок — `blocks/README.md`.
 
 События на `.ted-ui`: `ted:change`, `ted:mode` (`event.detail.html`, `event.detail.mode`).
 
@@ -53,7 +53,7 @@ editor.setHTML(html);
 ```
 
 Типы: `p h2–h6 ul ol checklist steps callout facts proscons quote code hr image gallery video audio file` (список — `Ted.blockJsonTypes`).
-Для готового HTML — `Ted.clean(html, { blocks })` или на сервере `TedSanitizer::clean`.
+Для готового HTML — `Ted.clean(html, { blocks })` или на сервере `Sanitizer::clean`.
 
 ## Горячие клавиши
 

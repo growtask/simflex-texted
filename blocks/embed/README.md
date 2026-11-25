@@ -2,7 +2,7 @@
 
 Карточка-снимок статьи CMS или страницы по ссылке (OpenGraph — страницу читает сервер CMS), полная или в одну строку. Макет `block-embed (Embed/embed type=post)`, окно `editor-popover kind=embed`. Блок целиком в этой папке: ядро его не упоминает (тест набора `blocks`).
 
-<!-- block.json:begin — собрано из block.json при сборке (tools/build.ps1, build.php), не правьте вручную -->
+<!-- block.json:begin — собрано из block.json при сборке (bin/build.php, build.php), не правьте вручную -->
 | Поле | Значение |
 |---|---|
 | Вид | `embed` |

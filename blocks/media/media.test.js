@@ -2,7 +2,7 @@
 import { group, test, eq, ok, wait } from '../../tests/harness.js';
 import { Ted, make, select } from '../../tests/helpers.js';
 import { videoEmbedUrl } from './media.js';
-import { blockDef } from '../../src/core/registry.js';
+import { blockDef } from '../../resources/js/core/registry.js';
 
 group('Медиа', () => {
   test('кнопка «Добавить» открывает менеджер и галерея переживает повторную загрузку HTML', async () => {
@@ -1034,7 +1034,7 @@ group('Медиа: точки подключения реестра', () => {
     ok(tile && groupTitle && /Файлы/.test(groupTitle.textContent) && !/Таблиц/.test(groupTitle.querySelector('h2, h3, h4, .ted-ui-picker__title')?.textContent || ''), groupTitle ? groupTitle.className : 'нет плитки');
     ed.blockMenu.closePicker();
     ed.destroy();
-    const blank = blockDef('image').blank(document);   // пустое изображение колонок (src/ui/columns.js)
+    const blank = blockDef('image').blank(document);   // пустое изображение колонок (resources/js/ui/columns.js)
     ok(blank.classList.contains('ted-ui-media') && blank.querySelector(':scope > figure.ted-media--image') && !blank.querySelector('img'), blank.outerHTML);
     eq(Ted.clean(fig('file', '<a href="/uf/files/a.pdf" download="">Прайс</a>'), { blocks: ['p'] }).replace(/>\s+</g, '><'), '<p><a href="/uf/files/a.pdf">Прайс</a></p>');
     eq(Ted.clean(fig('image', '<img src="/uf/images/a.webp" alt="">') + '<p>x</p>', { blocks: ['p'] }), '<p>x</p>');

@@ -12,8 +12,8 @@
 //   </div>
 
 import EMBED_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
-import { urlOk } from '../../src/core/urls.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
+import { urlOk } from '../../resources/js/core/urls.js';
 import { EmbedUI } from './embed.editor.js';
 
 const EMBED_URL_RE = /^(https?:\/\/|\/(?!\/))/i;

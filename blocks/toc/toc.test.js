@@ -2,7 +2,7 @@
 // Содержание (этап 6.3, макет block-navigation): разметка, очистка, окно главы, выбор якоря, кнопки главы, сайт (свёрнуто, прогресс).
 import { group, test, eq, ok, wait } from '../../tests/harness.js';
 import { make, html, blocks, Ted } from '../../tests/helpers.js';
-import { defOf as tocDefOf } from '../../src/core/registry.js';
+import { defOf as tocDefOf } from '../../resources/js/core/registry.js';
 
 group('Блок «Содержание» (blocks/toc): реестр', () => {
   test('один блок и на сайте (<nav class="ted-toc">), и в правке (<div class="ted-toc">) — selector «.ted-toc»', () => {

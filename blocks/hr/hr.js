@@ -2,7 +2,7 @@
 // Сайт и правка: <hr>. Без текста: выделяется целиком, панель «line», нет «Превратить в…», рамка — обводкой.
 // Вставка: меню «/», «Все блоки», Markdown «---» + Enter, Ctrl+Shift+−. В наборе без линии — исчезает (block.json → degrade: drop).
 import HR_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
 
 registerBlock({
   toMarkdown: () => '---',   // Ted.toMarkdown (22.11)

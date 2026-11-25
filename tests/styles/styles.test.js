@@ -21,7 +21,7 @@ const hexOf = (r, g, b) => [r, g, b].map((n) => Number(n).toString(16).padStart(
 
 const STYLE_FILES = ['theme.default.css', 'content.css', ...['tokens', 'shell', 'tabs', 'toolbar', 'tooltip', 'dropdown', 'input', 'popover', 'button', 'toggle', 'slash-menu', 'block-picker', 'interaction', 'preview', 'toasts', 'editing', 'blocks', 'motion'].map((n) => `ui/${n}.css`)];   // медиа — в blocks/media (этап 5)
 // файла нет — ошибка, а не чужая страница 404 (демо-сервер PHP отдаёт её со своими цветами)
-const source = async (f) => { const r = await fetch(new URL(`../../styles/${f}`, import.meta.url), { cache: 'no-store' }); if (!r.ok) throw new Error(`нет файла styles/${f}`); return r.text(); };
+const source = async (f) => { const r = await fetch(new URL(`../../resources/css/${f}`, import.meta.url), { cache: 'no-store' }); if (!r.ok) throw new Error(`нет файла resources/css/${f}`); return r.text(); };
 const noComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '');
 
 /** Страница вокруг редактора (host.html) в невидимом фрейме → подписи вычисленных стилей. */

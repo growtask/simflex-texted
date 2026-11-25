@@ -1,10 +1,9 @@
 <?php
-// Настройки texted на сервере. Скопируйте этот файл РЯДОМ с папкой пакета (не внутрь ted/ — обновление его затрёт):
-//   /var/www/site/ted/                 ← пакет
-//   /var/www/site/ted.config.php       ← ваши настройки
-// или укажите путь: переменная окружения TED_CONFIG=/путь/ted.config.php, либо TedConfig::load('/путь/ted.config.php').
+// Настройки texted на сервере. Не кладите этот файл внутрь пакета — обновление его затрёт. Путь задайте явно:
+//   \Simflex\Texted\Config::load('/var/www/site/ted.config.php')   или переменная окружения TED_CONFIG
+// (без пути файл ищется рядом с папкой пакета: для vendor/simflex/texted — vendor/simflex/ted.config.php).
 // Любой ключ можно не писать — действует значение по умолчанию. Неизвестный ключ — ошибка (защита от опечаток).
-// Проверка настроек и сервера: php ted/php/check.php
+// Проверка настроек и сервера: php vendor/simflex/texted/bin/check.php /var/www/site/ted.config.php
 
 return [
     // Папка файлов: путь на диске и адрес для браузера — два разных значения.

@@ -1,8 +1,8 @@
 // Блок «Цитата» (макет block-quote / Text/quote) — этап 5.4. Текстовый блок: абзацы внутри, ввод и превращение ведёт
 // текстовый движок ядра (там же автор цитаты — p.ted-author: имя, должность, инициалы). Здесь — описание, JSON, стили.
 import QUOTE_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
-import { bjEsc, bjLines } from '../../src/core/blocks-json.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
+import { bjEsc, bjLines } from '../../resources/js/core/blocks-json.js';
 
 registerBlock({
   ...QUOTE_BLOCK,

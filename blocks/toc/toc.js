@@ -1,6 +1,6 @@
 // Блок «Содержание» — полностью в папке (этап 5).
 import TOC_BLOCK from './block.json' with { type: 'json' };
-import { registerBlock } from '../../src/core/registry.js';
+import { registerBlock } from '../../resources/js/core/registry.js';
 import { TocUI } from './toc.editor.js';
 
 // Содержание (этап 6.3, макет block-navigation): заголовок и главы — ссылки на якоря страницы.

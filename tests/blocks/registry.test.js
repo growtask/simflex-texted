@@ -1,11 +1,11 @@
 // Этап 5 (MODULAR_PLAN.md): реестр блоков. Блок — папка blocks/<тип>/ (block.json + код), регистрирует себя;
 // ядро не упоминает перенесённые блоки. Тесты самих блоков — blocks/<тип>/<тип>.test.js (набор blocks в tests/run.html).
 import { group, test, eq, ok } from '../harness.js';
-import { registerBlock, registeredBlocks } from '../../src/core/registry.js';
-import { menuGroups } from '../../src/core/blocks.js';
-import { isBlockTag } from '../../src/core/sanitize.js';
+import { registerBlock, registeredBlocks } from '../../resources/js/core/registry.js';
+import { menuGroups } from '../../resources/js/core/blocks.js';
+import { isBlockTag } from '../../resources/js/core/sanitize.js';
 
-const BUILD = await (await fetch(new URL('../../tools/build.json', import.meta.url), { cache: 'no-store' })).json();
+const BUILD = await (await fetch(new URL('../../bin/build.json', import.meta.url), { cache: 'no-store' })).json();
 const FIELDS = ['type', 'title', 'aliases', 'figma', 'menu', 'object', 'outline', 'handleAt', 'selector', 'markdown', 'hotkey', 'html', 'degrade', 'text', 'style', 'placeholder', 'variants', 'jsonType', 'classes', 'compound', 'inContainers', 'core', 'toolbar', 'neverEmpty', 'caretBelow', 'frames', 'ids', 'wrap', 'insertMenu', 'lineAfter', 'container', 'linePlaceholder', 'noBold', 'narrow', 'inNarrow', 'jsonExample'];
 
 /** Виды блоков папки: у семейства (заголовки, списки) — variants, иначе — type. */
@@ -17,11 +17,11 @@ async function folderTypes(b) {
 /** Код ядра без комментариев. */
 async function coreSources() {
   const out = [];
-  for (const m of BUILD.modules.filter((m) => m.startsWith('src/') && m !== 'src/ui/icons.js')) {   // набор значков Figma — общая библиотека, не логика блоков
+  for (const m of BUILD.modules.filter((m) => m.startsWith('src/') && m !== 'resources/js/ui/icons.js')) {   // набор значков Figma — общая библиотека, не логика блоков
     const code = await (await fetch(new URL(`../../${m}`, import.meta.url), { cache: 'no-store' })).text();
     out.push([m, code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:\\'"`])\/\/[^\n]*/g, '$1')]);
   }
-  for (const s of BUILD.styles.filter((s) => s.startsWith('styles/'))) {
+  for (const s of BUILD.styles.filter((s) => s.startsWith('resources/css/'))) {
     const css = await (await fetch(new URL(`../../${s}`, import.meta.url), { cache: 'no-store' })).text();
     out.push([s, css.replace(/\/\*[\s\S]*?\*\//g, '')]);
   }
@@ -29,7 +29,7 @@ async function coreSources() {
 }
 
 group('Реестр блоков', () => {
-  test('блоки из tools/build.json зарегистрированы, у каждого папка с block.json, тип = имя папки', async () => {
+  test('блоки из bin/build.json зарегистрированы, у каждого папка с block.json, тип = имя папки', async () => {
     const types = registeredBlocks().map((d) => d.type);
     const expected = [];
     for (const b of BUILD.blocks) expected.push(...await folderTypes(b));
@@ -75,8 +75,8 @@ group('Реестр блоков', () => {
       for (const [file, code] of await coreSources()) {
         for (const line of code.split('\n')) {
           if (/basic:\s*\[/.test(line)) continue;   // прежний набор опции blocks называет виды по имени
-          // вид адреса (urlOk(…, 'image'), URL_KINDS — src/core/urls.js = TedSanitizer::urlOk) и вид файла службы загрузки
-          // (лимиты сервера, поле kind запроса — src/core/server.js, upload.js): слова те же, но это не блоки
+          // вид адреса (urlOk(…, 'image'), URL_KINDS — resources/js/core/urls.js = Sanitizer::urlOk) и вид файла службы загрузки
+          // (лимиты сервера, поле kind запроса — resources/js/core/server.js, upload.js): слова те же, но это не блоки
           if (/urlOk\(|URL_KINDS|kind === 'image' && IMAGE_DATA|body\.append\('kind'|const KINDS = \[/.test(line)) continue;
           if (re.test(line)) bad.push(`${file}: ${line.trim().slice(0, 100)}`);
           re.lastIndex = 0;

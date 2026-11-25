@@ -1,5 +1,5 @@
 // Общие помощники автотестов Ted: создание редактора нужной ширины и темы, выделение, ввод, ожидание.
-import Ted from '../src/index.js';
+import Ted from '../resources/js/index.js';
 import { afterEach } from './harness.js';
 export { Ted };
 export const sandbox = document.createElement('div');

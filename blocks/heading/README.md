@@ -2,7 +2,7 @@
 
 Заголовки разделов (макет `block-heading`, Text/heading): шрифт заголовков, 700, высота строки 1, цвет text-icon/gray/darker. Размеры: десктоп 42 / 28 / 24 / 20 / 16, до 811 px — 28 / 24 / 20 / 20 / 16. Семейство: одна папка, пять видов (`variants` в `block.json`).
 
-<!-- block.json:begin — собрано из block.json при сборке (tools/build.ps1, build.php), не правьте вручную -->
+<!-- block.json:begin — собрано из block.json при сборке (bin/build.php, build.php), не правьте вручную -->
 | Поле | Значение |
 |---|---|
 | Вид | `h2`, `h3`, `h4`, `h5`, `h6` |

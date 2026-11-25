@@ -4,3 +4,5 @@
 *.bak
 *.tmp
 *.log
+/.agents/
+/CLAUDE.local.md

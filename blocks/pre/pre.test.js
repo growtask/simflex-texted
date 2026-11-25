@@ -2,8 +2,8 @@
 // прежние тесты кода из tests/sizes.test.js (шапка, язык, номера, копирование, подсветка, вставка, 1000+ строк).
 import { group, test, eq, ok, wait } from '../../tests/harness.js';
 import { Ted, make, blocks, select, pop, html } from '../../tests/helpers.js';
-import { blockDef, defOf, markdownBlock } from '../../src/core/registry.js';
-import { menuGroups, styleTypes } from '../../src/core/blocks.js';
+import { blockDef, defOf, markdownBlock } from '../../resources/js/core/registry.js';
+import { menuGroups, styleTypes } from '../../resources/js/core/blocks.js';
 import { insertBlock } from '../../tests/interaction/samples.js';
 
 const WIDTHS = [1000, 860, 768, 414];

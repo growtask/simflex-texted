@@ -6,8 +6,8 @@
 // (признак правки data-tedui-collapsed, в HTML не попадает; решение 22.11). Enter в заголовке — новая глава; стрелки вправо и
 // вниз в конце заголовка — в следующий блок (в список глав курсор не встаёт). Окно главы — под главой (новой — под блоком).
 
-import { h, icon, smallButton, menuItem } from '../../src/ui/widgets.js';
-import { getRange, placeCaret } from '../../src/core/selection.js';
+import { h, icon, smallButton, menuItem } from '../../resources/js/ui/widgets.js';
+import { getRange, placeCaret } from '../../resources/js/core/selection.js';
 import { makeTocItem, documentAnchors, tocAnchorOk } from './toc.js';
 
 const cleanId = (v) => String(v || '').trim().replace(/^#/, '').replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);

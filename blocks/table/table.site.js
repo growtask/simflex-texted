@@ -1,4 +1,4 @@
-// Блок «Таблица» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из src/site/blocks.js.
+// Блок «Таблица» на сайте. Собирается в content.js (build.json → content → @blocks.content); siteBlock — из resources/js/site/blocks.js.
 
 /** Таблица шире колонки — data-ted-scroll: 12 до полосы прокрутки, как в редакторе. */
 function siteTableScroll(root) {

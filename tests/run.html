@@ -25,13 +25,13 @@
 <ul id="list"></ul>
 <p id="note">Новые наборы тестов по этапам (MODULAR_PLAN.md). Один набор: <code>?suite=layer</code>, <code>drag</code>, <code>rhythm</code>, <code>server</code>, <code>presets</code>, <code>security</code>, <code>styles</code>, <code>blocks</code>; без параметра — все по порядку.
   Фильтр по названию: <code>?q=слово</code>. Редакторы после прогона убираются; чтобы их посмотреть, добавьте <code>?keep</code>.
-  Тесты работают на исходниках из <code>src/</code> и стилях из <code>dist/ted.css</code>. Все наборы по порядку из консоли: <code>pwsh -File tools/test.ps1</code>.</p>
-<script src="../content.js"></script>
+  Тесты работают на исходниках из <code>src/</code> и стилях из <code>dist/ted.css</code>. Все наборы по порядку из консоли: <code>php bin/test.php</code>.</p>
+<script src="../dist/content.js"></script>
 <script type="module">
   import { run } from './harness.js';
   import { sandbox } from './helpers.js';
 
-  // наборы — в том порядке, в каком их запускает tools/test.ps1
+  // наборы — в том порядке, в каком их запускает bin/test.php
   const SUITES = {
     layer: './interaction/layer.test.js',    // этап 0: рамка, кнопки блока, пустые блоки, ручка при наведении, меню
     drag: './interaction/drag.test.js',      // этап 0: перетаскивание — блок и его кнопки

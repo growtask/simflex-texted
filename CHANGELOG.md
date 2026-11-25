@@ -1,11 +1,54 @@
 # Изменения texted
 
-Формат: версия — дата — что появилось, что изменилось, что исправлено. Версия в коде — `Ted.version` (`src/index.js → VERSION`).
-До 1.0 версии 0.x: возможны несовместимые изменения — они отмечены «⚠».
+Формат: версия — дата — что появилось, что изменилось, что исправлено. Версия в коде — `Ted.version`
+(`resources/js/index.js → VERSION`). Номера — по semver: несовместимое изменение (PHP API, настройки, разметка
+блоков в сохранённом HTML) — новая старшая версия (2.0.0), новая возможность — 1.x.0, исправление — 1.0.x.
+Несовместимые изменения отмечены «⚠».
 
-## Не выпущено
+## 1.0.0 — 24.11.2026 — первая публичная версия: пакет Simflex (composer, классы `Simflex\Texted`, самодостаточная `dist/`)
 
-- Composer-пакет `simflex/texted` (`composer.json`): классы сервера (`TedConfig`, `TedSanitizer`, `TedMediaStorage` и др.) загружаются автозагрузкой composer. Редактор админки Simflex CMS (`simflex/core`) вместо TinyMCE.
+- Composer-пакет `simflex/texted` (`composer.json`). Редактор админки Simflex CMS (`simflex/core`) вместо TinyMCE.
+- ⚠ Сервер — классы в namespace `Simflex\Texted\` (PSR-4, `src/`), только через автозагрузку composer: файлов `php/*.php`
+  и `require` больше нет. Серверная часть блока — класс `Simflex\Texted\Blocks\<Тип>` в папке блока
+  (`blocks/<тип>/<Тип>.php`, интерфейс `ServerBlock`) вместо массива функций. Проверка сервера — `bin/check.php`,
+  правила папки файлов — `resources/uf.htaccess`, тесты PHP — `tests/php/`.
+- ⚠ `dist/` самодостаточна: в ней `ted.js`, `ted.css`, `ted.vw.css`, `content.js` (был в корне пакета), `fonts/`,
+  `tiles/`, `icons/` — стили ссылаются на них относительно (`fonts/…`, а не `../fonts/…`). Сайту и CMS достаточно
+  опубликовать одну папку `dist/`. Исходники фронтенда — в `resources/`: `js/` (было `src/`), `css/` (было
+  `styles/`), `lang/`, `fonts/`, `tiles/`, `icons/`.
+- Инструменты разработки — PHP-скрипты в `bin/`, одинаково на Windows, Linux и macOS: `bin/build.php` (одна сборка
+  вместо двух), `bin/test.php` (свой `php -S`, Chrome / Chromium / Edge без окна; `--full`, `--suite`, `--only`),
+  `bin/demo.php`, `bin/snapshot.php`, `bin/make-preset-vectors.php`. Скрипты PowerShell (`tools/*.ps1`) и папка
+  `tools/` удалены; тест загрузки файлов — `tests/php/test-upload.php`; `--full` сверяет `dist/` в git со сборкой.
+  Отключённые 19.11 старые наборы (`tests/index.html`, `tests/dist.html`, `tests/walkthrough-all.html`) удалены.
+- Правила разработки — в пакете: `AGENTS.md` (структура, команды `bin/`, правила PHP Simflex, Figma 1 в 1,
+  безопасность, самопроверка, git), `docs/dev/PRINCIPLES.md` и `docs/dev/LAYOUT.md`. Планы, журналы и отчёты автора —
+  в репозитории `simflex-agents` (`plans/texted/`).
+
+### Переход
+
+| Было | Стало |
+|---|---|
+| `require 'ted/php/config.php'` и другие `require` | `composer require simflex/texted` (автозагрузка) |
+| `TedConfig`, `TedSanitizer`, `TedPresets`, `TedBlocks` | `Simflex\Texted\Config`, `Sanitizer`, `Presets`, `Blocks` |
+| `TedMediaStorage`, `TedOpenGraph`, `TedRateLimit` | `Simflex\Texted\MediaStorage`, `OpenGraph`, `RateLimit` |
+| `TedAccessDenied` | `Simflex\Texted\Exception\AccessDenied` |
+| `tedRespondToUpload($storage, $pagePath, $isReferenced)` | `$storage->respondToUpload($pagePath, $isReferenced)` |
+| `tedRespondToOpenGraph($enabled)` | `OpenGraph::respondToRequest($isEnabled)` |
+| `Config`: `client()`, `clientJson()` | `getClient()`, `getClientJson()` |
+| `Config`: `filesDir()`, `filesUrl()`, `limit()`, `limits()`, `ffmpeg()` | `getFilesDir()`, `getFilesUrl()`, `getLimit()`, `getLimits()`, `getFfmpeg()` |
+| `Config`: `opengraph()`, `iframeHosts()`, `presets()`, `preset()`, `rate()` | `isOpenGraphEnabled()`, `getIframeHosts()`, `getPresets()`, `getPreset()`, `getRates()` |
+| `Config`: `editable()`, `storage()`, `rateLimit()` | `isEditable()`, `createStorage()`, `createRateLimit()` |
+| `MediaStorage`: `filesDir()`, `filesUrl()` | `getFilesDir()`, `getFilesUrl()` |
+| `OpenGraph`: `allowedUrl()`, `publicIp()`, `pinned()` | `isAllowedUrl()`, `isPublicIp()`, `getPinnedTarget()` |
+| `RateLimit::client()` | `RateLimit::getClientKey()` |
+| `blocks/<тип>/<тип>.php` (`return ['degrade' => fn …]`), `TedBlocks::hook()` | класс `Blocks\<Тип> implements ServerBlock`, `Blocks::getServerBlock()` |
+| `php/check.php`, `php/uf.htaccess` | `bin/check.php`, `resources/uf.htaccess` |
+| `content.js` (корень пакета) | `dist/content.js` |
+| публикация `dist/`, `fonts/`, `tiles/`, `content.js` | публикация только `dist/` |
+| исходники `src/` (JS), `styles/`, `lang/`, `fonts/`, `tiles/`, `icons/` | `resources/js/`, `resources/css/`, `resources/lang/` и т. д. |
+
+`clean()`, `save()`, `respondToUpload()`, `respondToOpenGraph()`, `load()`, `fromArray()` у `Config` — без изменений.
 
 ## 0.1.0 — 22.11.2026 — первая версия
 

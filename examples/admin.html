@@ -7,7 +7,7 @@
 <!-- переменные сайта (шрифты, цвета) — нужны и в админке, чтобы текст выглядел как на сайте -->
 <link rel="stylesheet" href="site-theme.css">
 <!-- Ted: собранная версия — открывается даже двойным кликом по файлу, без сервера -->
-<link rel="preload" href="../fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../dist/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../dist/ted.css">
 <link rel="stylesheet" href="demo.css">
 <style>
@@ -52,10 +52,10 @@
 <script src="demo.js"></script>
 <script>document.write('<script src="/ted-demo-media/config.js' + location.search.replace(/"/g, '') + '"><\/script>')</script><!-- настройки сервера (ted.config.php) — только в демо на PHP; без него действуют значения по умолчанию. ?preset=mini&access=ro — набор поля и доступ без права правки (этап 2) -->
 <script src="../dist/ted.js"></script>
-<script src="../content.js"></script>
+<script src="../dist/content.js"></script>
 <script src="sample.js"></script>
 <script>
-  // Для разработки можно подключать исходники: <script type="module" src="../src/index.js">
+  // Для разработки можно подключать исходники: <script type="module" src="../resources/js/index.js">
 
   const KEY = 'ted-demo-html';
   const textarea = document.getElementById('content');
@@ -84,7 +84,7 @@
     search: async (q) => DEMO_ARTICLE_LIST.filter((a) => a.title.toLowerCase().includes(q.toLowerCase())),
     get: async (id) => DEMO_ARTICLE_LIST.find((a) => a.id === id),
   };
-  // Файловый менеджер SimflexCMS (демо запущено с пакетом simflex-file-manager, tools/fm-demo.php): окна и модуль
+  // Файловый менеджер SimflexCMS (демо запущено с пакетом simflex-file-manager, bin/demo/fm-demo.php): окна и модуль
   // подключаются один раз; в CMS их выводит шаблон админки. Тема окон следует теме демо.
   let fileManagerReady = null;
   function loadFileManager() {
@@ -123,7 +123,7 @@
       upload: directDemo ? Ted.createUpload('/ted-demo-media/upload', { headers: demoHeaders }) : null,
       // загрузка с компьютера и библиотека вместе: в зоне загрузки — «Из библиотеки» (файловый менеджер CMS)
       pickFile: library ? pickFromLibrary : null,
-      // «Встраивание»: карточка по ссылке — страницу читает сервер демо (php/opengraph.php); статьи CMS — демо-список
+      // «Встраивание»: карточка по ссылке — страницу читает сервер демо (src/OpenGraph.php); статьи CMS — демо-список
       opengraph: location.protocol !== 'file:' ? Ted.createOpenGraph('/ted-demo-media/og', { headers: demoHeaders }) : null,   // и без ?media=direct: карточку читает демо-сервер
       articles: DEMO_ARTICLES,
       // ?media=manager — демо подключения файлового менеджера CMS: pickFile вызывается кнопкой «Из библиотеки» и должен вернуть адреса файлов
@@ -150,8 +150,8 @@
   document.getElementById('save-top').onclick = () => window.editor.save();
   document.getElementById('form').addEventListener('submit', () => window.editor.save());
 
-  // Загрузка работает только при запуске через tools/demo.ps1 (PHP-сервер): если сервер демо найден, включаем её сами
-  const noServer = () => document.getElementById('status').textContent = 'Загрузка файлов выключена: запустите  pwsh -File ted/tools/demo.ps1';
+  // Загрузка работает только при запуске через bin/demo.php (PHP-сервер): если сервер демо найден, включаем её сами
+  const noServer = () => document.getElementById('status').textContent = 'Загрузка файлов выключена: запустите  php bin/demo.php';
   if (location.protocol === 'file:') { noServer(); start(); }
   // сервер демо найден, если он отдал свои настройки (config.js выше) — без пробного запроса, который давал красный 403 в консоли (проверка 22.11)
   else { directDemo = !!window.TED_SERVER; if (!directDemo) noServer(); start(); }

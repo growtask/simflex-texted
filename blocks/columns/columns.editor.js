@@ -5,11 +5,11 @@
 // Клавиши: Backspace в начале колонки и Delete в её конце не склеивают соседние колонки; Tab / Shift+Tab — в соседнюю колонку;
 // Enter в пустой строке последней колонки после ещё одной пустой — выход из колонок (новый абзац под блоком, решение 22.11).
 
-import { h, icon } from '../../src/ui/widgets.js';
-import { getRange, placeCaret } from '../../src/core/selection.js';
+import { h, icon } from '../../resources/js/ui/widgets.js';
+import { getRange, placeCaret } from '../../resources/js/core/selection.js';
 import { makeColumn, COLUMNS_MAX } from './columns.js';
-import { wrapSelector, objectSelector } from '../../src/core/registry.js';
-import { isEmptyBlock } from '../../src/core/blocks.js';
+import { wrapSelector, objectSelector } from '../../resources/js/core/registry.js';
+import { isEmptyBlock } from '../../resources/js/core/blocks.js';
 
 export class ColumnsUI {
   constructor(editor) {

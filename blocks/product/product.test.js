@@ -2,7 +2,7 @@
 // Товар (этап 6.5, макет block-product, окно kind=product): каталог CMS и ручной режим, скидка, безопасность, событие корзины, вид.
 import { group, test, eq, ok, wait } from '../../tests/harness.js';
 import { make, html, blocks, Ted } from '../../tests/helpers.js';
-import { cleanByAllowlist } from '../../src/core/allowlist.js';
+import { cleanByAllowlist } from '../../resources/js/core/allowlist.js';
 
 const CAT = [{ id: 'p5', name: 'Наушники Studio 5', sku: 'ST-5', price: 12900, oldPrice: 16900, image: '/uf/images/studio5.webp', url: '/catalog/studio-5/' }];
 const products = { search: async (q) => CAT.filter((p) => (p.name + p.sku).toLowerCase().includes(q.toLowerCase())), get: async (id) => CAT.find((p) => p.id === id) };
@@ -154,7 +154,7 @@ group('Товар: точки подключения реестра', () => {
   });
 
   test('ids (block.json): id товара и корзины CMS — только латиница, цифры, _ и -; то же правило у id статьи встраивания', () => {
-    // белый список (общий с сервером — TedSanitizer, php/test-sanitize.php проверяет то же): атрибут из block.json → html, правило — из ids
+    // белый список (общий с сервером — Sanitizer, tests/php/test-sanitize.php проверяет то же): атрибут из block.json → html, правило — из ids
     const box = document.createElement('div');
     box.innerHTML = '<p><a href="/x" data-ted-cart="sku-1_A">a</a> <a href="/y" data-ted-cart="x y">b</a></p><div data-ted-product="p 1"></div>';
     cleanByAllowlist(box);

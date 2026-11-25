@@ -1,8 +1,8 @@
 // Правки заказчика 22.11.2026 (planmin.md → «Правки 22.11.2026»): поведение, найденное вручную, — тестом.
 import { group, test, eq, ok, wait } from '../harness.js';
 import { make, select } from '../helpers.js';
-import { blockCanConvert } from '../../src/core/blocks.js';
-import { Toaster } from '../../src/ui/widgets.js';
+import { blockCanConvert } from '../../resources/js/core/blocks.js';
+import { Toaster } from '../../resources/js/ui/widgets.js';
 import { buildAudioPlayer } from '../../blocks/media/audio-player.js';
 import { productFilesOf } from '../../blocks/product/product.js';
 
@@ -682,7 +682,7 @@ group('Решения 22.11: колонки, товар, встраивание,
     ok(embedHTML({ ...base, url: 'https://habr.com/ru/articles/1/', title: 'Длинный заголовок статьи', sub: 'Хабр' }).includes('>ХА<'), 'Хабр → ХА');
   });
   test('типограф: минус только перед числом', async () => {
-    const { typografText } = await import('../../src/core/typo.js');
+    const { typografText } = await import('../../resources/js/core/typo.js');
     const t = (s) => typografText(s, 'ru', { depth: 0 }, 'P', {});
     ok(t('Мороз -5 градусов').includes('−5'), t('Мороз -5 градусов'));
     ok(t('(-3)').includes('(−3)') && t('x = -2').includes('−2'), t('x = -2'));
@@ -749,7 +749,7 @@ group('Markdown, JSON и нейросети (22.11)', () => {
     ed.destroy();
   });
   test('загрузка заменяет статью, «Отменить» (Ctrl+Z) возвращает прежнюю; неизвестные блоки — в сообщении', async () => {
-    const { toHtml, replaceDoc } = await import('../../src/ui/exchange.js');
+    const { toHtml, replaceDoc } = await import('../../resources/js/ui/exchange.js');
     const ed = make('<p>старая статья</p>', {}, { width: 1000 });
     const said = [];
     ed.toast = (m) => said.push(m);
@@ -763,7 +763,7 @@ group('Markdown, JSON и нейросети (22.11)', () => {
     ed.destroy();
   });
   test('«Ещё»: «Скопировать промт», «Загрузить» (JSON или Markdown), «Выгрузить ▸»; промт описывает блоки из block.json', async () => {
-    const { aiPrompt } = await import('../../src/ui/exchange.js');
+    const { aiPrompt } = await import('../../resources/js/ui/exchange.js');
     const ed = make('<p>x</p>', {}, { width: 1000 });
     ed.toolbar.openMoreMenu();
     const labels = [...ed.popover.el.querySelectorAll('.ted-ui-item')].map((i) => i.textContent.trim());
@@ -795,7 +795,7 @@ group('Файловый менеджер CMS: вид файла и отмена 
 
 group('Две вкладки и печать (22.11)', () => {
   test('другая вкладка с тем же документом: предупреждение; там сохранили — сохранение здесь сначала спрашивает', async () => {
-    const { Presence } = await import('../../src/core/presence.js');
+    const { Presence } = await import('../../resources/js/core/presence.js');
     const events = [];
     const p = new Presence('test-doc-' + Math.random(), (t) => events.push(t));
     p.receive({ type: 'hello', from: 'x1', page: 'другая' });
@@ -821,7 +821,7 @@ group('Две вкладки и печать (22.11)', () => {
     ed.destroy();
   });
   test('печать: страница A4 со стилями сайта, аккордеон раскрыт, служебное скрыто; окно печати браузера', async () => {
-    const { printDoc } = await import('../../src/ui/exchange.js');
+    const { printDoc } = await import('../../resources/js/ui/exchange.js');
     const ed = make('<h2>Заголовок</h2><div class="ted-accordion"><details class="ted-accordion__item"><summary class="ted-accordion__q">В</summary><div class="ted-accordion__body"><p>ответ</p></div></details></div><p>x</p>', {}, { width: 1000 });
     const orig = window.HTMLIFrameElement.prototype;
     printDoc(ed);

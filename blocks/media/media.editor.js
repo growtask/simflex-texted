@@ -1,13 +1,13 @@
 import { MEDIA_KINDS, makeMediaFigure, mediaEditorBlock, mediaKind, readMediaFigure, safeMediaUrl, videoEmbedUrl } from './media.js';
-import { formatLimit } from '../../src/core/server.js';
-import { canPickLibrary, mediaPagePath, videoPoster } from '../../src/core/upload.js';
-import { emptyBlock, isEmptyBlock, blockAllowed } from '../../src/core/blocks.js';
-import { registeredBlocks } from '../../src/core/registry.js';
-import { placeCaret, topBlockOf } from '../../src/core/selection.js';
+import { formatLimit } from '../../resources/js/core/server.js';
+import { canPickLibrary, mediaPagePath, videoPoster } from '../../resources/js/core/upload.js';
+import { emptyBlock, isEmptyBlock, blockAllowed } from '../../resources/js/core/blocks.js';
+import { registeredBlocks } from '../../resources/js/core/registry.js';
+import { placeCaret, topBlockOf } from '../../resources/js/core/selection.js';
 import { buildAudioPlayer } from './audio-player.js';
 import { wrapFileNames } from './file-names.js';
 import { videoSourceButton } from './video-link.js';
-import { h, icon, smallButton } from '../../src/ui/widgets.js';
+import { h, icon, smallButton } from '../../resources/js/ui/widgets.js';
 
 const MEDIA_LABELS = { image: 'Изображение', gallery: 'Галерея', video: 'Видео', audio: 'Аудио', file: 'Файл' };
 const MEDIA_HINTS = { image: 'JPG, PNG, WEBP до 5 МБ (сохраним как WebP), GIF до 5 МБ (как есть)', gallery: 'JPG, PNG, WEBP до 5 МБ (сохраним как WebP), GIF до 5 МБ (как есть), несколько файлов', video: 'MP4, WebM, MOV, AVI, MKV и другие до 500 МБ. Постер из первого кадра, видео грузится по нажатию на плей', audio: 'MP3, WAV, до 50 МБ', file: 'PDF, DOCX, XLSX, ZIP, до 20 МБ' };

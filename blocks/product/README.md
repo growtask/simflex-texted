@@ -2,7 +2,7 @@
 
 Карточка товара из каталога CMS (опция `products`: search / get) или заполненная вручную; «В корзину» или «Перейти». Макет `block-product (Action/product)`, окно `editor-popover kind=product`. Блок целиком в этой папке: ядро его не упоминает (тест набора `blocks`).
 
-<!-- block.json:begin — собрано из block.json при сборке (tools/build.ps1, build.php), не правьте вручную -->
+<!-- block.json:begin — собрано из block.json при сборке (bin/build.php, build.php), не правьте вручную -->
 | Поле | Значение |
 |---|---|
 | Вид | `product` |
@@ -20,7 +20,7 @@
 
 ## Безопасность
 
-Атрибуты `data-ted-product` и `data-ted-cart` — в белом списке через `html` в `block.json`; поле `ids` включает общее правило «значение — id CMS: латиница, цифры, _ и -, до 64» (JS `allowlist.js` и PHP `TedSanitizer` одинаково). Ссылки и картинки — только через `urlOk`.
+Атрибуты `data-ted-product` и `data-ted-cart` — в белом списке через `html` в `block.json`; поле `ids` включает общее правило «значение — id CMS: латиница, цифры, _ и -, до 64» (JS `allowlist.js` и PHP `Sanitizer` одинаково). Ссылки и картинки — только через `urlOk`.
 
 ## Как ядро с ним работает
 

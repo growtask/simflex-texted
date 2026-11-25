@@ -19,22 +19,22 @@ texted превращает обычное поле `textarea` в блочный
 composer require simflex/texted
 ```
 
-1. Опубликуйте статику пакета в корень веб-сервера: `vendor/` не должен быть доступен из браузера. Нужны
-   `dist/`, `fonts/`, `tiles/` и `content.js` с сохранением взаимного расположения (стили ссылаются на `../fonts/`
-   и `../tiles/`) — шагом сборки или деплоя, например в `public/assets/texted/`.
+1. Опубликуйте папку `dist/` пакета в корень веб-сервера: `vendor/` не должен быть доступен из браузера. В `dist/`
+   всё нужное — скрипт, стили, `content.js`, шрифты, плитки и значки (стили ссылаются на них относительно) — шагом
+   сборки или деплоя, например в `public/assets/texted/`.
 2. Подключите стили и скрипт и превратите поле в редактор:
 
 ```html
-<link rel="stylesheet" href="/assets/texted/dist/ted.css">
+<link rel="stylesheet" href="/assets/texted/ted.css">
 <textarea name="content" id="content"><?= htmlspecialchars($page['content']) ?></textarea>
-<script src="/assets/texted/dist/ted.js"></script>
-<script>Ted.init({ selector: '#content', server: <?= $ted->clientJson('full', $canEdit) ?> });</script>
+<script src="/assets/texted/ted.js"></script>
+<script>Ted.init({ selector: '#content', server: <?= $ted->getClientJson('full', $canEdit) ?> });</script>
 ```
 
 3. HTML из браузера сохраняйте и выводите **только очищенным** (классы сервера загружает автозагрузка composer):
 
 ```php
-$ted = TedConfig::fromArray(['files' => ['dir' => __DIR__ . '/public/uf', 'url' => '/uf']]);   // ключи — ted.config.example.php
+$ted = Config::fromArray(['files' => ['dir' => __DIR__ . '/public/uf', 'url' => '/uf']]);   // ключи — ted.config.example.php
 $clean = $ted->save($_POST['content'], 'full', $canEdit); // при сохранении: очистка, набор блоков, право на правку
 echo $ted->clean($page['content']);                       // при выводе
 ```
@@ -42,12 +42,12 @@ echo $ted->clean($page['content']);                       // при выводе
 На страницах сайта подключите оформление и поведение блоков (вкладки, содержание, плеер):
 
 ```html
-<link rel="stylesheet" href="/assets/texted/dist/ted.css">
+<link rel="stylesheet" href="/assets/texted/ted.css">
 <script src="/assets/texted/content.js" defer></script>
 ```
 
 4. Загрузка файлов — `$ted->respondToUpload($pagePath, $preset, $canEdit)` за авторизацией CMS; в браузере
-`Ted.init({ selector: '#content', upload: Ted.createUpload('/admin/ted-upload', { headers }) })`. Проверка сервера: `php php/check.php`.
+`Ted.init({ selector: '#content', upload: Ted.createUpload('/admin/ted-upload', { headers }) })`. Проверка сервера: `php bin/check.php`.
 
 ## Документация
 
@@ -57,7 +57,7 @@ echo $ted->clean($page['content']);                       // при выводе
 
 ## Безопасность — коротко
 
-HTML из браузера не доверяем: перед сохранением и выводом его всегда очищает сервер (`TedSanitizer::clean`) по тому же белому
+HTML из браузера не доверяем: перед сохранением и выводом его всегда очищает сервер (`Sanitizer::clean`) по тому же белому
 списку, что и браузер. Загрузка — только за авторизацией CMS, тип файла проверяется по содержимому, папка файлов — только данные.
 Подробно — [docs/security.md](docs/security.md).
 
