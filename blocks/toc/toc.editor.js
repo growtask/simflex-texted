@@ -34,11 +34,58 @@ export class TocUI {
     };
     this.root.addEventListener('click', this.onClick);
     this.ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => this.place()) : null;
+    // полоса прогресса чтения и в правке (1.0.1), как на сайте: идёт за читателем под липкой панелью редактора
+    this.frame = 0;
+    // в скрытой вкладке кадров нет — считаем сразу, иначе отложенный кадр «зависает» и прогресс стоит
+    this.onScroll = () => {
+      if (document.visibilityState !== 'visible') { this.updateProgress(); return; }
+      if (!this.frame) this.frame = requestAnimationFrame(() => { this.frame = 0; this.updateProgress(); });
+    };
+    window.addEventListener('scroll', this.onScroll, { passive: true, capture: true });
+    window.addEventListener('resize', this.onScroll);
+    this.onScroll();
   }
 
   destroy() {
     this.ro?.disconnect();
     this.root.removeEventListener('click', this.onClick);
+    window.removeEventListener('scroll', this.onScroll, { capture: true });
+    window.removeEventListener('resize', this.onScroll);
+    if (this.frame) cancelAnimationFrame(this.frame);
+  }
+
+  /**
+   * Прогресс чтения в правке — те же правила, что у content.js на сайте (toc.site.js): доля прочитанного поля правки
+   * в полосе; пока содержание ушло вверх, полоса прилипает к верху области текста ниже --ted-sticky-top (шапка сайта +
+   * панель редактора) с отступом 8. Окно или ближайший прокручиваемый родитель. Стили полосы в HTML не попадают.
+   */
+  updateProgress() {
+    const tocs = this.editor.mode === 'edit' ? this.root.querySelectorAll('.ted-toc') : [];
+    if (!tocs.length) return;
+    let scroller = null;
+    for (let n = this.root.parentElement; n && n !== document.body && n !== document.documentElement; n = n.parentElement) {
+      const o = getComputedStyle(n).overflowY;
+      if ((o === 'auto' || o === 'scroll') && n.scrollHeight > n.clientHeight) { scroller = n; break; }
+    }
+    const view = scroller ? scroller.getBoundingClientRect() : { top: 0, height: window.innerHeight };
+    const sticky = parseFloat(getComputedStyle(this.root).getPropertyValue('--ted-sticky-top')) || 0;
+    const a = this.root.getBoundingClientRect();
+    const total = a.height - view.height;
+    const p = total > 0 ? Math.min(1, Math.max(0, (view.top - a.top) / total)) : (a.bottom <= view.top + view.height ? 1 : 0);
+    for (const toc of tocs) {
+      const progress = toc.querySelector(':scope > .ted-toc__progress');
+      const bar = progress && progress.querySelector('.ted-toc__bar');
+      if (!bar) continue;
+      bar.style.width = `${(p * 100).toFixed(2)}%`;
+      const t = toc.getBoundingClientRect();
+      const edge = Math.max(0, view.top) + sticky + 8;
+      const stuck = t.top < edge && a.bottom > edge;
+      progress.style.position = stuck ? 'fixed' : '';
+      progress.style.zIndex = stuck ? '19' : '';
+      progress.style.top = stuck ? `${edge}px` : '';
+      progress.style.left = stuck ? `${t.left}px` : '';
+      progress.style.width = stuck ? `${t.width}px` : '';
+    }
   }
 
   /** Глава — пункт этого блока: кнопки ⠿ 🗑 внутри её строки; после удаления блок остаётся и без глав. */

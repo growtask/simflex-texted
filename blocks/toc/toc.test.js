@@ -170,6 +170,77 @@ group('Содержание: сайт и вид', () => {
   });
 });
 
+group('Содержание: прогресс в правке и под панелью редактора (1.0.1)', () => {
+  test('правка: полоса прогресса считается; стили полосы в HTML не попадают', () => {
+    const ed = make(DOC + '<p>текст</p>'.repeat(120), {}, { width: 1000 });
+    ed.toc.updateProgress();
+    ok(ed.editable.querySelector('.ted-toc__bar').style.width !== '', 'прогресс посчитан в правке');
+    ok(!/style=/.test(ed.getHTML()), 'в HTML нет style полосы');
+  });
+
+  test('--ted-sticky-top на редакторе = шапка сайта снаружи + липкая панель редактора', () => {
+    const ed = make(DOC, {}, { width: 1000 });
+    ed.ui.parentElement.style.setProperty('--ted-sticky-top', '40px');
+    ed.syncStickyTop();
+    ok(ed.toolbar.el.offsetHeight > 0, 'панель есть');
+    eq(ed.ui.style.getPropertyValue('--ted-sticky-top'), `${40 + ed.toolbar.el.offsetHeight}px`);
+  });
+
+  test('тёмная тема опубликованного текста: текст светлый, код на main/gray/dark, подсветка — тёмные цвета', () => {
+    const box = document.createElement('div');
+    box.setAttribute('data-ted-theme', 'dark');
+    box.innerHTML = `<div class="ted-content">${Ted.clean('<p>текст</p><pre data-lang="js"><code>const a = 1;</code></pre>')}</div>`;
+    document.body.appendChild(box);
+    eq(getComputedStyle(box.querySelector('p')).color, 'rgb(237, 243, 250)', 'текст — text-icon/gray/lighter');
+    eq(getComputedStyle(box.querySelector('pre > code')).backgroundColor, 'rgb(77, 77, 77)', 'код — main/gray/dark');
+    eq(getComputedStyle(box.querySelector('.ted-k, .ted-tok-kw')).color, 'rgb(255, 123, 114)', 'ключевое слово — тёмная подсветка');
+    box.remove();
+  });
+
+  test('просмотр на странице: глава ведёт к заголовку в просмотре, а не к скрытому полю правки с тем же id', async () => {
+    const ed = make(DOC, { preview: 'inline' }, { width: 1000 });
+    await ed.setMode('view');
+    await wait(20);
+    const viewTarget = ed.ui.querySelector('.ted-ui-view [id="done"]');
+    ok(viewTarget && ed.editable.querySelector('[id="done"]'), 'один id в правке и в просмотре');
+    let scrolled = null;
+    const orig = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = function () { scrolled = this; };
+    try {
+      ed.ui.querySelector('.ted-ui-view .ted-toc a[href="#done"]').click();
+    } finally {
+      Element.prototype.scrollIntoView = orig;
+    }
+    ok(scrolled === viewTarget, 'прокрутка к заголовку в просмотре');
+    await ed.setMode('edit');
+  });
+
+  test('меню панели (стиль текста): под панелью, прикреплено к окну, не помещается — прокрутка внутри', async () => {
+    const ed = make('<p>текст</p>', {}, { width: 1000 });
+    ed.editable.focus();
+    placeCaretIn(ed.editable.querySelector('p'));
+    ed.toolbar.styleBtn.click();
+    await wait(20);
+    const pop = ed.toolbar.pop;
+    ok(pop.isOpen && pop.fixed, 'меню панели — fixed');
+    eq(pop.el.style.position, 'fixed');
+    const btn = ed.toolbar.styleBtn.getBoundingClientRect();
+    ok(Math.abs(pop.el.getBoundingClientRect().top - (btn.bottom + 4)) < 2 || pop.el.getBoundingClientRect().top >= 8, 'под кнопкой');
+    eq(pop.box.style.overflowY, 'auto');
+    ok(parseFloat(pop.box.style.maxHeight) <= window.innerHeight, 'высота не больше окна');
+    pop.close();
+  });
+});
+
+function placeCaretIn(el) {
+  const r = document.createRange();
+  r.setStart(el.firstChild || el, 0);
+  r.collapse(true);
+  const s = getSelection();
+  s.removeAllRanges();
+  s.addRange(r);
+}
+
 // ---- блок полностью в папке (отвязка ядра, 21.11): ядро спрашивает реестр ----
 group('Содержание: точки подключения реестра', () => {
   const TOC = '<nav class="ted-toc"><div class="ted-toc__panel"><p class="ted-toc__title">Оглавление</p><ul class="ted-toc__list"><li><a href="#start">Начало</a></li><li><a href="#end">Итог</a></li></ul></div></nav>';

@@ -14,6 +14,10 @@
 
 :is(.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-columns__col) > blockquote.ted-callout { margin-bottom: calc(var(--ted-gap) * var(--ted-u)); }
 
+/* тёмная тема (1.0.1): плашка main/gray/darker на фоне страницы — рамка main/gray/dark 2 (макет block-callout theme=dark) */
+[data-ted-theme="dark"] .ted-content blockquote.ted-callout,
+.ted-content[data-ted-theme="dark"] blockquote.ted-callout { box-shadow: inset 0 0 0 2px var(--color-main-gray-dark, #4d4d4d); }
+
 /* значок «информация» вместо акцентной линии цитаты */
 .ted-content blockquote.ted-callout::before {
   top: calc(12 * var(--ted-u));

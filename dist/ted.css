@@ -1,4 +1,4 @@
-/*! Ted 1.0.0 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-24 14:04 */
+/*! Ted 1.0.1 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-25 15:25 */
 
 /* ---- resources/css/fonts.css ---- */
 /* ==========================================================================
@@ -249,6 +249,26 @@
   --ted-icon-close: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M17.293 5.293C17.6835 4.9025 18.3165 4.9025 18.707 5.293C19.0975 5.6835 19.0975 6.3166 18.707 6.7071L13.414 12L18.707 17.293C19.0975 17.6835 19.0975 18.3166 18.707 18.7071C18.3165 19.0976 17.6835 19.0976 17.293 18.7071L12 13.4141L6.707 18.7071C6.3165 19.0976 5.6835 19.0976 5.293 18.7071C4.9024 18.3166 4.9024 17.6835 5.293 17.293L10.5859 12L5.293 6.7071C4.9024 6.3166 4.9024 5.6835 5.293 5.293C5.6835 4.9025 6.3165 4.9025 6.707 5.293L12 10.586L17.293 5.293Z'/%3E%3C/svg%3E");
 }
 
+/* Тёмная тема опубликованного текста (1.0.1): цвета блоков theme=dark из макета (страница сайта на фоне
+   main/gray/darker). Раньше тёмные цвета текста были только у редактора (.ted-ui — у него правила сильнее и фон
+   main/gray/black), и на сайте в тёмной теме текст оставался тёмным, а код — светлым */
+[data-ted-theme="dark"] .ted-content,
+.ted-content[data-ted-theme="dark"] {
+  --ted-c-text: var(--color-text-icon-gray-lighter, #edf3fa);
+  --ted-c-heading: var(--color-text-icon-gray-white, #ffffff);
+  --ted-c-quote: var(--color-text-icon-gray-white, #ffffff);
+  --ted-c-link: var(--color-text-icon-color1-light, #63a1f7);
+  --ted-c-link-hover: var(--color-text-icon-color1-lighter, #d2e2f7);
+  --ted-c-line: var(--color-main-gray-dark, #4d4d4d);
+  --ted-c-step-line: var(--color-main-gray-dark, #4d4d4d);
+  --ted-c-callout-bg: var(--color-main-gray-darker, #262626);
+  --ted-c-fact-bg: var(--color-main-gray-dark, #4d4d4d);
+  --ted-c-pros-bg: var(--color-main-gray-dark, #4d4d4d);
+  --ted-c-cons-bg: var(--color-main-gray-dark, #4d4d4d);
+  --ted-c-code-bg: var(--color-main-gray-dark, #4d4d4d);
+  --ted-c-code-head: var(--color-main-gray-darker, #262626);
+  --ted-c-code-text: var(--color-text-icon-gray-lighter, #edf3fa);
+}
 
 /* ---- blocks/hr/hr.site.css ---- */
 /* Блок «Разделитель» — вид на сайте и в редакторе (макет block-line, Layout/line): 2 px, main/gray/lighter (--ted-c-line),
@@ -421,6 +441,10 @@
 
 :is(.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-columns__col) > blockquote.ted-callout { margin-bottom: calc(var(--ted-gap) * var(--ted-u)); }
 
+/* тёмная тема (1.0.1): плашка main/gray/darker на фоне страницы — рамка main/gray/dark 2 (макет block-callout theme=dark) */
+[data-ted-theme="dark"] .ted-content blockquote.ted-callout,
+.ted-content[data-ted-theme="dark"] blockquote.ted-callout { box-shadow: inset 0 0 0 2px var(--color-main-gray-dark, #4d4d4d); }
+
 /* значок «информация» вместо акцентной линии цитаты */
 .ted-content blockquote.ted-callout::before {
   top: calc(12 * var(--ted-u));
@@ -589,6 +613,19 @@
   --ted-tok-attr: #0550ae;
   --ted-tok-prop: #0550ae;
   --ted-tok-var: #953800;
+}
+/* тёмная тема опубликованного текста (1.0.1) — те же цвета, что у редактора в тёмной теме */
+[data-ted-theme="dark"] .ted-content,
+.ted-content[data-ted-theme="dark"] {
+  --ted-tok-kw: #ff7b72;
+  --ted-tok-str: #a5d6ff;
+  --ted-tok-num: #79c0ff;
+  --ted-tok-com: #8b949e;
+  --ted-tok-fn: #d2a8ff;
+  --ted-tok-tag: #7ee787;
+  --ted-tok-attr: #79c0ff;
+  --ted-tok-prop: #79c0ff;
+  --ted-tok-var: #ffa657;
 }
 .ted-content .ted-tok-kw, .ted-content .ted-k { color: var(--ted-tok-kw); }
 .ted-content .ted-tok-str, .ted-content .ted-s { color: var(--ted-tok-str); }
