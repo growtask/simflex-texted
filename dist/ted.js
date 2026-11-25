@@ -1,4 +1,4 @@
-/*! Ted 1.0.0 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-24 14:04 */
+/*! Ted 1.0.1 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-25 15:25 */
 (function () {
 'use strict';
 
@@ -10230,11 +10230,58 @@ class TocUI {
     };
     this.root.addEventListener('click', this.onClick);
     this.ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => this.place()) : null;
+    // полоса прогресса чтения и в правке (1.0.1), как на сайте: идёт за читателем под липкой панелью редактора
+    this.frame = 0;
+    // в скрытой вкладке кадров нет — считаем сразу, иначе отложенный кадр «зависает» и прогресс стоит
+    this.onScroll = () => {
+      if (document.visibilityState !== 'visible') { this.updateProgress(); return; }
+      if (!this.frame) this.frame = requestAnimationFrame(() => { this.frame = 0; this.updateProgress(); });
+    };
+    window.addEventListener('scroll', this.onScroll, { passive: true, capture: true });
+    window.addEventListener('resize', this.onScroll);
+    this.onScroll();
   }
 
   destroy() {
     this.ro?.disconnect();
     this.root.removeEventListener('click', this.onClick);
+    window.removeEventListener('scroll', this.onScroll, { capture: true });
+    window.removeEventListener('resize', this.onScroll);
+    if (this.frame) cancelAnimationFrame(this.frame);
+  }
+
+  /**
+   * Прогресс чтения в правке — те же правила, что у content.js на сайте (toc.site.js): доля прочитанного поля правки
+   * в полосе; пока содержание ушло вверх, полоса прилипает к верху области текста ниже --ted-sticky-top (шапка сайта +
+   * панель редактора) с отступом 8. Окно или ближайший прокручиваемый родитель. Стили полосы в HTML не попадают.
+   */
+  updateProgress() {
+    const tocs = this.editor.mode === 'edit' ? this.root.querySelectorAll('.ted-toc') : [];
+    if (!tocs.length) return;
+    let scroller = null;
+    for (let n = this.root.parentElement; n && n !== document.body && n !== document.documentElement; n = n.parentElement) {
+      const o = getComputedStyle(n).overflowY;
+      if ((o === 'auto' || o === 'scroll') && n.scrollHeight > n.clientHeight) { scroller = n; break; }
+    }
+    const view = scroller ? scroller.getBoundingClientRect() : { top: 0, height: window.innerHeight };
+    const sticky = parseFloat(getComputedStyle(this.root).getPropertyValue('--ted-sticky-top')) || 0;
+    const a = this.root.getBoundingClientRect();
+    const total = a.height - view.height;
+    const p = total > 0 ? Math.min(1, Math.max(0, (view.top - a.top) / total)) : (a.bottom <= view.top + view.height ? 1 : 0);
+    for (const toc of tocs) {
+      const progress = toc.querySelector(':scope > .ted-toc__progress');
+      const bar = progress && progress.querySelector('.ted-toc__bar');
+      if (!bar) continue;
+      bar.style.width = `${(p * 100).toFixed(2)}%`;
+      const t = toc.getBoundingClientRect();
+      const edge = Math.max(0, view.top) + sticky + 8;
+      const stuck = t.top < edge && a.bottom > edge;
+      progress.style.position = stuck ? 'fixed' : '';
+      progress.style.zIndex = stuck ? '19' : '';
+      progress.style.top = stuck ? `${edge}px` : '';
+      progress.style.left = stuck ? `${t.left}px` : '';
+      progress.style.width = stuck ? `${t.width}px` : '';
+    }
   }
 
   /** Глава — пункт этого блока: кнопки ⠿ 🗑 внутри её строки; после удаления блок остаётся и без глав. */
@@ -10951,6 +10998,10 @@ class Popover {
     this.anchorX = anchorX;
     this.rel = null;
     this.anchorDX = undefined;
+    // меню панели редактора (и их подменю) — под липкой панелью, прикреплены к окну (1.0.1): при прокрутке страницы не
+    // уезжают, а не помещаются по высоте — прокручиваются внутри (страница под меню не докручивается)
+    this.fixed = !!(anchor && anchor.closest && (anchor.closest('.ted-ui-toolbar')
+      || (this.parent && this.parent.fixed && this.parent.el && this.parent.el.contains(anchor))));
     // место курсора до окна — Esc возвращает туда (afterKeyboardClose ставит редактор, проверка 22.11)
     const sel = typeof document !== 'undefined' ? document.getSelection() : null;
     this.returnRange = sel && sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
@@ -10965,7 +11016,7 @@ class Popover {
     // панель целиком в окне — докручиваем страницу плавно, когда редактор уже вытянулся под панель (без рывка)
     const panel = this.el;
     setTimeout(() => {
-      if (this.el !== panel) return;
+      if (this.el !== panel || this.fixed) return;
       const bottom = this.host.getBoundingClientRect().top + panel.offsetTop + panel.offsetHeight;
       const overflow = bottom - document.documentElement.clientHeight;
       if (overflow > 0) window.scrollBy({ top: overflow + 8, behavior: 'smooth' });
@@ -11004,6 +11055,7 @@ class Popover {
    */
   place() {
     if (!this.el || !this.anchor) return;
+    if (this.fixed) { this.placeFixed(); return; }
     const host = this.host.getBoundingClientRect();
     let r;
     if (this.anchor.getBoundingClientRect) {
@@ -11049,9 +11101,50 @@ class Popover {
     else (this.parent || this).grow();
   }
 
+  /**
+   * Меню панели редактора (1.0.1): координаты окна, под кнопкой, в пределах экрана; высота — до низа окна с отступом 8,
+   * лишнее прокручивается внутри (полоса Scrollbar/scrollbar). Подменю — справа от меню (не помещается — слева, затем под ним).
+   */
+  placeFixed() {
+    const r = this.anchor.getBoundingClientRect();
+    const vw = document.documentElement.clientWidth;
+    const vh = window.innerHeight;
+    this.el.style.position = 'fixed';
+    this.box.style.overflowY = 'auto';
+    const w = this.el.offsetWidth;
+    let left;
+    let top;
+    let x;
+    if (this.side === 'right' && this.parent?.el) {
+      const pr = this.parent.el.getBoundingClientRect();
+      const fitsRight = pr.right + 8 + w <= vw - 8;
+      left = fitsRight ? pr.right + 8 : pr.left - w - 8;
+      if (this.anchor.classList) this.anchor.classList.toggle('is-sub-left', !fitsRight);
+      top = r.top - 12;
+      if (!fitsRight && left < 8) { left = pr.left; top = pr.bottom + 8; }
+      x = left + 28;
+    } else {
+      if (this.anchorX !== null && this.anchorX !== undefined && this.anchorDX === undefined) {
+        const ax = typeof this.anchorX === 'function' ? this.anchorX(r) : this.anchorX;
+        this.anchorDX = ax - r.left;
+      }
+      x = this.anchorDX !== undefined ? r.left + this.anchorDX : r.left + Math.min(20, r.width / 2);
+      left = this.align === 'end' ? x + 28 - w : x - 28;
+      top = r.bottom + 4;
+    }
+    left = Math.max(8, Math.min(vw - w - 8, left));
+    top = Math.max(8, top);
+    this.el.style.left = `${left}px`;
+    this.el.style.top = `${top}px`;
+    this.el.style.setProperty('--corner-x', `${Math.max(16, Math.min(w - 24, x - left - 4))}px`);
+    this.box.style.maxHeight = `${Math.max(120, vh - top - this.box.offsetTop - 8)}px`;
+    if (this.child?.isOpen) this.child.place();
+  }
+
   /** Основное меню и подменю делят один запас высоты редактора. */
   grow() {
-    const panels = this.host.querySelectorAll(':scope > .ted-ui-pop, :scope > .ted-ui-picker');
+    if (this.fixed) return;
+    const panels = this.host.querySelectorAll(':scope > .ted-ui-pop:not([style*="position: fixed"]), :scope > .ted-ui-picker');
     const bottom = Math.max(0, ...Array.from(panels, (panel) => panel.offsetTop + panel.offsetHeight + 16));
     if (bottom) this.host.style.setProperty('--ted-pop-min-height', `${bottom}px`);
     else this.host.style.removeProperty('--ted-pop-min-height');
@@ -13497,6 +13590,18 @@ class InlineView {
     this.el.addEventListener('dblclick', () => {
       if (editor.options.dblclickToEdit !== false) editor.setMode('edit');
     });
+    // ссылка на раздел (#якорь: глава «Содержания», ссылка в тексте) — к заголовку в просмотре (1.0.1): те же id есть
+    // и в скрытом поле правки, браузер шёл к первому (скрытому) и страница не прокручивалась
+    this.el.addEventListener('click', (e) => {
+      const a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a || !this.el.contains(a) || e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      const id = decodeURIComponent(a.getAttribute('href').slice(1));
+      const target = id && this.content.querySelector(`[id="${CSS.escape(id)}"]`);
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      if (history.replaceState) history.replaceState(null, '', `#${encodeURIComponent(id)}`);
+    });
   }
 
   render(innerHTML) {
@@ -14021,6 +14126,12 @@ class Editor {
       this.target.appendChild(this.ui);
     }
     this.ui.__ted = this;
+    this.syncStickyTop();
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => this.syncStickyTop());
+      ro.observe(this.toolbar.el);
+      this.disposers.push(() => ro.disconnect());
+    }
     this.handle = new BlockHandle(this);
     // правка блоков из реестра (blocks/<тип>/<тип>.editor.js → editorUi): клавиши, sync, рамка, destroy; у семейства — одна
     const uis = new Map();
@@ -14518,6 +14629,17 @@ class Editor {
    * Уничтожить редактор: сохраняет изменения в textarea, снимает все слушатели и наблюдатели,
    * закрывает меню и окна, убирает подсветку кода и снимает редактор с реестра Ted. Повторный вызов безопасен.
    */
+  /**
+   * Верх области текста под липкими панелями (1.0.1): шапка сайта (--ted-sticky-top снаружи редактора) + липкая панель
+   * редактора. Ставится на .ted-ui как --ted-sticky-top — его учитывают полоса прогресса «Содержания» (правка и просмотр)
+   * и переход по якорям: полоса больше не прячется под панелью редактора.
+   */
+  syncStickyTop() {
+    const outer = this.ui.parentElement ? parseFloat(getComputedStyle(this.ui.parentElement).getPropertyValue('--ted-sticky-top')) || 0 : 0;
+    const bar = this.toolbar && this.toolbar.el.isConnected ? this.toolbar.el.offsetHeight : 0;
+    this.ui.style.setProperty('--ted-sticky-top', `${outer + bar}px`);
+  }
+
   destroy() {
     if (this.destroyed) return;
     this.destroyed = true;
@@ -16595,7 +16717,7 @@ function escapeHTML(s) {
 
 
 
-const VERSION = '1.0.0';
+const VERSION = '1.0.1';
 
 const Ted = {
   version: VERSION,

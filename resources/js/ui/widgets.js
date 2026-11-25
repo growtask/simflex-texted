@@ -224,6 +224,10 @@ export class Popover {
     this.anchorX = anchorX;
     this.rel = null;
     this.anchorDX = undefined;
+    // меню панели редактора (и их подменю) — под липкой панелью, прикреплены к окну (1.0.1): при прокрутке страницы не
+    // уезжают, а не помещаются по высоте — прокручиваются внутри (страница под меню не докручивается)
+    this.fixed = !!(anchor && anchor.closest && (anchor.closest('.ted-ui-toolbar')
+      || (this.parent && this.parent.fixed && this.parent.el && this.parent.el.contains(anchor))));
     // место курсора до окна — Esc возвращает туда (afterKeyboardClose ставит редактор, проверка 22.11)
     const sel = typeof document !== 'undefined' ? document.getSelection() : null;
     this.returnRange = sel && sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
@@ -238,7 +242,7 @@ export class Popover {
     // панель целиком в окне — докручиваем страницу плавно, когда редактор уже вытянулся под панель (без рывка)
     const panel = this.el;
     setTimeout(() => {
-      if (this.el !== panel) return;
+      if (this.el !== panel || this.fixed) return;
       const bottom = this.host.getBoundingClientRect().top + panel.offsetTop + panel.offsetHeight;
       const overflow = bottom - document.documentElement.clientHeight;
       if (overflow > 0) window.scrollBy({ top: overflow + 8, behavior: 'smooth' });
@@ -277,6 +281,7 @@ export class Popover {
    */
   place() {
     if (!this.el || !this.anchor) return;
+    if (this.fixed) { this.placeFixed(); return; }
     const host = this.host.getBoundingClientRect();
     let r;
     if (this.anchor.getBoundingClientRect) {
@@ -322,9 +327,50 @@ export class Popover {
     else (this.parent || this).grow();
   }
 
+  /**
+   * Меню панели редактора (1.0.1): координаты окна, под кнопкой, в пределах экрана; высота — до низа окна с отступом 8,
+   * лишнее прокручивается внутри (полоса Scrollbar/scrollbar). Подменю — справа от меню (не помещается — слева, затем под ним).
+   */
+  placeFixed() {
+    const r = this.anchor.getBoundingClientRect();
+    const vw = document.documentElement.clientWidth;
+    const vh = window.innerHeight;
+    this.el.style.position = 'fixed';
+    this.box.style.overflowY = 'auto';
+    const w = this.el.offsetWidth;
+    let left;
+    let top;
+    let x;
+    if (this.side === 'right' && this.parent?.el) {
+      const pr = this.parent.el.getBoundingClientRect();
+      const fitsRight = pr.right + 8 + w <= vw - 8;
+      left = fitsRight ? pr.right + 8 : pr.left - w - 8;
+      if (this.anchor.classList) this.anchor.classList.toggle('is-sub-left', !fitsRight);
+      top = r.top - 12;
+      if (!fitsRight && left < 8) { left = pr.left; top = pr.bottom + 8; }
+      x = left + 28;
+    } else {
+      if (this.anchorX !== null && this.anchorX !== undefined && this.anchorDX === undefined) {
+        const ax = typeof this.anchorX === 'function' ? this.anchorX(r) : this.anchorX;
+        this.anchorDX = ax - r.left;
+      }
+      x = this.anchorDX !== undefined ? r.left + this.anchorDX : r.left + Math.min(20, r.width / 2);
+      left = this.align === 'end' ? x + 28 - w : x - 28;
+      top = r.bottom + 4;
+    }
+    left = Math.max(8, Math.min(vw - w - 8, left));
+    top = Math.max(8, top);
+    this.el.style.left = `${left}px`;
+    this.el.style.top = `${top}px`;
+    this.el.style.setProperty('--corner-x', `${Math.max(16, Math.min(w - 24, x - left - 4))}px`);
+    this.box.style.maxHeight = `${Math.max(120, vh - top - this.box.offsetTop - 8)}px`;
+    if (this.child?.isOpen) this.child.place();
+  }
+
   /** Основное меню и подменю делят один запас высоты редактора. */
   grow() {
-    const panels = this.host.querySelectorAll(':scope > .ted-ui-pop, :scope > .ted-ui-picker');
+    if (this.fixed) return;
+    const panels = this.host.querySelectorAll(':scope > .ted-ui-pop:not([style*="position: fixed"]), :scope > .ted-ui-picker');
     const bottom = Math.max(0, ...Array.from(panels, (panel) => panel.offsetTop + panel.offsetHeight + 16));
     if (bottom) this.host.style.setProperty('--ted-pop-min-height', `${bottom}px`);
     else this.host.style.removeProperty('--ted-pop-min-height');

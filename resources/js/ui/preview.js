@@ -174,6 +174,18 @@ export class InlineView {
     this.el.addEventListener('dblclick', () => {
       if (editor.options.dblclickToEdit !== false) editor.setMode('edit');
     });
+    // ссылка на раздел (#якорь: глава «Содержания», ссылка в тексте) — к заголовку в просмотре (1.0.1): те же id есть
+    // и в скрытом поле правки, браузер шёл к первому (скрытому) и страница не прокручивалась
+    this.el.addEventListener('click', (e) => {
+      const a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a || !this.el.contains(a) || e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      const id = decodeURIComponent(a.getAttribute('href').slice(1));
+      const target = id && this.content.querySelector(`[id="${CSS.escape(id)}"]`);
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      if (history.replaceState) history.replaceState(null, '', `#${encodeURIComponent(id)}`);
+    });
   }
 
   render(innerHTML) {

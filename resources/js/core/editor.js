@@ -172,6 +172,12 @@ export class Editor {
       this.target.appendChild(this.ui);
     }
     this.ui.__ted = this;
+    this.syncStickyTop();
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => this.syncStickyTop());
+      ro.observe(this.toolbar.el);
+      this.disposers.push(() => ro.disconnect());
+    }
     this.handle = new BlockHandle(this);
     // правка блоков из реестра (blocks/<тип>/<тип>.editor.js → editorUi): клавиши, sync, рамка, destroy; у семейства — одна
     const uis = new Map();
@@ -669,6 +675,17 @@ export class Editor {
    * Уничтожить редактор: сохраняет изменения в textarea, снимает все слушатели и наблюдатели,
    * закрывает меню и окна, убирает подсветку кода и снимает редактор с реестра Ted. Повторный вызов безопасен.
    */
+  /**
+   * Верх области текста под липкими панелями (1.0.1): шапка сайта (--ted-sticky-top снаружи редактора) + липкая панель
+   * редактора. Ставится на .ted-ui как --ted-sticky-top — его учитывают полоса прогресса «Содержания» (правка и просмотр)
+   * и переход по якорям: полоса больше не прячется под панелью редактора.
+   */
+  syncStickyTop() {
+    const outer = this.ui.parentElement ? parseFloat(getComputedStyle(this.ui.parentElement).getPropertyValue('--ted-sticky-top')) || 0 : 0;
+    const bar = this.toolbar && this.toolbar.el.isConnected ? this.toolbar.el.offsetHeight : 0;
+    this.ui.style.setProperty('--ted-sticky-top', `${outer + bar}px`);
+  }
+
   destroy() {
     if (this.destroyed) return;
     this.destroyed = true;

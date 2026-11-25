@@ -92,6 +92,19 @@
   --ted-tok-prop: #0550ae;
   --ted-tok-var: #953800;
 }
+/* тёмная тема опубликованного текста (1.0.1) — те же цвета, что у редактора в тёмной теме */
+[data-ted-theme="dark"] .ted-content,
+.ted-content[data-ted-theme="dark"] {
+  --ted-tok-kw: #ff7b72;
+  --ted-tok-str: #a5d6ff;
+  --ted-tok-num: #79c0ff;
+  --ted-tok-com: #8b949e;
+  --ted-tok-fn: #d2a8ff;
+  --ted-tok-tag: #7ee787;
+  --ted-tok-attr: #79c0ff;
+  --ted-tok-prop: #79c0ff;
+  --ted-tok-var: #ffa657;
+}
 .ted-content .ted-tok-kw, .ted-content .ted-k { color: var(--ted-tok-kw); }
 .ted-content .ted-tok-str, .ted-content .ted-s { color: var(--ted-tok-str); }
 .ted-content .ted-tok-num, .ted-content .ted-n { color: var(--ted-tok-num); }

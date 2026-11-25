@@ -22,6 +22,12 @@ if ($package === '' || !is_file($package . '/src/FileManager/Manager.php')) {
     exit(0);
 }
 
+// менеджер с 25.11 берёт настройки из ядра Simflex (Container) — без ядра демо его не запустит: пропуск с причиной
+if (str_contains((string) file_get_contents($package . '/src/FileManager/Manager.php'), 'Simflex\\Core\\') && !class_exists('Simflex\\Core\\System\\Container')) {
+    echo "  Файловый менеджер требует ядро Simflex (simflex/core) — демо без ядра его не запускает, пропущено\n";
+    exit(0);
+}
+
 require_once dirname(__DIR__, 2) . '/bin/demo/fm-demo.php';
 require_once $package . '/src/FileManager/Manager.php';
 
