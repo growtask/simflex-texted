@@ -9,7 +9,7 @@ function siteEmbed(link) {
   try { url = new URL(link.dataset.tedVideo); } catch { return; }
   if (url.protocol !== 'https:' || !SITE_VIDEO_HOSTS.includes(url.hostname) || url.username || url.password || url.port) return;
   const frame = link.ownerDocument.createElement('iframe');
-  frame.title = link.textContent.trim() || 'Видеоплеер';
+  frame.title = link.textContent.trim() || siteText(link, 'Видеоплеер', 'Video player');
   frame.src = url.href;
   frame.loading = 'lazy';
   frame.allowFullscreen = true;

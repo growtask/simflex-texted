@@ -1,4 +1,4 @@
-/*! Ted 1.0.1 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-25 15:25 */
+/*! Ted 1.0.2 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-25 16:09 */
 (function () {
 'use strict';
 
@@ -29,6 +29,16 @@ function t(s) {
   if (LANG === 'ru' || typeof s !== 'string' || !s) return s;
   const d = DICT[LANG];
   return (d && (d[s] ?? d[s.trim()])) ?? s;
+}
+
+/** Перевод строки с подстановками: tf('Загружено файлов: {n}', { n: 3 }) — в словаре ключ с {n} (1.0.2) */
+function tf(s, vars = {}) {
+  return String(t(s)).replace(/\{(\w+)\}/g, (m, k) => (k in vars ? String(vars[k]) : m));
+}
+
+/** Дробное число по языку: 2,5 по-русски, 2.5 по-английски */
+function num(x) {
+  return LANG === 'ru' ? String(x).replace('.', ',') : String(x);
 }
 
 /** Атрибуты с текстом интерфейса — переводятся в h(). */
@@ -316,6 +326,8 @@ addLang('en', {
   'JPG, PNG, WEBP до 5 МБ (сохраним как WebP), GIF до 5 МБ (как есть)': 'JPG, PNG, WEBP up to 5 MB (saved as WebP), GIF up to 5 MB (as is)',
   'MP3, WAV, до 50 МБ': 'MP3, WAV, up to 50 MB',
   'PDF, DOCX, XLSX, ZIP, до 20 МБ': 'PDF, DOCX, XLSX, ZIP, up to 20 MB',
+  'JPG, PNG, WEBP до 5 МБ (сохраним как WebP), GIF до 5 МБ (как есть), несколько файлов': 'JPG, PNG, WEBP up to 5 MB (saved as WebP), GIF up to 5 MB (as is), several files',
+  'MP4, WebM, MOV, AVI, MKV и другие до 500 МБ. Постер из первого кадра, видео грузится по нажатию на плей': 'MP4, WebM, MOV, AVI, MKV and others up to 500 MB. The poster is the first frame; the video loads when you press play',
   'не изображение': 'not an image',
   'не видео': 'not a video',
   'не аудио': 'not an audio file',
@@ -438,6 +450,43 @@ addLang('en', {
   'Важно': 'Important',
   'Внимание': 'Warning',
   'Осторожно': 'Caution',
+  // строки с подстановками — tf(строка, { n, size, … }) (1.0.2)
+  'МБ': 'MB',
+  'КБ': 'KB',
+  'фото': 'photo',
+  'изображение': 'image',
+  'видео': 'video',
+  'аудио': 'audio',
+  'файл': 'file',
+  'Загружается {what}': 'Uploading {what}',
+  'Файл больше {size} — так настроено на сайте': 'The file is larger than {size} — this is the site setting',
+  'Галерея · {n} фото. У каждого фото своя подпись; ⠿ — переставить, карандаш — alt': 'Gallery · {n} photos. Each photo has its own caption; ⠿ — reorder, pencil — alt',
+  'Выбрать файл: {kind}': 'Choose a file: {kind}',
+  'Переместить фото (Alt и стрелки)': 'Move photo (Alt and arrows)',
+  'Переместить файл (Alt и стрелки)': 'Move file (Alt and arrows)',
+  'Удалить фото': 'Delete photo',
+  'Удалить файл': 'Delete file',
+  'Загружено файлов: {n}': 'Files uploaded: {n}',
+  'GIF сохранён без изменений{dims} · {kb}': 'GIF saved as is{dims} · {kb}',
+  'без изменений': 'unchanged',
+  ' (было {size}, −{pct}%)': ' (was {size}, −{pct}%)',
+  'Изображение: {text}': 'Image: {text}',
+  'Видео сконвертировано в {type} · {kb} (было {size})': 'Video converted to {type} · {kb} (was {size})',
+  'Загружено · {type} · {kb}': 'Uploaded · {type} · {kb}',
+  'постер из первого кадра': 'poster from the first frame',
+  '{names} — {what}, пропущено': '{names} — {what}, skipped',
+  'Статья заменена': 'Article replaced',
+  'Статья заменена (пропущены неизвестные блоки: {types})': 'Article replaced (unknown blocks skipped: {types})',
+  'Изменено мест: {n}. Выключите то, что не нужно.': 'Changes: {n}. Turn off what you do not need.',
+  'Карточка не получена: {error}': 'Could not get the card: {error}',
+  'Этот сайт нельзя встроить: разрешены {hosts}': 'This site cannot be embedded: allowed are {hosts}',
+  'только сайты из настроек': 'only sites from the settings',
+  'Не больше {n} строк': 'No more than {n} rows',
+  'Не больше {n} столбцов': 'No more than {n} columns',
+  'Не больше {n} вкладок': 'No more than {n} tabs',
+  '{title}, {w}px': '{title}, {w}px',
+  'vw-режим': 'vw mode',
+  'px-режим': 'px mode',
 });
 
 // ---- resources/js/ui/icons.js ----
@@ -2025,7 +2074,6 @@ class History {
 }
 
 // ---- resources/js/core/upload.js ----
-// Прямая загрузка: XHR даёт реальный прогресс отправки и поддерживает отмену.
 function createUpload(endpoint, { headers = {} } = {}) {
   // maxSide — картинку уменьшить до этой стороны (товар: размер карточки с запасом для ретины, 22.11); сервер ограничивает 160…2560
   const upload = (file, { kind, pagePath, signal, onProgress, maxSide } = {}) => new Promise((resolve, reject) => {
@@ -2169,7 +2217,7 @@ async function chooseMedia(editor, kind, { multiple = false, source = null } = {
     const fits = (a) => !extensions || extensions.includes(extOf(a.url || a.name || ''));
     const assets = all.filter(fits);
     const wrong = all.filter((a) => !fits(a));
-    if (wrong.length) editor.toast(`${wrong.map((a) => decodeURIComponent((a.name || a.url || '').split('/').pop())).join(', ')} — ${MEDIA_WRONG[kind]}, пропущено`, { status: 'error' });
+    if (wrong.length) editor.toast(tf('{names} — {what}, пропущено', { names: wrong.map((a) => decodeURIComponent((a.name || a.url || '').split('/').pop())).join(', '), what: t(MEDIA_WRONG[kind]) }), { status: 'error' });
     return { source: 'manager', assets: multiple ? assets : assets.slice(0, 1) };
   }
   if (typeof upload !== 'function') throw new Error('Прямая загрузка не настроена');
@@ -2298,6 +2346,7 @@ function presetNames(serverPresets = null) {
 //   presets     — свои наборы из ted.config.php → presets: { имя: { blocks, mode } }
 //   canEdit     — false: у пользователя нет права правки — только просмотр, кнопки «Редактировать» нет
 
+
 const KINDS = ['image', 'video', 'audio', 'file'];
 const HOST = /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
 
@@ -2329,7 +2378,7 @@ function serverOptions(raw) {
 /** Размер для сообщения: «5 МБ», «2,5 МБ». */
 function formatLimit(bytes) {
   const mb = bytes / 1048576;
-  return `${(Math.round(mb * 10) / 10).toString().replace('.', ',')} МБ`;
+  return `${num(Math.round(mb * 10) / 10)} ${t('МБ')}`;
 }
 
 // ---- resources/js/core/containers.js ----
@@ -6133,8 +6182,9 @@ registerBlock({
 
 
 
+
 /** Сайт не из списка в настройках сервера (ted.config.php → iframe.hosts). */
-const frameHostMessage = (ed) => `Этот сайт нельзя встроить: разрешены ${ed.server.iframeHosts.join(', ') || 'только сайты из настроек'}`;
+const frameHostMessage = (ed) => tf('Этот сайт нельзя встроить: разрешены {hosts}', { hosts: ed.server.iframeHosts.join(', ') || t('только сайты из настроек') });
 
 class IframeUI {
   constructor(editor) {
@@ -6485,6 +6535,7 @@ registerBlock({
 
 
 
+
 const fixLink = (v) => {
   const s = String(v || '').trim();
   if (!s) return '';
@@ -6563,7 +6614,7 @@ class EmbedUI {
         this.apply(el, data);
       } catch (err) {
         busy(false);
-        ed.toast(err && err.message ? `Карточка не получена: ${err.message}` : 'Карточка не получена', { status: 'error' });
+        ed.toast(err && err.message ? tf('Карточка не получена: {error}', { error: err.message }) : 'Карточка не получена', { status: 'error' });
       }
     };
     input.addEventListener('keydown', (e) => {
@@ -6668,7 +6719,7 @@ class EmbedUI {
         ed.popover.close();
         this.apply(el, data, { compact: tInput.checked });
       } catch (err) {
-        ed.toast(err && err.message ? `Карточка не получена: ${err.message}` : 'Карточка не получена', { status: 'error' });
+        ed.toast(err && err.message ? tf('Карточка не получена: {error}', { error: err.message }) : 'Карточка не получена', { status: 'error' });
       } finally { saving = false; }
     };
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); save(); } });
@@ -7557,7 +7608,7 @@ class MediaBlocks {
     try {
       // лимит размера из настроек сервера: слишком большой файл не отправляем — сервер его всё равно не примет
       const limit = job.file && editor.server.limits[mediaFileKind(kind)];
-      if (limit && job.file.size > limit) throw new Error(`Файл больше ${formatLimit(limit)} — так настроено на сайте`);
+      if (limit && job.file.size > limit) throw new Error(tf('Файл больше {size} — так настроено на сайте', { size: formatLimit(limit) }));
       const asset = job.url ? await editor.options.upload.fromUrl(job.url, { pagePath: mediaPagePath(editor), signal: abort.signal }) : await editor.options.upload(job.file, {
         kind: mediaFileKind(kind), pagePath: mediaPagePath(editor), signal: abort.signal,
         onProgress: (fraction) => {
@@ -7700,7 +7751,7 @@ class MediaBlocks {
     };
     if (kind === 'file') wrapFileNames(figure);   // название файла в две строки с многоточием
     if (kind === 'gallery' || kind === 'file') this.itemControls(block, figure, kind);
-    if (kind === 'gallery' && items.length) panel.appendChild(h('div', { class: 'ted-ui-media__info', text: `Галерея · ${items.length} фото. У каждого фото своя подпись; ⠿ — переставить, карандаш — alt` }));
+    if (kind === 'gallery' && items.length) panel.appendChild(h('div', { class: 'ted-ui-media__info', text: tf('Галерея · {n} фото. У каждого фото своя подпись; ⠿ — переставить, карандаш — alt', { n: items.length }) }));
     for (const job of jobs) {
       if (job.status === 'done' && !job.multi) continue;   // одиночная загрузка: между концом и вставкой файла области нет
       panel.appendChild(this.jobPanel(block, kind, job));
@@ -7710,7 +7761,7 @@ class MediaBlocks {
   addButton(block, kind) {
     const clip = h('i', { class: 'ted-ui-media__paperclip', 'aria-hidden': 'true' });
     // скрепка — часть надписи: в узкой колонке стоит перед первым словом, а не отдельной строкой
-    const pick = h('button', { type: 'button', class: 'ted-ui-media__drop', 'aria-label': `Выбрать файл: ${MEDIA_LABELS[kind]}` }, [
+    const pick = h('button', { type: 'button', class: 'ted-ui-media__drop', 'aria-label': tf('Выбрать файл: {kind}', { kind: t(MEDIA_LABELS[kind]) }) }, [
       h('span', { class: 'ted-ui-media__drop-label' }, [clip, kind === 'gallery' && this.state(block).items.length ? 'Добавить фото в галерею' : MEDIA_PICK[kind]]),
       h('span', { class: 'ted-ui-media__drop-hint', text: 'или перетащите сюда' }),
       h('span', { class: 'ted-ui-media__drop-active', text: 'Отпустите, чтобы загрузить' })]);
@@ -7782,7 +7833,7 @@ class MediaBlocks {
     job.fill.classList.toggle('is-pending', pct === null);
     if (pct === null) job.fill.removeAttribute('aria-valuenow');
     else job.fill.setAttribute('aria-valuenow', String(pct));
-    job.title.textContent = job.stage === 'poster' ? 'Готовим постер…' : job.url ? 'Загружаем по ссылке и сжимаем…' : pct === 100 ? 'Обрабатываем на сервере…' : `Загружается ${what}${pct === null ? '…' : ` ${pct}%`}`;
+    job.title.textContent = job.stage === 'poster' ? t('Готовим постер…') : job.url ? t('Загружаем по ссылке и сжимаем…') : pct === 100 ? t('Обрабатываем на сервере…') : tf('Загружается {what}', { what: t(what) }) + (pct === null ? '…' : ` ${pct}%`);
   }
 
   /** Подпись под изображением, видео, аудио: прямо в блоке, без окна. Enter — переход к новому абзацу после блока. Пустая подпись в HTML не попадает. */
@@ -7887,11 +7938,10 @@ class MediaBlocks {
   itemControls(block, figure, kind) {
     const tag = kind === 'gallery' ? 'figure' : 'a';
     const tiles = () => [...figure.querySelectorAll(`:scope > ${tag}`)];
-    const noun = kind === 'gallery' ? 'фото' : 'файл';
     for (const [index, tile] of tiles().entries()) {
       const tools = h('div', { class: 'ted-ui-media__tile-tools', 'data-tedui-media-panel': '' });
       for (const type of ['click', 'dblclick']) tools.addEventListener(type, (event) => { event.preventDefault(); event.stopPropagation(); });
-      const grip = smallButton({ name: 'media-grip', label: `Переместить ${noun} (Alt и стрелки)`, iconName: 'grip' });
+      const grip = smallButton({ name: 'media-grip', label: kind === 'gallery' ? 'Переместить фото (Alt и стрелки)' : 'Переместить файл (Alt и стрелки)', iconName: 'grip' });
       grip.addEventListener('contextmenu', (event) => event.preventDefault());
       grip.addEventListener('pointerdown', (event) => this.editor.handle.onGripDown(event, () => tile, grip, {
         item: true,
@@ -7906,7 +7956,7 @@ class MediaBlocks {
         block.querySelectorAll('.ted-ui-media__tile-tools button:first-child')[index + step]?.focus();
       });
       const settings = smallButton({ name: 'media-settings', label: kind === 'gallery' ? 'Описание (alt)' : 'Переименовать', iconName: 'edit', onClick: (event) => this.settings(block, index, event.currentTarget) });
-      const remove = smallButton({ name: 'media-delete', label: `Удалить ${noun}`, iconName: 'trash', onClick: () => {
+      const remove = smallButton({ name: 'media-delete', label: kind === 'gallery' ? 'Удалить фото' : 'Удалить файл', iconName: 'trash', onClick: () => {
         const { kind: current, items, caption } = this.state(block);
         items.splice(index, 1); this.update(block, current, items, caption);
       } });
@@ -8117,7 +8167,7 @@ function jobLabel(job) {
 }
 
 function fileSize(bytes) {
-  return bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1).replace('.', ',')} МБ` : `${Math.max(1, Math.round(bytes / 1024))} КБ`;
+  return bytes >= 1048576 ? `${num((bytes / 1048576).toFixed(1))} ${t('МБ')}` : `${Math.max(1, Math.round(bytes / 1024))} ${t('КБ')}`;
 }
 
 function mediaAction(text, action, primary = false) {
@@ -8135,21 +8185,21 @@ function setCaption(figure, value) {
 
 /** Что сказать пользователю после загрузки: сжато ли, во что превращено, сколько весит. */
 function uploadReport(assets) {
-  if (assets.length > 1) return { toast: `Загружено файлов: ${assets.length}`, info: '' };
+  if (assets.length > 1) return { toast: tf('Загружено файлов: {n}', { n: assets.length }), info: '' };
   const a = assets[0];
-  if (!a.size) return { toast: 'Файл загружен', info: '' };
+  if (!a.size) return { toast: t('Файл загружен'), info: '' };
   const kb = fileSize(a.size);
   const type = String(a.type || '').toUpperCase();
   const dims = a.width ? ` · ${a.width}×${a.height}` : '';
-  const poster = a.poster ? ' · постер из первого кадра' : '';
-  if (type === 'GIF') return { toast: `GIF сохранён без изменений${dims} · ${kb}`, info: `GIF${dims} · ${kb} · без изменений` };
+  const poster = a.poster ? ` · ${t('постер из первого кадра')}` : '';
+  if (type === 'GIF') return { toast: tf('GIF сохранён без изменений{dims} · {kb}', { dims, kb }), info: `GIF${dims} · ${kb} · ${t('без изменений')}` };
   if (type === 'WEBP' && a.originalSize) {
-    const saved = a.originalSize > a.size ? ` (было ${fileSize(a.originalSize)}, −${Math.round((1 - a.size / a.originalSize) * 100)}%)` : '';
+    const saved = a.originalSize > a.size ? tf(' (было {size}, −{pct}%)', { size: fileSize(a.originalSize), pct: Math.round((1 - a.size / a.originalSize) * 100) }) : '';
     const text = `WebP${dims} · ${kb}${saved}`;
-    return { toast: `Изображение: ${text}`, info: text };
+    return { toast: tf('Изображение: {text}', { text }), info: text };
   }
-  if (a.converted) return { toast: `Видео сконвертировано в ${type} · ${kb} (было ${fileSize(a.originalSize)})`, info: `${type} · ${kb}${poster}` };
-  return { toast: `Загружено · ${type} · ${kb}`, info: `${type} · ${kb}${poster}` };
+  if (a.converted) return { toast: tf('Видео сконвертировано в {type} · {kb} (было {size})', { type, kb, size: fileSize(a.originalSize) }), info: `${type} · ${kb}${poster}` };
+  return { toast: tf('Загружено · {type} · {kb}', { type, kb }), info: `${type} · ${kb}${poster}` };
 }
 
 /** Фото, открытое заново: к типу добавляются размеры (из разметки или из самой картинки) и вес (HEAD-запрос к своему серверу). */
@@ -8637,6 +8687,7 @@ registerBlock({
 
 
 
+
 class TableUI {
   constructor(editor) {
     this.editor = editor;
@@ -8670,7 +8721,14 @@ class TableUI {
     this.formulas = new TableFormulas(this);   // формулы: «=», выбор ячеек, протягивание (этап 6.1б)
     this.onScroll = () => this.place();
     // ширина окна или колонки поменялась (поворот телефона, перенос строк, картинка догрузилась) — кнопки едут вместе с таблицей
-    this.onReflow = () => { this.measure(); if (this.fig && !this.drag) this.place(); };
+    // скрытые кнопки уходят к левому краю колонки: прозрачные, но со старым местом они раздвигали страницу вбок,
+    // когда окно стало уже (1.0.2)
+    this.onReflow = () => {
+      this.measure();
+      if (this.drag) return;
+      if (this.fig) this.place();
+      for (const el of [this.rowCtl, this.colCtl, this.addBar]) if (!el.classList.contains('is-visible')) el.style.left = '0px';
+    };
     window.addEventListener('resize', this.onReflow);
     this.ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(this.onReflow) : null;
     this.ro?.observe(this.root);
@@ -8788,8 +8846,8 @@ class TableUI {
     const ed = this.editor;
     const fig = this.fig;
     if (!fig) return;
-    if (kind === 'row' && tableRows(fig).length >= TABLE_MAX_ROWS) { ed.toast(`Не больше ${TABLE_MAX_ROWS} строк`); return; }
-    if (kind === 'col' && colCount(fig) >= TABLE_MAX_COLS) { ed.toast(`Не больше ${TABLE_MAX_COLS} столбцов`); return; }
+    if (kind === 'row' && tableRows(fig).length >= TABLE_MAX_ROWS) { ed.toast(tf('Не больше {n} строк', { n: TABLE_MAX_ROWS })); return; }
+    if (kind === 'col' && colCount(fig) >= TABLE_MAX_COLS) { ed.toast(tf('Не больше {n} столбцов', { n: TABLE_MAX_COLS })); return; }
     ed.history.commit();
     let target;
     if (kind === 'row') target = addRow(fig).cells[0];
@@ -9836,6 +9894,7 @@ registerBlock({
 
 
 
+
 const keyOf = (el) => el.getAttribute('data-tedui-key');
 
 /** Ключи названий и тел на месте и тела идут в порядке названий (после Undo, перетаскивания, вставки — восстанавливаем). */
@@ -9939,7 +9998,7 @@ class TabsUI {
     if (!tabs) return;
     const ed = this.editor;
     const bar = tabs.querySelector(':scope > .ted-tabs__bar');
-    if (bar.children.length >= TABS_MAX) { ed.toast(`Не больше ${TABS_MAX} вкладок`); return; }
+    if (bar.children.length >= TABS_MAX) { ed.toast(tf('Не больше {n} вкладок', { n: TABS_MAX })); return; }
     ed.history.commit();
     const [title, body] = makeTab(document);
     bar.appendChild(title);
@@ -11304,6 +11363,7 @@ class Toaster {
 
 
 
+
 /** Сохранить текст файлом (скачивание в браузере). */
 function download(name, text, type) {
   const url = URL.createObjectURL(new Blob([text], { type }));
@@ -11360,8 +11420,8 @@ function replaceDoc(ed, html, skipped = []) {
   if (!ed.editable.firstElementChild) ed.editable.appendChild(h('p', {}, [h('br')]));
   normalizeRoot(ed.editable);
   ed.afterChange({ immediate: true });
-  const extra = skipped.length ? ` (пропущены неизвестные блоки: ${[...new Set(skipped)].join(', ')})` : '';
-  ed.toast(`Статья заменена${extra}`, { undo: true, timeout: skipped.length ? 8000 : undefined });
+  const text = skipped.length ? tf('Статья заменена (пропущены неизвестные блоки: {types})', { types: [...new Set(skipped)].join(', ') }) : 'Статья заменена';
+  ed.toast(text, { undo: true, timeout: skipped.length ? 8000 : undefined });
 }
 
 /** Предупреждение перед заменой: окно у кнопки «Ещё» (как «Ссылка»), «Заменить» / «Отмена». */
@@ -11492,6 +11552,7 @@ ${css.map((u) => `<link rel="stylesheet" href="${esc(u)}">`).join('\n')}
 //   text    — курсор в тексте:    стиль ▾, выравнивание ▾, цвет ▾ | B I U S код ссылка якорь | удалить, ✨ | помощь, режим
 //   view    — режим просмотра:    только кнопка режима
 // Кнопки будущих этапов показаны как в макете, по клику — подсказка «появится на этапе N».
+
 
 
 
@@ -11640,6 +11701,11 @@ class Toolbar {
   /** Сводка для режима просмотра: слов · символов · время чтения · блоков (из editor.getStats()). */
   refreshStats() {
     const s = this.editor.getStats();
+    if (getLang() === 'en') {
+      const en = (n, one, many) => `${n.toLocaleString('en-US')} ${n === 1 ? one : many}`;
+      this.stats.textContent = [en(s.words, 'word', 'words'), en(s.chars, 'character', 'characters'), `${s.minutes} min read`, en(s.blocks, 'block', 'blocks')].join(' · ');
+      return;
+    }
     const plural = (n, one, few, many) => {
       const m = n % 100, d = n % 10;
       const f = m > 10 && m < 15 ? many : d === 1 ? one : d > 1 && d < 5 ? few : many;
@@ -11898,7 +11964,12 @@ class BlockHandle {
     for (const g of [this.gutterGrip, this.ctrlGrip]) g.addEventListener('contextmenu', (e) => e.preventDefault());
     this.gutterGrip.addEventListener('pointerdown', (e) => this.onGripDown(e, () => this.hovered, this.gutterGrip));
     this.ctrlGrip.addEventListener('pointerdown', (e) => this.onGripDown(e, () => this.focused, this.ctrlGrip));
-    this.onWinResize = () => this.refresh();
+    // скрытые кнопки пунктов (шаги, таблица…) — к левому краю колонки: прозрачные, но со старым местом они раздвигали
+    // страницу вбок, когда окно стало уже (1.0.2)
+    this.onWinResize = () => {
+      this.refresh();
+      for (const el of this.column.querySelectorAll('.ted-ui-itemctl:not(.is-visible)')) el.style.left = '0px';
+    };
     window.addEventListener('resize', this.onWinResize);
     // высота содержимого изменилась (раскрылся аккордеон, загрузилась картинка выше) — кнопки идут за блоком (22.11)
     // ResizeObserver и так вызывается раз в кадр, после раскладки; requestAnimationFrame не нужен (в фоновой вкладке он не срабатывает)
@@ -13421,6 +13492,7 @@ class BlockMenu {
 // масштабируется под панель. Внутри iframe работают настоящие медиа-запросы
 // и vw — ровно как на сайте, поэтому vw-режим виден честно.
 
+
 const SCREENS = [
   { w: 1920, title: 'Десктоп' },
   { w: 1366, title: 'Ноутбук' },
@@ -13440,7 +13512,7 @@ class FramePreview {
     this.html = '';
 
     this.buttons = SCREENS.map((s) => {
-      const b = button({ name: `screen-${s.w}`, label: `${s.title}, ${s.w}px`, text: String(s.w), onClick: () => this.setScreen(s.w) });
+      const b = button({ name: `screen-${s.w}`, label: tf('{title}, {w}px', { title: t(s.title), w: s.w }), text: String(s.w), onClick: () => this.setScreen(s.w) });
       b.dataset.w = s.w;
       return b;
     });
@@ -13556,7 +13628,7 @@ ${innerHTML}${empty}
     }
     this.stage.hidden = this.screen === null;
     if (this.editorView) this.editorView.el.hidden = this.screen !== null;
-    this.info.textContent = this.screen !== null && this.editor.options.unit === 'vw' ? 'vw-режим' : 'px-режим';
+    this.info.textContent = t(this.screen !== null && this.editor.options.unit === 'vw' ? 'vw-режим' : 'px-режим');
   }
 
   layout() {
@@ -14085,7 +14157,7 @@ class Editor {
 
   buildDOM() {
     const o = this.options;
-    this.ui = h('div', { class: 'ted-ui', 'data-mode': 'edit' });
+    this.ui = h('div', { class: 'ted-ui', 'data-mode': 'edit', lang: getLang() });
     if (o.preview === 'inline') this.ui.classList.add('is-inline-view');
 
     this.editable = h('div', {
@@ -14949,6 +15021,8 @@ class Editor {
         current.setAttribute('data-tedui-ph', text);
       }
     }
+    // заглушки блоков записаны по-русски — показываем на языке редактора (1.0.2)
+    if (getLang() !== 'ru') for (const el of ed.querySelectorAll('[data-tedui-ph]')) el.setAttribute('data-tedui-ph', t(el.getAttribute('data-tedui-ph')));
     this.lineHolder(r, current);
   }
 
@@ -15001,7 +15075,7 @@ class Editor {
     // место — переменными на поле правки (наследуются), чтобы не писать style в содержимое
     this.editable.style.setProperty('--ted-ph-x', `${Math.round(rect.left - box.left)}px`);
     this.editable.style.setProperty('--ted-ph-y', `${Math.round(rect.top - box.top)}px`);
-    el.setAttribute('data-tedui-phline', text);
+    el.setAttribute('data-tedui-phline', t(text));
   }
 
   // -------------------------------------------------------------------------
@@ -15186,7 +15260,7 @@ class Editor {
     });
     const refresh = () => {
       const n = res.changed ? Object.values(res.stats).reduce((a, b) => a + b, 0) : 0;
-      total.textContent = n ? `Изменено мест: ${n}. Выключите то, что не нужно.` : 'Все правила выключены — текст не изменён.';
+      total.textContent = n ? tf('Изменено мест: {n}. Выключите то, что не нужно.', { n }) : t('Все правила выключены — текст не изменён.');
     };
     refresh();
     mark();
@@ -16717,7 +16791,7 @@ function escapeHTML(s) {
 
 
 
-const VERSION = '1.0.1';
+const VERSION = '1.0.2';
 
 const Ted = {
   version: VERSION,

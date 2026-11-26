@@ -6,6 +6,7 @@
 // Кнопки будущих этапов показаны как в макете, по клику — подсказка «появится на этапе N».
 
 import { h, button, icon, formatKeys, menuItem } from './widgets.js';
+import { getLang } from '../core/i18n.js';
 import { exchangeItems } from './exchange.js';
 import { styleTypes, blockAllowed } from '../core/blocks.js';
 import { HOTKEYS, keysFor } from '../core/keys.js';
@@ -154,6 +155,11 @@ export class Toolbar {
   /** Сводка для режима просмотра: слов · символов · время чтения · блоков (из editor.getStats()). */
   refreshStats() {
     const s = this.editor.getStats();
+    if (getLang() === 'en') {
+      const en = (n, one, many) => `${n.toLocaleString('en-US')} ${n === 1 ? one : many}`;
+      this.stats.textContent = [en(s.words, 'word', 'words'), en(s.chars, 'character', 'characters'), `${s.minutes} min read`, en(s.blocks, 'block', 'blocks')].join(' · ');
+      return;
+    }
     const plural = (n, one, few, many) => {
       const m = n % 100, d = n % 10;
       const f = m > 10 && m < 15 ? many : d === 1 ? one : d > 1 && d < 5 ? few : many;

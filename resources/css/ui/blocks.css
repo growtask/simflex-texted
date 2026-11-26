@@ -257,3 +257,12 @@
 /* Группа полей окна (ручной ввод товара): тот же шаг 8, что между полями окна */
 .ted-ui-pop__group { display: grid; gap: 8px; }
 
+
+/* заглушки на английском интерфейсе (lang="en" у .ted-ui ставит редактор; 1.0.2) */
+.ted-ui[lang="en"] .ted-ui-editable ol.ted-steps > li[data-tedui-notitle] > strong::before { content: "Step"; }
+.ted-ui[lang="en"] .ted-ui-editable ol.ted-steps > li[data-tedui-nodesc] > strong::after { content: "Step description"; }
+.ted-ui[lang="en"] .ted-ui-editable ul.ted-facts > li[data-tedui-nodesc] > strong::after { content: "Caption"; }
+.ted-ui[lang="en"] .ted-ui-editable ul.ted-proscons > li[data-tedui-notitle] > strong::before,
+.ted-ui[lang="en"] .ted-ui-editable ul.ted-proscons > li > ul > li[data-tedui-empty]::after { content: "Item"; }
+.ted-ui[lang="en"] .ted-ui-editable pre:not([data-lang])::before { content: "Choose a language"; }
+.ted-ui[lang="en"] .ted-ui-editable pre[data-tedui-empty] > code::before { content: "// Paste or type code"; }

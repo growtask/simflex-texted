@@ -865,6 +865,86 @@ group('Английский интерфейс (22.11)', () => {
       ed.destroy();
     }
   });
+
+  // сайт texted 25.11: на /en/ оставались русские строки с числами и именами, заглушки CSS и подписи content.js (1.0.2)
+  test('lang: en — все блоки: подписи, подсказки, заглушки (и нарисованные CSS) без русского; у .ted-ui lang="en" сразу', async () => {
+    const CYR = /[А-Яа-яЁё]/;
+    const ed = make('<p>x</p>', { lang: 'en' }, { width: 1000 });
+    try {
+      eq(ed.ui.getAttribute('lang'), 'en', 'язык на корне редактора — с создания');
+      for (const type of ['accordion', 'background', 'quote', 'button', 'callout', 'checklist', 'columns', 'embed', 'facts', 'hr', 'iframe', 'image', 'gallery', 'video', 'audio', 'file', 'code', 'proscons', 'steps', 'table', 'tabs', 'toc', 'ul', 'ol', 'h3']) {
+        const p = document.createElement('p'); p.innerHTML = '<br>';
+        ed.editable.appendChild(p); ed.afterChange({ immediate: true });
+        ed.focus();
+        const r = document.createRange(); r.setStart(p, 0); r.collapse(true);
+        const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+        ed.insertBlock(type);
+        ed.popover.close();
+      }
+      await wait(50);
+      ed.updatePlaceholders();
+      const bad = new Set();
+      for (const el of ed.ui.querySelectorAll('*')) {
+        if (el.closest('.ted-ui-pop, .ted-ui-picker')) continue;
+        if (!el.children.length && CYR.test(el.textContent)) bad.add(el.textContent.trim().slice(0, 50));
+        for (const a of ['aria-label', 'title', 'placeholder', 'data-tip', 'data-tedui-ph', 'data-tedui-phline']) { const v = el.getAttribute(a); if (v && CYR.test(v)) bad.add(`@${a}: ${v}`); }
+        for (const ps of ['::before', '::after']) { const c = getComputedStyle(el, ps).content; if (c && c !== 'none' && CYR.test(c)) bad.add(`${ps} ${c}`); }
+      }
+      eq([...bad].join('\n'), '', 'всё на английском');
+    } finally {
+      ed.setLang('ru');
+      try { localStorage.removeItem('ted-lang'); } catch (e) { /* */ }
+      ed.destroy();
+    }
+  });
+
+  test('tf: строки с подстановками переводятся целиком; дробные числа — 2,5 / 2.5', async () => {
+    const { tf, num, setLang } = await import('../../resources/js/core/i18n.js');
+    try {
+      setLang('en');
+      eq(tf('Загружено файлов: {n}', { n: 3 }), 'Files uploaded: 3');
+      eq(tf('Галерея · {n} фото. У каждого фото своя подпись; ⠿ — переставить, карандаш — alt', { n: 4 }).startsWith('Gallery · 4 photos'), true);
+      eq(num(2.5), '2.5');
+      setLang('ru');
+      eq(tf('Загружено файлов: {n}', { n: 3 }), 'Загружено файлов: 3');
+      eq(num(2.5), '2,5');
+    } finally {
+      setLang('ru');
+    }
+  });
+
+  test('content.js на странице lang="en": «Hide» у содержания, «Copy code» у кода', () => {
+    if (!window.TedContent) return;
+    const box = document.createElement('div');
+    box.className = 'ted-content';
+    box.setAttribute('lang', 'en');
+    box.innerHTML = Ted.clean('<nav class="ted-toc"><div class="ted-toc__panel"><p class="ted-toc__title">Contents</p><ol class="ted-toc__list"><li><a href="#a">A</a></li></ol></div></nav><pre data-lang="js"><code>let a;</code></pre>');
+    document.body.appendChild(box);
+    try {
+      window.TedContent.mount(box);
+      const toggle = box.querySelector('.ted-toc__toggle');
+      if (toggle) ok(/^(Hide|Show)$/.test(toggle.textContent), toggle.textContent);
+      eq(box.querySelector('.ted-code-copy')?.getAttribute('aria-label'), 'Copy code');
+    } finally {
+      box.remove();
+    }
+  });
+});
+
+group('Окно стало уже (сайт texted 25.11, 1.0.2)', () => {
+  test('скрытые кнопки пункта и таблицы не раздвигают страницу: при смене ширины окна уходят к левому краю колонки', () => {
+    const ed = make('<ol class="ted-steps"><li><strong>Шаг</strong><br>a</li><li><strong>Шаг</strong><br>b</li></ol><p>x</p>', {}, { width: 1000 });
+    try {
+      const ctl = ed.ui.querySelector('.ted-ui-itemctl');
+      ok(ctl, 'кнопки пункта есть');
+      ctl.classList.remove('is-visible');
+      ctl.style.left = '5000px';   // место, посчитанное на широком окне
+      window.dispatchEvent(new Event('resize'));
+      eq(ctl.style.left, '0px');
+    } finally {
+      ed.destroy();
+    }
+  });
 });
 
 group('Доступность (22.11): клавиатура, роли, контраст', () => {

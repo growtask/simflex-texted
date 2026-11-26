@@ -1,4 +1,4 @@
-/*! Ted 1.0.1 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-25 15:25 */
+/*! Ted 1.0.2 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-25 16:09 */
 
 /* ---- resources/css/fonts.css ---- */
 /* ==========================================================================
@@ -3018,6 +3018,8 @@ textarea.ted-editor[data-ted-theme="dark"],
   pointer-events: none;
 }
 
+.ted-ui[lang="en"] .ted-ui-editable .ted-ui-raw::after { content: "HTML block from old content"; }
+
 /* ---- resources/css/ui/blocks.css ---- */
 /* ==========================================================================
    Блоки этапа 4 и код в правке
@@ -3279,6 +3281,15 @@ textarea.ted-editor[data-ted-theme="dark"],
 .ted-ui-pop__group { display: grid; gap: 8px; }
 
 
+/* заглушки на английском интерфейсе (lang="en" у .ted-ui ставит редактор; 1.0.2) */
+.ted-ui[lang="en"] .ted-ui-editable ol.ted-steps > li[data-tedui-notitle] > strong::before { content: "Step"; }
+.ted-ui[lang="en"] .ted-ui-editable ol.ted-steps > li[data-tedui-nodesc] > strong::after { content: "Step description"; }
+.ted-ui[lang="en"] .ted-ui-editable ul.ted-facts > li[data-tedui-nodesc] > strong::after { content: "Caption"; }
+.ted-ui[lang="en"] .ted-ui-editable ul.ted-proscons > li[data-tedui-notitle] > strong::before,
+.ted-ui[lang="en"] .ted-ui-editable ul.ted-proscons > li > ul > li[data-tedui-empty]::after { content: "Item"; }
+.ted-ui[lang="en"] .ted-ui-editable pre:not([data-lang])::before { content: "Choose a language"; }
+.ted-ui[lang="en"] .ted-ui-editable pre[data-tedui-empty] > code::before { content: "// Paste or type code"; }
+
 /* ---- blocks/hr/hr.editor.css ---- */
 /* Блок «Разделитель» — только отличия в редакторе. Рамка выделения и перетаскивания — общий слой (ui/interaction.css):
    у блоков с outline (block.json) она рисуется обводкой, ручка — по центру линии (handleAt: middle). */
@@ -3311,6 +3322,10 @@ textarea.ted-editor[data-ted-theme="dark"],
 }
 
 .ted-ui-editable blockquote[data-tedui-qbtn] { margin-bottom: 80px; }
+
+/* английский интерфейс (1.0.2) */
+.ted-ui[lang="en"] .ted-ui-editable blockquote > p.ted-author[data-tedui-notitle] > strong::before { content: "Name"; }
+.ted-ui[lang="en"] .ted-ui-editable blockquote > p.ted-author[data-tedui-nodesc] > strong::after { content: "Position"; }
 
 /* ---- blocks/callout/callout.editor.css ---- */
 /* Блок «Выноска» — только отличия в редакторе: заглушки «Заголовок выноски» и «Текст выноски» читаются на плашке
@@ -3410,6 +3425,9 @@ textarea.ted-editor[data-ted-theme="dark"],
 /* пустая картинка ручного товара — скрепка, как у зоны загрузки медиа: нажатие загружает картинку */
 .ted-ui-editable div.ted-product[data-tedui-inline] span.ted-product__img { display: grid; place-items: center; }
 .ted-ui-editable div.ted-product[data-tedui-inline] span.ted-product__img::after { content: ""; width: 24px; height: 24px; background: center / contain no-repeat url('icons/media-paperclip.svg'); }
+
+/* английский интерфейс (1.0.2) */
+.ted-ui[lang="en"] .ted-ui-editable div.ted-product[data-tedui-empty] .ted-product__name::before { content: "Choose a product"; }
 
 /* ---- blocks/media/media.editor.css ---- */
 /* Медиа — правка в редакторе (бывш. styles/ui/media.css). */

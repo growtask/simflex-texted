@@ -6,11 +6,12 @@
 // Фрейм в правке не перехватывает нажатия (pointer-events: none): первое нажатие выбирает блок.
 
 import { h, smallButton, button } from '../../resources/js/ui/widgets.js';
+import { t, tf } from '../../resources/js/core/i18n.js';
 import { emptyBlock, isEmptyBlock } from '../../resources/js/core/blocks.js';
 import { iframeSrcOk, parseIframeInput, makeIframeBlock, readIframe, IFRAME_RATIOS } from './iframe.js';
 
 /** Сайт не из списка в настройках сервера (ted.config.php → iframe.hosts). */
-const frameHostMessage = (ed) => `Этот сайт нельзя встроить: разрешены ${ed.server.iframeHosts.join(', ') || 'только сайты из настроек'}`;
+const frameHostMessage = (ed) => tf('Этот сайт нельзя встроить: разрешены {hosts}', { hosts: ed.server.iframeHosts.join(', ') || t('только сайты из настроек') });
 
 export class IframeUI {
   constructor(editor) {

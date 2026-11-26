@@ -3,6 +3,7 @@
 // «Отменить» в уведомлении возвращает прежнюю. Всё загруженное проходит обычную очистку и набор блоков поля.
 
 import { h, menuItem } from './widgets.js';
+import { tf } from '../core/i18n.js';
 import { sanitizeHTML } from '../core/sanitize.js';
 import { normalizeRoot } from '../core/blocks.js';
 import { blocksToHtml, htmlToBlocks } from '../core/blocks-json.js';
@@ -66,8 +67,8 @@ export function replaceDoc(ed, html, skipped = []) {
   if (!ed.editable.firstElementChild) ed.editable.appendChild(h('p', {}, [h('br')]));
   normalizeRoot(ed.editable);
   ed.afterChange({ immediate: true });
-  const extra = skipped.length ? ` (пропущены неизвестные блоки: ${[...new Set(skipped)].join(', ')})` : '';
-  ed.toast(`Статья заменена${extra}`, { undo: true, timeout: skipped.length ? 8000 : undefined });
+  const text = skipped.length ? tf('Статья заменена (пропущены неизвестные блоки: {types})', { types: [...new Set(skipped)].join(', ') }) : 'Статья заменена';
+  ed.toast(text, { undo: true, timeout: skipped.length ? 8000 : undefined });
 }
 
 /** Предупреждение перед заменой: окно у кнопки «Ещё» (как «Ссылка»), «Заменить» / «Отмена». */

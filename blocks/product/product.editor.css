@@ -27,3 +27,6 @@
 /* пустая картинка ручного товара — скрепка, как у зоны загрузки медиа: нажатие загружает картинку */
 .ted-ui-editable div.ted-product[data-tedui-inline] span.ted-product__img { display: grid; place-items: center; }
 .ted-ui-editable div.ted-product[data-tedui-inline] span.ted-product__img::after { content: ""; width: 24px; height: 24px; background: center / contain no-repeat url('../icons/media-paperclip.svg'); }
+
+/* английский интерфейс (1.0.2) */
+.ted-ui[lang="en"] .ted-ui-editable div.ted-product[data-tedui-empty] .ted-product__name::before { content: "Choose a product"; }

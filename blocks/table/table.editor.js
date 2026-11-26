@@ -4,6 +4,7 @@
 // Под таблицей — «+ Добавить строку» и «+ Добавить столбец». Строки и столбцы перетаскиваются за ⠿.
 
 import { h, smallButton, icon, adminModalOpen } from '../../resources/js/ui/widgets.js';
+import { tf } from '../../resources/js/core/i18n.js';
 import { TableFormulas } from './table-formula.js';
 import { getRange, placeCaret } from '../../resources/js/core/selection.js';
 import { normalizeRoot, emptyBlock, isEmptyBlock } from '../../resources/js/core/blocks.js';
@@ -46,7 +47,14 @@ export class TableUI {
     this.formulas = new TableFormulas(this);   // формулы: «=», выбор ячеек, протягивание (этап 6.1б)
     this.onScroll = () => this.place();
     // ширина окна или колонки поменялась (поворот телефона, перенос строк, картинка догрузилась) — кнопки едут вместе с таблицей
-    this.onReflow = () => { this.measure(); if (this.fig && !this.drag) this.place(); };
+    // скрытые кнопки уходят к левому краю колонки: прозрачные, но со старым местом они раздвигали страницу вбок,
+    // когда окно стало уже (1.0.2)
+    this.onReflow = () => {
+      this.measure();
+      if (this.drag) return;
+      if (this.fig) this.place();
+      for (const el of [this.rowCtl, this.colCtl, this.addBar]) if (!el.classList.contains('is-visible')) el.style.left = '0px';
+    };
     window.addEventListener('resize', this.onReflow);
     this.ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(this.onReflow) : null;
     this.ro?.observe(this.root);
@@ -164,8 +172,8 @@ export class TableUI {
     const ed = this.editor;
     const fig = this.fig;
     if (!fig) return;
-    if (kind === 'row' && tableRows(fig).length >= TABLE_MAX_ROWS) { ed.toast(`Не больше ${TABLE_MAX_ROWS} строк`); return; }
-    if (kind === 'col' && colCount(fig) >= TABLE_MAX_COLS) { ed.toast(`Не больше ${TABLE_MAX_COLS} столбцов`); return; }
+    if (kind === 'row' && tableRows(fig).length >= TABLE_MAX_ROWS) { ed.toast(tf('Не больше {n} строк', { n: TABLE_MAX_ROWS })); return; }
+    if (kind === 'col' && colCount(fig) >= TABLE_MAX_COLS) { ed.toast(tf('Не больше {n} столбцов', { n: TABLE_MAX_COLS })); return; }
     ed.history.commit();
     let target;
     if (kind === 'row') target = addRow(fig).cells[0];

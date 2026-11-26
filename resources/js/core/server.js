@@ -9,6 +9,7 @@
 //   canEdit     — false: у пользователя нет права правки — только просмотр, кнопки «Редактировать» нет
 
 import { PRESETS, checkPreset, presetOf } from './presets.js';
+import { t, num } from './i18n.js';
 
 const KINDS = ['image', 'video', 'audio', 'file'];
 const HOST = /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
@@ -41,5 +42,5 @@ export function serverOptions(raw) {
 /** Размер для сообщения: «5 МБ», «2,5 МБ». */
 export function formatLimit(bytes) {
   const mb = bytes / 1048576;
-  return `${(Math.round(mb * 10) / 10).toString().replace('.', ',')} МБ`;
+  return `${num(Math.round(mb * 10) / 10)} ${t('МБ')}`;
 }
