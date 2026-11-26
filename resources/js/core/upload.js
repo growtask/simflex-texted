@@ -1,3 +1,4 @@
+import { t, tf } from './i18n.js';
 // Прямая загрузка: XHR даёт реальный прогресс отправки и поддерживает отмену.
 export function createUpload(endpoint, { headers = {} } = {}) {
   // maxSide — картинку уменьшить до этой стороны (товар: размер карточки с запасом для ретины, 22.11); сервер ограничивает 160…2560
@@ -142,7 +143,7 @@ export async function chooseMedia(editor, kind, { multiple = false, source = nul
     const fits = (a) => !extensions || extensions.includes(extOf(a.url || a.name || ''));
     const assets = all.filter(fits);
     const wrong = all.filter((a) => !fits(a));
-    if (wrong.length) editor.toast(`${wrong.map((a) => decodeURIComponent((a.name || a.url || '').split('/').pop())).join(', ')} — ${MEDIA_WRONG[kind]}, пропущено`, { status: 'error' });
+    if (wrong.length) editor.toast(tf('{names} — {what}, пропущено', { names: wrong.map((a) => decodeURIComponent((a.name || a.url || '').split('/').pop())).join(', '), what: t(MEDIA_WRONG[kind]) }), { status: 'error' });
     return { source: 'manager', assets: multiple ? assets : assets.slice(0, 1) };
   }
   if (typeof upload !== 'function') throw new Error('Прямая загрузка не настроена');

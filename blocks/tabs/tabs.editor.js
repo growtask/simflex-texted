@@ -6,6 +6,7 @@
 // Backspace в пустом названии пустой вкладки — удаляет её; на краях содержимого — не склеивает с названием.
 
 import { h, icon } from '../../resources/js/ui/widgets.js';
+import { tf } from '../../resources/js/core/i18n.js';
 import { getRange, placeCaret } from '../../resources/js/core/selection.js';
 import { objectSelector, wrapSelector } from '../../resources/js/core/registry.js';
 import { normalizeRoot, emptyBlock, isEmptyBlock } from '../../resources/js/core/blocks.js';
@@ -114,7 +115,7 @@ export class TabsUI {
     if (!tabs) return;
     const ed = this.editor;
     const bar = tabs.querySelector(':scope > .ted-tabs__bar');
-    if (bar.children.length >= TABS_MAX) { ed.toast(`Не больше ${TABS_MAX} вкладок`); return; }
+    if (bar.children.length >= TABS_MAX) { ed.toast(tf('Не больше {n} вкладок', { n: TABS_MAX })); return; }
     ed.history.commit();
     const [title, body] = makeTab(document);
     bar.appendChild(title);

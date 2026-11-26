@@ -10,7 +10,7 @@ function siteToc(root) {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'ted-toc__toggle';
-      const set = (open) => { toc.toggleAttribute('data-ted-collapsed', !open); btn.textContent = open ? 'Скрыть' : 'Показать'; btn.setAttribute('aria-expanded', String(open)); };
+      const set = (open) => { toc.toggleAttribute('data-ted-collapsed', !open); btn.textContent = open ? siteText(toc, 'Скрыть', 'Hide') : siteText(toc, 'Показать', 'Show'); btn.setAttribute('aria-expanded', String(open)); };
       // плавно — только по нажатию (data-ted-anim): при загрузке свёрнутый список не «схлопывается» на глазах
       btn.addEventListener('click', () => { toc.setAttribute('data-ted-anim', ''); set(toc.hasAttribute('data-ted-collapsed')); });
       panel.appendChild(btn);

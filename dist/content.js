@@ -1,4 +1,4 @@
-/*! Ted content 1.0.1 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-25 15:25 */
+/*! Ted content 1.0.2 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-25 16:09 */
 (function () {
 'use strict';
 
@@ -255,6 +255,12 @@ function enhanceAudio(root = document) {
 const SITE_BLOCKS = [];
 function siteBlock(fn) { SITE_BLOCKS.push(fn); }
 
+/** Подпись на языке страницы: английская, если у содержимого или у страницы lang="en…", иначе русская (1.0.2) */
+function siteText(node, ru, en) {
+  const el = node.nodeType === 9 ? node.documentElement : (node.closest && node.closest('[lang]')) || node.ownerDocument.documentElement;
+  return /^en/i.test((el && el.getAttribute('lang')) || '') ? en : ru;
+}
+
 // ---- blocks/pre/pre.site.js ----
 // Блок «Код» на сайте: в шапке справа кнопка «Копировать код» (как в редакторе). Собирается в content.js
 // (build.json → content → @blocks.content); siteBlock — из resources/js/site/blocks.js.
@@ -285,8 +291,8 @@ function siteCodeCopy(root) {
     const button = doc.createElement('button');
     button.type = 'button';
     button.className = 'ted-code-copy';
-    button.setAttribute('aria-label', 'Копировать код');
-    button.title = 'Копировать код';
+    button.setAttribute('aria-label', siteText(pre, 'Копировать код', 'Copy code'));
+    button.title = siteText(pre, 'Копировать код', 'Copy code');
     button.innerHTML = SITE_COPY_ICON;
     let timer = 0;
     button.addEventListener('click', async () => {
@@ -295,8 +301,8 @@ function siteCodeCopy(root) {
       button.classList.toggle('is-copied', ok);
       button.classList.toggle('is-failed', !ok);
       button.innerHTML = ok ? SITE_CHECK_ICON : SITE_COPY_ICON;
-      button.setAttribute('aria-label', ok ? 'Код скопирован' : 'Не удалось скопировать код');
-      timer = setTimeout(() => { button.classList.remove('is-copied', 'is-failed'); button.innerHTML = SITE_COPY_ICON; button.setAttribute('aria-label', 'Копировать код'); }, 1600);
+      button.setAttribute('aria-label', ok ? siteText(pre, 'Код скопирован', 'Code copied') : siteText(pre, 'Не удалось скопировать код', 'Could not copy the code'));
+      timer = setTimeout(() => { button.classList.remove('is-copied', 'is-failed'); button.innerHTML = SITE_COPY_ICON; button.setAttribute('aria-label', siteText(pre, 'Копировать код', 'Copy code')); }, 1600);
     });
     pre.prepend(button);
   }
@@ -348,7 +354,7 @@ function siteEmbed(link) {
   try { url = new URL(link.dataset.tedVideo); } catch { return; }
   if (url.protocol !== 'https:' || !SITE_VIDEO_HOSTS.includes(url.hostname) || url.username || url.password || url.port) return;
   const frame = link.ownerDocument.createElement('iframe');
-  frame.title = link.textContent.trim() || 'Видеоплеер';
+  frame.title = link.textContent.trim() || siteText(link, 'Видеоплеер', 'Video player');
   frame.src = url.href;
   frame.loading = 'lazy';
   frame.allowFullscreen = true;
@@ -414,7 +420,7 @@ function siteTabs(root) {
       b.id = uid + '-t' + i;
       b.setAttribute('role', 'tab');
       b.setAttribute('aria-controls', uid + '-p' + i);
-      b.textContent = (title && title.textContent.trim()) || 'Вкладка ' + (i + 1);
+      b.textContent = (title && title.textContent.trim()) || siteText(panel, 'Вкладка ', 'Tab ') + (i + 1);
       panel.id = panel.id || uid + '-p' + i;
       panel.setAttribute('role', 'tabpanel');
       panel.setAttribute('aria-labelledby', b.id);
@@ -474,7 +480,7 @@ function siteToc(root) {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'ted-toc__toggle';
-      const set = (open) => { toc.toggleAttribute('data-ted-collapsed', !open); btn.textContent = open ? 'Скрыть' : 'Показать'; btn.setAttribute('aria-expanded', String(open)); };
+      const set = (open) => { toc.toggleAttribute('data-ted-collapsed', !open); btn.textContent = open ? siteText(toc, 'Скрыть', 'Hide') : siteText(toc, 'Показать', 'Show'); btn.setAttribute('aria-expanded', String(open)); };
       // плавно — только по нажатию (data-ted-anim): при загрузке свёрнутый список не «схлопывается» на глазах
       btn.addEventListener('click', () => { toc.setAttribute('data-ted-anim', ''); set(toc.hasAttribute('data-ted-collapsed')); });
       panel.appendChild(btn);

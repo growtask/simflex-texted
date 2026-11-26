@@ -4,6 +4,7 @@
 // и vw — ровно как на сайте, поэтому vw-режим виден честно.
 
 import { h, button } from './widgets.js';
+import { t, tf } from '../core/i18n.js';
 
 export const SCREENS = [
   { w: 1920, title: 'Десктоп' },
@@ -24,7 +25,7 @@ export class FramePreview {
     this.html = '';
 
     this.buttons = SCREENS.map((s) => {
-      const b = button({ name: `screen-${s.w}`, label: `${s.title}, ${s.w}px`, text: String(s.w), onClick: () => this.setScreen(s.w) });
+      const b = button({ name: `screen-${s.w}`, label: tf('{title}, {w}px', { title: t(s.title), w: s.w }), text: String(s.w), onClick: () => this.setScreen(s.w) });
       b.dataset.w = s.w;
       return b;
     });
@@ -140,7 +141,7 @@ ${innerHTML}${empty}
     }
     this.stage.hidden = this.screen === null;
     if (this.editorView) this.editorView.el.hidden = this.screen !== null;
-    this.info.textContent = this.screen !== null && this.editor.options.unit === 'vw' ? 'vw-режим' : 'px-режим';
+    this.info.textContent = t(this.screen !== null && this.editor.options.unit === 'vw' ? 'vw-режим' : 'px-режим');
   }
 
   layout() {

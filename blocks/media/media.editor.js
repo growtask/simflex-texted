@@ -1,5 +1,6 @@
 import { MEDIA_KINDS, makeMediaFigure, mediaEditorBlock, mediaKind, readMediaFigure, safeMediaUrl, videoEmbedUrl } from './media.js';
 import { formatLimit } from '../../resources/js/core/server.js';
+import { t, tf, num } from '../../resources/js/core/i18n.js';
 import { canPickLibrary, mediaPagePath, videoPoster } from '../../resources/js/core/upload.js';
 import { emptyBlock, isEmptyBlock, blockAllowed } from '../../resources/js/core/blocks.js';
 import { registeredBlocks } from '../../resources/js/core/registry.js';
@@ -159,7 +160,7 @@ export class MediaBlocks {
     try {
       // лимит размера из настроек сервера: слишком большой файл не отправляем — сервер его всё равно не примет
       const limit = job.file && editor.server.limits[mediaFileKind(kind)];
-      if (limit && job.file.size > limit) throw new Error(`Файл больше ${formatLimit(limit)} — так настроено на сайте`);
+      if (limit && job.file.size > limit) throw new Error(tf('Файл больше {size} — так настроено на сайте', { size: formatLimit(limit) }));
       const asset = job.url ? await editor.options.upload.fromUrl(job.url, { pagePath: mediaPagePath(editor), signal: abort.signal }) : await editor.options.upload(job.file, {
         kind: mediaFileKind(kind), pagePath: mediaPagePath(editor), signal: abort.signal,
         onProgress: (fraction) => {
@@ -302,7 +303,7 @@ export class MediaBlocks {
     };
     if (kind === 'file') wrapFileNames(figure);   // название файла в две строки с многоточием
     if (kind === 'gallery' || kind === 'file') this.itemControls(block, figure, kind);
-    if (kind === 'gallery' && items.length) panel.appendChild(h('div', { class: 'ted-ui-media__info', text: `Галерея · ${items.length} фото. У каждого фото своя подпись; ⠿ — переставить, карандаш — alt` }));
+    if (kind === 'gallery' && items.length) panel.appendChild(h('div', { class: 'ted-ui-media__info', text: tf('Галерея · {n} фото. У каждого фото своя подпись; ⠿ — переставить, карандаш — alt', { n: items.length }) }));
     for (const job of jobs) {
       if (job.status === 'done' && !job.multi) continue;   // одиночная загрузка: между концом и вставкой файла области нет
       panel.appendChild(this.jobPanel(block, kind, job));
@@ -312,7 +313,7 @@ export class MediaBlocks {
   addButton(block, kind) {
     const clip = h('i', { class: 'ted-ui-media__paperclip', 'aria-hidden': 'true' });
     // скрепка — часть надписи: в узкой колонке стоит перед первым словом, а не отдельной строкой
-    const pick = h('button', { type: 'button', class: 'ted-ui-media__drop', 'aria-label': `Выбрать файл: ${MEDIA_LABELS[kind]}` }, [
+    const pick = h('button', { type: 'button', class: 'ted-ui-media__drop', 'aria-label': tf('Выбрать файл: {kind}', { kind: t(MEDIA_LABELS[kind]) }) }, [
       h('span', { class: 'ted-ui-media__drop-label' }, [clip, kind === 'gallery' && this.state(block).items.length ? 'Добавить фото в галерею' : MEDIA_PICK[kind]]),
       h('span', { class: 'ted-ui-media__drop-hint', text: 'или перетащите сюда' }),
       h('span', { class: 'ted-ui-media__drop-active', text: 'Отпустите, чтобы загрузить' })]);
@@ -384,7 +385,7 @@ export class MediaBlocks {
     job.fill.classList.toggle('is-pending', pct === null);
     if (pct === null) job.fill.removeAttribute('aria-valuenow');
     else job.fill.setAttribute('aria-valuenow', String(pct));
-    job.title.textContent = job.stage === 'poster' ? 'Готовим постер…' : job.url ? 'Загружаем по ссылке и сжимаем…' : pct === 100 ? 'Обрабатываем на сервере…' : `Загружается ${what}${pct === null ? '…' : ` ${pct}%`}`;
+    job.title.textContent = job.stage === 'poster' ? t('Готовим постер…') : job.url ? t('Загружаем по ссылке и сжимаем…') : pct === 100 ? t('Обрабатываем на сервере…') : tf('Загружается {what}', { what: t(what) }) + (pct === null ? '…' : ` ${pct}%`);
   }
 
   /** Подпись под изображением, видео, аудио: прямо в блоке, без окна. Enter — переход к новому абзацу после блока. Пустая подпись в HTML не попадает. */
@@ -489,11 +490,10 @@ export class MediaBlocks {
   itemControls(block, figure, kind) {
     const tag = kind === 'gallery' ? 'figure' : 'a';
     const tiles = () => [...figure.querySelectorAll(`:scope > ${tag}`)];
-    const noun = kind === 'gallery' ? 'фото' : 'файл';
     for (const [index, tile] of tiles().entries()) {
       const tools = h('div', { class: 'ted-ui-media__tile-tools', 'data-tedui-media-panel': '' });
       for (const type of ['click', 'dblclick']) tools.addEventListener(type, (event) => { event.preventDefault(); event.stopPropagation(); });
-      const grip = smallButton({ name: 'media-grip', label: `Переместить ${noun} (Alt и стрелки)`, iconName: 'grip' });
+      const grip = smallButton({ name: 'media-grip', label: kind === 'gallery' ? 'Переместить фото (Alt и стрелки)' : 'Переместить файл (Alt и стрелки)', iconName: 'grip' });
       grip.addEventListener('contextmenu', (event) => event.preventDefault());
       grip.addEventListener('pointerdown', (event) => this.editor.handle.onGripDown(event, () => tile, grip, {
         item: true,
@@ -508,7 +508,7 @@ export class MediaBlocks {
         block.querySelectorAll('.ted-ui-media__tile-tools button:first-child')[index + step]?.focus();
       });
       const settings = smallButton({ name: 'media-settings', label: kind === 'gallery' ? 'Описание (alt)' : 'Переименовать', iconName: 'edit', onClick: (event) => this.settings(block, index, event.currentTarget) });
-      const remove = smallButton({ name: 'media-delete', label: `Удалить ${noun}`, iconName: 'trash', onClick: () => {
+      const remove = smallButton({ name: 'media-delete', label: kind === 'gallery' ? 'Удалить фото' : 'Удалить файл', iconName: 'trash', onClick: () => {
         const { kind: current, items, caption } = this.state(block);
         items.splice(index, 1); this.update(block, current, items, caption);
       } });
@@ -719,7 +719,7 @@ function jobLabel(job) {
 }
 
 function fileSize(bytes) {
-  return bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1).replace('.', ',')} МБ` : `${Math.max(1, Math.round(bytes / 1024))} КБ`;
+  return bytes >= 1048576 ? `${num((bytes / 1048576).toFixed(1))} ${t('МБ')}` : `${Math.max(1, Math.round(bytes / 1024))} ${t('КБ')}`;
 }
 
 function mediaAction(text, action, primary = false) {
@@ -737,21 +737,21 @@ function setCaption(figure, value) {
 
 /** Что сказать пользователю после загрузки: сжато ли, во что превращено, сколько весит. */
 function uploadReport(assets) {
-  if (assets.length > 1) return { toast: `Загружено файлов: ${assets.length}`, info: '' };
+  if (assets.length > 1) return { toast: tf('Загружено файлов: {n}', { n: assets.length }), info: '' };
   const a = assets[0];
-  if (!a.size) return { toast: 'Файл загружен', info: '' };
+  if (!a.size) return { toast: t('Файл загружен'), info: '' };
   const kb = fileSize(a.size);
   const type = String(a.type || '').toUpperCase();
   const dims = a.width ? ` · ${a.width}×${a.height}` : '';
-  const poster = a.poster ? ' · постер из первого кадра' : '';
-  if (type === 'GIF') return { toast: `GIF сохранён без изменений${dims} · ${kb}`, info: `GIF${dims} · ${kb} · без изменений` };
+  const poster = a.poster ? ` · ${t('постер из первого кадра')}` : '';
+  if (type === 'GIF') return { toast: tf('GIF сохранён без изменений{dims} · {kb}', { dims, kb }), info: `GIF${dims} · ${kb} · ${t('без изменений')}` };
   if (type === 'WEBP' && a.originalSize) {
-    const saved = a.originalSize > a.size ? ` (было ${fileSize(a.originalSize)}, −${Math.round((1 - a.size / a.originalSize) * 100)}%)` : '';
+    const saved = a.originalSize > a.size ? tf(' (было {size}, −{pct}%)', { size: fileSize(a.originalSize), pct: Math.round((1 - a.size / a.originalSize) * 100) }) : '';
     const text = `WebP${dims} · ${kb}${saved}`;
-    return { toast: `Изображение: ${text}`, info: text };
+    return { toast: tf('Изображение: {text}', { text }), info: text };
   }
-  if (a.converted) return { toast: `Видео сконвертировано в ${type} · ${kb} (было ${fileSize(a.originalSize)})`, info: `${type} · ${kb}${poster}` };
-  return { toast: `Загружено · ${type} · ${kb}`, info: `${type} · ${kb}${poster}` };
+  if (a.converted) return { toast: tf('Видео сконвертировано в {type} · {kb} (было {size})', { type, kb, size: fileSize(a.originalSize) }), info: `${type} · ${kb}${poster}` };
+  return { toast: tf('Загружено · {type} · {kb}', { type, kb }), info: `${type} · ${kb}${poster}` };
 }
 
 /** Фото, открытое заново: к типу добавляются размеры (из разметки или из самой картинки) и вес (HEAD-запрос к своему серверу). */

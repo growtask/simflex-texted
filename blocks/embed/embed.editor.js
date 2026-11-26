@@ -5,6 +5,7 @@
 // Если сервер карточку не дал — блок остаётся пустым, автор видит сообщение (поле не очищается).
 
 import { h, icon, smallButton, menuItem } from '../../resources/js/ui/widgets.js';
+import { tf } from '../../resources/js/core/i18n.js';
 import { emptyBlock, isEmptyBlock } from '../../resources/js/core/blocks.js';
 import { embedUrlOk, embedData, readEmbed, makeEmbedBlock } from './embed.js';
 
@@ -86,7 +87,7 @@ export class EmbedUI {
         this.apply(el, data);
       } catch (err) {
         busy(false);
-        ed.toast(err && err.message ? `Карточка не получена: ${err.message}` : 'Карточка не получена', { status: 'error' });
+        ed.toast(err && err.message ? tf('Карточка не получена: {error}', { error: err.message }) : 'Карточка не получена', { status: 'error' });
       }
     };
     input.addEventListener('keydown', (e) => {
@@ -191,7 +192,7 @@ export class EmbedUI {
         ed.popover.close();
         this.apply(el, data, { compact: tInput.checked });
       } catch (err) {
-        ed.toast(err && err.message ? `Карточка не получена: ${err.message}` : 'Карточка не получена', { status: 'error' });
+        ed.toast(err && err.message ? tf('Карточка не получена: {error}', { error: err.message }) : 'Карточка не получена', { status: 'error' });
       } finally { saving = false; }
     };
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); save(); } });

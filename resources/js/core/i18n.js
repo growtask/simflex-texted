@@ -26,6 +26,16 @@ export function t(s) {
   return (d && (d[s] ?? d[s.trim()])) ?? s;
 }
 
+/** Перевод строки с подстановками: tf('Загружено файлов: {n}', { n: 3 }) — в словаре ключ с {n} (1.0.2) */
+export function tf(s, vars = {}) {
+  return String(t(s)).replace(/\{(\w+)\}/g, (m, k) => (k in vars ? String(vars[k]) : m));
+}
+
+/** Дробное число по языку: 2,5 по-русски, 2.5 по-английски */
+export function num(x) {
+  return LANG === 'ru' ? String(x).replace('.', ',') : String(x);
+}
+
 /** Атрибуты с текстом интерфейса — переводятся в h(). */
 export const I18N_ATTRS = ['title', 'placeholder', 'aria-label', 'data-tip'];
 

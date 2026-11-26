@@ -27,8 +27,8 @@ function siteCodeCopy(root) {
     const button = doc.createElement('button');
     button.type = 'button';
     button.className = 'ted-code-copy';
-    button.setAttribute('aria-label', 'Копировать код');
-    button.title = 'Копировать код';
+    button.setAttribute('aria-label', siteText(pre, 'Копировать код', 'Copy code'));
+    button.title = siteText(pre, 'Копировать код', 'Copy code');
     button.innerHTML = SITE_COPY_ICON;
     let timer = 0;
     button.addEventListener('click', async () => {
@@ -37,8 +37,8 @@ function siteCodeCopy(root) {
       button.classList.toggle('is-copied', ok);
       button.classList.toggle('is-failed', !ok);
       button.innerHTML = ok ? SITE_CHECK_ICON : SITE_COPY_ICON;
-      button.setAttribute('aria-label', ok ? 'Код скопирован' : 'Не удалось скопировать код');
-      timer = setTimeout(() => { button.classList.remove('is-copied', 'is-failed'); button.innerHTML = SITE_COPY_ICON; button.setAttribute('aria-label', 'Копировать код'); }, 1600);
+      button.setAttribute('aria-label', ok ? siteText(pre, 'Код скопирован', 'Code copied') : siteText(pre, 'Не удалось скопировать код', 'Could not copy the code'));
+      timer = setTimeout(() => { button.classList.remove('is-copied', 'is-failed'); button.innerHTML = SITE_COPY_ICON; button.setAttribute('aria-label', siteText(pre, 'Копировать код', 'Copy code')); }, 1600);
     });
     pre.prepend(button);
   }

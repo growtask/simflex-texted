@@ -31,7 +31,7 @@ function siteTabs(root) {
       b.id = uid + '-t' + i;
       b.setAttribute('role', 'tab');
       b.setAttribute('aria-controls', uid + '-p' + i);
-      b.textContent = (title && title.textContent.trim()) || 'Вкладка ' + (i + 1);
+      b.textContent = (title && title.textContent.trim()) || siteText(panel, 'Вкладка ', 'Tab ') + (i + 1);
       panel.id = panel.id || uid + '-p' + i;
       panel.setAttribute('role', 'tabpanel');
       panel.setAttribute('aria-labelledby', b.id);

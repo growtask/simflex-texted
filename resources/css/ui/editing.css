@@ -69,3 +69,5 @@
   white-space: nowrap;
   pointer-events: none;
 }
+
+.ted-ui[lang="en"] .ted-ui-editable .ted-ui-raw::after { content: "HTML block from old content"; }

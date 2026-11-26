@@ -4,7 +4,7 @@ import { sanitizeHTML, sanitizeNodes, serializeBlocks, ensureCode, setNumsAttrs,
 import { applyEditorHighlight, detectCodeLang, releaseEditorHighlight } from './highlight.js';
 import { markdownToHtml, looksLikeMarkdown } from './markdown.js';
 import { Presence } from './presence.js';
-import { t, setLang, getLang, relabel } from './i18n.js';
+import { t, tf, setLang, getLang, relabel } from './i18n.js';
 import { getRange, topBlockOf, selectedBlocks, isAtStart, isAtEnd, placeCaret } from './selection.js';
 import { History } from './history.js';
 import { chooseMedia, mediaPagePath } from './upload.js';
@@ -131,7 +131,7 @@ export class Editor {
 
   buildDOM() {
     const o = this.options;
-    this.ui = h('div', { class: 'ted-ui', 'data-mode': 'edit' });
+    this.ui = h('div', { class: 'ted-ui', 'data-mode': 'edit', lang: getLang() });
     if (o.preview === 'inline') this.ui.classList.add('is-inline-view');
 
     this.editable = h('div', {
@@ -995,6 +995,8 @@ export class Editor {
         current.setAttribute('data-tedui-ph', text);
       }
     }
+    // заглушки блоков записаны по-русски — показываем на языке редактора (1.0.2)
+    if (getLang() !== 'ru') for (const el of ed.querySelectorAll('[data-tedui-ph]')) el.setAttribute('data-tedui-ph', t(el.getAttribute('data-tedui-ph')));
     this.lineHolder(r, current);
   }
 
@@ -1047,7 +1049,7 @@ export class Editor {
     // место — переменными на поле правки (наследуются), чтобы не писать style в содержимое
     this.editable.style.setProperty('--ted-ph-x', `${Math.round(rect.left - box.left)}px`);
     this.editable.style.setProperty('--ted-ph-y', `${Math.round(rect.top - box.top)}px`);
-    el.setAttribute('data-tedui-phline', text);
+    el.setAttribute('data-tedui-phline', t(text));
   }
 
   // -------------------------------------------------------------------------
@@ -1232,7 +1234,7 @@ export class Editor {
     });
     const refresh = () => {
       const n = res.changed ? Object.values(res.stats).reduce((a, b) => a + b, 0) : 0;
-      total.textContent = n ? `Изменено мест: ${n}. Выключите то, что не нужно.` : 'Все правила выключены — текст не изменён.';
+      total.textContent = n ? tf('Изменено мест: {n}. Выключите то, что не нужно.', { n }) : t('Все правила выключены — текст не изменён.');
     };
     refresh();
     mark();

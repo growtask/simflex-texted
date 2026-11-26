@@ -22,3 +22,7 @@
 }
 
 .ted-ui-editable blockquote[data-tedui-qbtn] { margin-bottom: 80px; }
+
+/* английский интерфейс (1.0.2) */
+.ted-ui[lang="en"] .ted-ui-editable blockquote > p.ted-author[data-tedui-notitle] > strong::before { content: "Name"; }
+.ted-ui[lang="en"] .ted-ui-editable blockquote > p.ted-author[data-tedui-nodesc] > strong::after { content: "Position"; }
