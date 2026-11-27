@@ -1,4 +1,4 @@
-/*! Ted 1.0.2 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-25 16:09 */
+/*! Ted 1.0.3 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-27 12:32 */
 (function () {
 'use strict';
 
@@ -11964,11 +11964,11 @@ class BlockHandle {
     for (const g of [this.gutterGrip, this.ctrlGrip]) g.addEventListener('contextmenu', (e) => e.preventDefault());
     this.gutterGrip.addEventListener('pointerdown', (e) => this.onGripDown(e, () => this.hovered, this.gutterGrip));
     this.ctrlGrip.addEventListener('pointerdown', (e) => this.onGripDown(e, () => this.focused, this.ctrlGrip));
-    // скрытые кнопки пунктов (шаги, таблица…) — к левому краю колонки: прозрачные, но со старым местом они раздвигали
+    // скрытые кнопки блока и пунктов (шаги, таблица…) — к левому краю колонки: прозрачные, но со старым местом они раздвигали
     // страницу вбок, когда окно стало уже (1.0.2)
     this.onWinResize = () => {
       this.refresh();
-      for (const el of this.column.querySelectorAll('.ted-ui-itemctl:not(.is-visible)')) el.style.left = '0px';
+      for (const el of this.column.querySelectorAll('.ted-ui-itemctl:not(.is-visible), .ted-ui-controls:not(.is-visible)')) { el.style.left = '0px'; el.style.right = ''; }
     };
     window.addEventListener('resize', this.onWinResize);
     // высота содержимого изменилась (раскрылся аккордеон, загрузилась картинка выше) — кнопки идут за блоком (22.11)
@@ -16791,7 +16791,7 @@ function escapeHTML(s) {
 
 
 
-const VERSION = '1.0.2';
+const VERSION = '1.0.3';
 
 const Ted = {
   version: VERSION,

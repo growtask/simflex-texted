@@ -939,8 +939,12 @@ group('Окно стало уже (сайт texted 25.11, 1.0.2)', () => {
       ok(ctl, 'кнопки пункта есть');
       ctl.classList.remove('is-visible');
       ctl.style.left = '5000px';   // место, посчитанное на широком окне
+      const controls = ed.ui.querySelector('.ted-ui-controls');
+      controls.classList.remove('is-visible');
+      controls.style.left = '5000px';   // панель блока — так же
       window.dispatchEvent(new Event('resize'));
       eq(ctl.style.left, '0px');
+      eq(controls.style.left, '0px', 'панель блока');
     } finally {
       ed.destroy();
     }
