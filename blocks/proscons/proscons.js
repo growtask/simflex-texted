@@ -8,6 +8,12 @@ import { bjEsc, bjLines } from '../../resources/js/core/blocks-json.js';
 
 registerBlock({
   ...PROSCONS_BLOCK,
+  // фон карточки по умолчанию — свой: плюсы зелёные, минусы красные; в меню «Цвет» отмечен «Успех» / «Ошибка» (заказчик 28.11)
+  // в тёмной теме карточки серые (main/gray/dark) — там отмечен «Стандартный»
+  defaultBg: (el) => (el.closest('[data-ted-theme="dark"]') ? 'gray' : el.classList.contains('ted-pros') ? 'success' : el.classList.contains('ted-cons') ? 'error' : ''),
+  // цвет текста и фон — у карточки, где курсор (меню «Цвет», заказчик 28.11): плюсы и минусы красятся отдельно
+  tcPart: (block, node) => { const el = node.nodeType === 1 ? node : node.parentNode; const card = el && el.closest('ul.ted-proscons > li'); return card && block.contains(card) ? card : null; },
+  bgPart: (block, node) => { const el = node.nodeType === 1 ? node : node.parentNode; const card = el && el.closest('ul.ted-proscons > li'); return card && block.contains(card) ? card : null; },
   match: (el) => el.tagName === 'UL' && el.classList.contains('ted-proscons'),
   /** Макет block-proscons, state=empty: в каждой карточке заголовок и три пустых пункта; курсор — в заголовок плюсов. */
   create: (doc) => {

@@ -1,4 +1,4 @@
-/*! Ted 1.0.3 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-27 12:32 */
+/*! Ted 1.0.4 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-27 22:53 */
 (function () {
 'use strict';
 
@@ -91,6 +91,15 @@ addLang('en', {
   'По левому краю': 'Align left',
   'По правому краю': 'Align right',
   'Удалить фон': 'Remove background',
+  'Сбросить цвет': 'Reset color',
+  'Цвет': 'Color',
+  'Фон': 'Background',
+  'Стандартный': 'Default',
+  'Акцентный': 'Accent',
+  'Дополнительный': 'Secondary',
+  'Ошибка': 'Error',
+  'Успех': 'Success',
+  'Предупреждение': 'Warning',
   'Удалить блок': 'Delete block',
   'Очистить всё': 'Clear all',
   'Всё очищено': 'Everything cleared',
@@ -199,6 +208,8 @@ addLang('en', {
   'Добавить вкладку': 'Add tab',
   'Добавить вопрос': 'Add question',
   'Добавить главу': 'Add chapter',
+  'Собрать из заголовков': 'Collect from headings',
+  'Содержание собрано из заголовков': 'Contents collected from headings',
   'Добавить колонку': 'Add column',
   'Добавить строку': 'Add row',
   'Добавить столбец': 'Add column',
@@ -1120,7 +1131,9 @@ const UNWRAP_BLOCK_TAGS = new Set([
 ]);
 
 const ALIGN_CLASS = /^ted-align-(center|right)$/;
-const BG_CLASS = /^ted-bg-(gray|color1|color2)$/;
+const BG_CLASS = /^ted-bg-(gray|color1|color2|error|alert|success)$/;
+// цвет текста блока или части текста (меню «Цвет» → «Текст», 1.0.4); gray — «Стандартный» внутри цветного блока
+const TC_CLASS = /^ted-tc-(gray|color1|color2|error|alert|success)$/;
 const ID_RE = ID_PATTERN;   // id — как на сервере: с буквы, до 64 знаков (core/allowlist.js)
 
 const isWhitespace = (s) => !/[^\t\n\r ]/.test(s);
@@ -1242,6 +1255,8 @@ function cleanBlockLevel(node, ctx) {
   const made = regDef ? regDef.clean(inner || node, doc, (id) => ID_RE.test(id || ''), inner ? node : null) : false;
   if (made !== false) {   // false — «не мой»: элемент очищается дальше как обычно (сложная таблица — «сырой» HTML)
     closePara(ctx);
+    // цвет текста и фон блока (меню «Цвет», 1.0.4) переносит ядро — блоку не нужно знать о них
+    if (made && made.nodeType === 1) for (const c of colorClasses(inner || node)) made.classList.add(c);
     if (made) ctx.out.appendChild(made);
     return;
   }
@@ -1374,6 +1389,9 @@ function cleanBlockLevel(node, ctx) {
       if (emitTokens) code.appendChild(highlightFragment(text, lang, doc)); else code.appendChild(doc.createTextNode(text));
       pre.appendChild(code);
       applyCodeMeta(pre, lang, nums);
+      // цветной фон кода (меню «Цвет» → «Фон», 1.0.4)
+      const bg = node.classList && Array.from(node.classList).find((c) => BG_CLASS.test(c));
+      if (bg) pre.className = bg;
       ctx.out.appendChild(pre);
     }
     return;
@@ -1466,6 +1484,8 @@ function cleanListItem(node, doc) {
   for (const cls of ['ted-checked', 'ted-pros', 'ted-cons']) {
     if (node.classList && node.classList.contains(cls)) li.classList.add(cls);
   }
+  // карточка плюсов или минусов красится отдельно (меню «Цвет», 1.0.4)
+  if (li.classList.contains('ted-pros') || li.classList.contains('ted-cons')) for (const c of colorClasses(node)) li.classList.add(c);
   const nested = [];
   for (const child of Array.from(node.childNodes)) {
     if (child.nodeType === 1 && (child.tagName === 'UL' || child.tagName === 'OL')) {
@@ -1525,8 +1545,8 @@ function cleanInlineNode(node, dest, doc, opts) {
       target = a;
     }
   } else if (mapped === 'mark') {
-    // подложка под фрагментом текста: только с классом палитры, иначе <mark> без смысла — просто текст
-    const bg = node.classList && Array.from(node.classList).find((c) => BG_CLASS.test(c));
+    // подложка или цвет фрагмента текста: только с классом палитры, иначе <mark> без смысла — просто текст
+    const bg = node.classList && Array.from(node.classList).find((c) => BG_CLASS.test(c) || TC_CLASS.test(c));
     if (bg) {
       const el = doc.createElement('mark');
       el.className = bg;
@@ -1657,16 +1677,17 @@ function withAlign(el, src) {
   const align = (src.style && src.style.textAlign) || src.getAttribute('align') || '';
   let cls = '';
   let bg = '';
+  let tc = '';
   if (src.classList) {
-    for (const c of src.classList) { if (ALIGN_CLASS.test(c)) cls = c; if (BG_CLASS.test(c)) bg = c; }
+    for (const c of src.classList) { if (ALIGN_CLASS.test(c)) cls = c; if (BG_CLASS.test(c)) bg = c; if (TC_CLASS.test(c) && c !== 'ted-tc-gray') tc = c; }
   }
   if (!cls && /center/i.test(align)) cls = 'ted-align-center';
   if (!cls && /right|end/i.test(align)) cls = 'ted-align-right';
   // у чек-листа и шагов выравнивания нет
   if (src.classList && Array.from(src.classList).some((c) => /^ted-(checklist|steps)$/.test(c))) cls = '';
-  // у чек-листа, шагов, цифр, плюсов и минусов, выноски фона нет
-  if (src.classList && Array.from(src.classList).some((c) => /^ted-(checklist|steps|proscons)$/.test(c))) bg = '';
-  const all = [cls, bg].filter(Boolean).join(' ');
+  // у чек-листа и шагов фона нет (плюсы и минусы красятся с 1.0.4)
+  if (src.classList && Array.from(src.classList).some((c) => /^ted-(checklist|steps)$/.test(c))) bg = '';
+  const all = [cls, bg, tc].filter(Boolean).join(' ');
   if (all) el.className = all;
   // якоря: id блока (латиница, цифры, дефис) сохраняется
   const id = src.getAttribute && src.getAttribute('id');
@@ -1768,6 +1789,24 @@ function stripDangerous(root) {
   }
 }
 
+/** Классы цвета текста и фона блока (ted-tc-*, ted-bg-*): ted-tc-gray — только у части текста, у блока не нужен. */
+function colorClasses(el) {
+  return el && el.classList ? Array.from(el.classList).filter((c) => BG_CLASS.test(c) || (TC_CLASS.test(c) && c !== 'ted-tc-gray')) : [];
+}
+
+/** Классы цвета в первом теге HTML блока, если его serialize их не вывел. */
+function withColorClasses(html, el) {
+  const cls = colorClasses(el);
+  if (!cls.length) return html;
+  return html.replace(/^(\s*<[a-z0-9]+)([^>]*)>/i, (m, tag, attrs) => {
+    const have = ((attrs.match(/\sclass="([^"]*)"/) || [])[1] || '').split(/\s+/);
+    const add = cls.filter((c) => !have.includes(c));
+    if (!add.length) return m;
+    if (/\sclass="/.test(attrs)) return tag + attrs.replace(/\sclass="([^"]*)"/, (x, v) => ` class="${v} ${add.join(' ')}"`) + '>';
+    return `${tag} class="${add.join(' ')}"${attrs}>`;
+  });
+}
+
 /** Чистый фрагмент → аккуратная HTML-строка: один блок на строку. */
 function serializeBlocks(frag) {
   const parts = [];
@@ -1775,7 +1814,7 @@ function serializeBlocks(frag) {
     if (node.nodeType !== 1) continue;
     const wrapped = isWrap(node) ? node.firstElementChild : null;   // обёртка правки (медиа): сохраняется блок внутри
     const sd = defOf(wrapped || node);   // блок из реестра сохраняет себя сам (blocks/<тип>/<тип>.js → serialize)
-    if (sd && sd.serialize) { const out = sd.serialize(wrapped || node, wrapped ? node : null); if (out) parts.push(out); continue; }
+    if (sd && sd.serialize) { const out = sd.serialize(wrapped || node, wrapped ? node : null); if (out) parts.push(withColorClasses(out, wrapped || node)); continue; }
     if (isWrap(node)) continue;   // обёртка без блока внутри (всё вычищено) — не сохраняем
     if (node.classList.contains('ted-ui-raw')) {
       parts.push(node.getAttribute('data-ted-raw') || node.innerHTML);
@@ -1832,12 +1871,16 @@ function getRange(root) {
 
 // Каждый блок верхнего уровня добавляет 1 «символ»-разделитель, иначе позиция
 // в конце одного блока и в начале следующего совпадала бы.
+// служебные элементы интерфейса в поле правки (панели медиа, data-tedui-m: «Скрыть» у содержания, поля карточек) — их нет
+// в снимках истории, поэтому и в позиции курсора они не считаются: иначе после Ctrl+Z выделение съезжало на их длину (28.11)
+const isUi = (node) => node.nodeType === 1 && (node.hasAttribute('data-tedui-media-panel') || node.hasAttribute('data-tedui-m'));
+
 function walkOffset(root, container, offset) {
   let count = 0;
   let found = -1;
   const visit = (node, isBlockStart) => {
     if (found >= 0) return;
-    if (node.nodeType === 1 && node.hasAttribute('data-tedui-media-panel')) return;
+    if (isUi(node)) return;
     if (node === container && node.nodeType !== 3) {
       // смещение указывает на дочерний узел
       for (let i = 0; i < offset && i < node.childNodes.length; i++) count += textLen(node.childNodes[i], node === root);
@@ -1864,9 +1907,12 @@ function walkOffset(root, container, offset) {
 }
 
 function textLen(node, isTopLevel) {
+  if (isUi(node)) return isTopLevel ? 1 : 0;
   let len = node.nodeType === 3 ? node.data.length : node.textContent.length;
-  if (node.nodeType === 1 && isWrap(node)) {   // обёртка правки (медиа): текст её панели не считается
-    for (const ui of node.querySelectorAll('[data-tedui-media-panel]')) len -= ui.textContent.length;
+  if (node.nodeType === 1) {   // панели медиа и служебные элементы (data-tedui-m) не считаются
+    for (const ui of node.querySelectorAll('[data-tedui-media-panel], [data-tedui-m]')) {
+      if (!ui.parentElement.closest('[data-tedui-media-panel], [data-tedui-m]') || !node.contains(ui.parentElement.closest('[data-tedui-media-panel], [data-tedui-m]'))) len -= ui.textContent.length;
+    }
   }
   return len + (isTopLevel ? 1 : 0);
 }
@@ -1890,7 +1936,7 @@ function findPoint(root, target) {
       const walker = root.ownerDocument.createTreeWalker(block, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
         acceptNode(node) {
           if (node.nodeType === 3) return NodeFilter.FILTER_ACCEPT;
-          return node.hasAttribute('data-tedui-media-panel') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP;
+          return isUi(node) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP;
         },
       });
       let local = target - count;
@@ -3740,7 +3786,7 @@ function fill(el, nodes) {
 }
 
 function alignOf(block) {
-  return Array.from(block.classList).filter((c) => /^ted-(align|bg)-/.test(c));
+  return Array.from(block.classList).filter((c) => /^ted-(align|bg|tc)-/.test(c));   // выравнивание, фон и цвет текста (1.0.4) переходят в новый вид
 }
 
 /**
@@ -3852,10 +3898,10 @@ function alignOfBlock(b) {
 }
 
 // Цветной фон (подложка): палитры сайта gray / color1 / color2 → класс ted-bg-<имя>
-const BG_NAMES = ['gray', 'color1', 'color2'];
+const BG_NAMES = ['gray', 'color1', 'color2', 'error', 'alert', 'success'];
 
 // Блоки со своим видом (чек-лист, шаги, плюсы и минусы): цветной фон запрещён; выноска и цифры красятся целиком
-const NO_BG_KINDS = new Set(['checklist', 'steps', 'proscons']);
+const NO_BG_KINDS = new Set(['checklist', 'steps']);
 function bgAllowed(b) {
   const bd = b && b.nodeType === 1 ? defOf(b) : null;
   if (bd && bd.toolbar && bd.toolbar.bg === false) return false;   // block.json → toolbar.bg
@@ -3866,7 +3912,10 @@ function bgAllowed(b) {
 function setBg(blocks, name) {
   for (const b of blocks) {
     const t = blockType(b);
-    if (!t || t === 'raw' || t === 'pre' || isObjectBlock(b)) continue;
+    if (!t || t === 'raw') continue;
+    // код и объекты (разделитель, кнопка, товар) — только если блок сам разрешил фон (canBg, 1.0.4)
+    const bd = defOf(b);
+    if ((t === 'pre' || isObjectBlock(b)) && !(bd && bd.canBg && bd.canBg(b))) continue;
     if (!bgAllowed(b)) continue;
     for (const n of BG_NAMES) b.classList.remove(`ted-bg-${n}`);
     if (BG_NAMES.includes(name)) b.classList.add(`ted-bg-${name}`);
@@ -3877,6 +3926,36 @@ function setBg(blocks, name) {
 function bgOfBlock(b) {
   if (!b || !b.classList) return '';
   return BG_NAMES.find((n) => b.classList.contains(`ted-bg-${n}`)) || '';
+}
+
+// Цвет текста (меню «Цвет» → «Текст», 1.0.4): класс ted-tc-<имя> на блоке или <mark class="ted-tc-<имя>"> на выделении.
+// «Стандартный» снимает цвет с блока; внутри цветного блока выделение «Стандартным» — mark ted-tc-gray.
+// Заголовки того же цвета — на ступень сильнее (светлая darker, тёмная lighter) — в стилях (content.css).
+const TC_NAMES = ['color1', 'color2', 'error', 'alert', 'success'];
+
+/** Можно ли красить текст блока: не код, не сырой HTML, не объект; блок из реестра решает сам (block.json → toolbar.tc, canTc). */
+function tcAllowed(b) {
+  if (!b || b.nodeType !== 1) return false;
+  const t = blockType(b);
+  if (!t || t === 'raw') return false;
+  const bd = defOf(b);
+  if (bd && bd.toolbar && bd.toolbar.tc === false) return false;
+  if (bd && bd.canTc) return !!bd.canTc(b);   // блок решает сам (баннер, товар — да; карточки — нет)
+  return !(t === 'pre' || isObjectBlock(b));
+}
+
+function setTc(blocks, name) {
+  for (const b of blocks) {
+    if (!tcAllowed(b)) continue;
+    for (const n of TC_NAMES) b.classList.remove(`ted-tc-${n}`);
+    if (TC_NAMES.includes(name)) b.classList.add(`ted-tc-${name}`);
+    if (!b.className) b.removeAttribute('class');
+  }
+}
+
+function tcOfBlock(b) {
+  if (!b || !b.classList) return '';
+  return TC_NAMES.find((n) => b.classList.contains(`ted-tc-${n}`)) || '';
 }
 
 // ---------------------------------------------------------------------------
@@ -3956,7 +4035,8 @@ function normalizeRoot(root) {
     changed = true;
   }
   for (const el of Array.from(root.querySelectorAll('[style]'))) {
-    if (el.closest(`.ted-ui-raw, ${wrapSelector()}`)) continue;
+    // нередактируемые части блоков (полоса прогресса содержания и т. п.): их положение задаёт сам блок, при наборе не сбрасываем
+    if (el.closest(`.ted-ui-raw, [contenteditable="false"], ${wrapSelector()}`)) continue;
     el.removeAttribute('style');
     changed = true;
   }
@@ -4168,6 +4248,11 @@ function fixStepItem(li, doc) {
   if (!desc || (desc.nodeType === 1 && /^(UL|OL)$/.test(desc.tagName))) {
     li.insertBefore(doc.createTextNode(ZWSP), desc);
     changed = true;
+  } else if (desc.nodeType === 3 && !desc.data) {
+    // пустой текст (описание целиком ушло в новый шаг) строки не даёт — шаг ниже, и следующий наезжает (1.0.4)
+    let rest = '';
+    for (let n = desc.nextSibling; n && !(n.nodeType === 1 && /^(UL|OL)$/.test(n.tagName)); n = n.nextSibling) rest += n.textContent;
+    if (!rest) { desc.data = ZWSP; changed = true; }
   }
   return changed;
 }
@@ -4734,6 +4819,9 @@ function keysFor(cmd) {
 //   normalize(el, doc) — привести форму правки к порядку (true — что-то поменялось)
 //   toText(el, h)     — блок в наборе без него → массив узлов текста; h = { doc, p, list, text, esc } (то же — <Тип>.php → degrade)
 //   canAlign(el), canBg(el) — можно ли выравнивать / красить фоном этот блок (баннер — нет)
+//   canTc(el) — можно ли менять цвет текста (меню «Цвет» → «Текст»; карточки — нет); или block.json → toolbar.tc: false
+//   tcPart(block, node) — часть блока, которую красит «Цвет» → «Текст» при курсоре в ней (вопрос, вкладка, заголовок шага) → Range
+//   defaultBg — фон блока без класса ted-bg-* (своя серая плашка): 'gray' или (el) => имя; меню «Цвет» отмечает его
 //   editorUi(editor)  — правка блока в редакторе (<тип>.editor.js): объект с onKey(e), sync(), focusBlock(), destroy();
 //                       editorUiName — имя свойства редактора (editor.buttons)
 //   afterInsert(editor, el) — после вставки из меню (открыть окно настроек)
@@ -4873,6 +4961,7 @@ const HR_BLOCK = {
 };
 
 registerBlock({
+  canBg: () => true,   // цвет линии — из «Фона» (меню «Цвет», 1.0.4)
   toMarkdown: () => '---',   // Ted.toMarkdown (22.11)
   ...HR_BLOCK,
   match: (el) => el.tagName === 'HR',
@@ -5246,6 +5335,8 @@ const CALLOUT_BLOCK = {
 const CALLOUT_ZW = new RegExp(String.fromCharCode(0x200b), 'g');
 
 registerBlock({
+  // светлая тема — main/gray/lighter («Стандартный»); в тёмной подложка main/gray/darker — такой точки нет, ничего не отмечено
+  defaultBg: (el) => (el.closest('[data-ted-theme="dark"]') ? '' : 'gray'),
   // Markdown (22.11): выноска — «> [!NOTE] Заголовок» и строки «> текст»; обратно — fromMarkdownAlert
   toMarkdown: (el, md) => { const [title, ...rest] = [...el.children]; return [`> [!NOTE] ${title ? title.textContent.trim() : ''}`, ...rest.map((p) => '> ' + md.inline(p).trim())].join('\n'); },
   fromMarkdownAlert: (title, html) => `<blockquote class="ted-callout"><p><strong>${title}</strong></p>${html}</blockquote>`,
@@ -5362,7 +5453,7 @@ const PRE_BLOCK = {
   "figma": "block-code",
   "text": true,
   "toolbar": {
-    "bg": false,
+    "tc": false,
     "align": false,
     "marks": []
   },
@@ -5393,6 +5484,8 @@ const PRE_BLOCK = {
 
 
 registerBlock({
+  defaultBg: 'gray',   // своя серая плашка — в меню «Цвет» → «Фон» по умолчанию отмечен «Стандартный» (заказчик 28.11)
+  canBg: () => true,   // у кода меняется только фон (меню «Цвет», 1.0.4)
   ...PRE_BLOCK,
   match: (el) => el.tagName === 'PRE',
   create: (doc) => { const pre = doc.createElement('pre'); pre.appendChild(doc.createElement('code')); return pre; },
@@ -5479,6 +5572,21 @@ const STEPS_BLOCK = {
 
 
 registerBlock({
+  /** Цвет текста одной части (меню «Цвет», 1.0.4): курсор в заголовке шага — заголовок, в описании — описание. */
+  tcPart: (block, node) => {
+    const el = node.nodeType === 1 ? node : node.parentNode;
+    const li = el && el.closest('ol.ted-steps > li');
+    if (!li || !block.contains(li)) return null;
+    const title = li.querySelector(':scope > strong:first-child');
+    const r = document.createRange();
+    // курсор в заголовке или в самом начале пункта (перед заголовком) — заголовок
+    if (title && (title.contains(el) || node === li)) { r.selectNodeContents(title); return r; }
+    const br = [...li.childNodes].find((n) => n.nodeName === 'BR');
+    if (!br || !br.nextSibling) return null;
+    r.setStartAfter(br);
+    r.setEnd(li, li.childNodes.length);
+    return r;
+  },
   ...STEPS_BLOCK,
   match: (el) => el.tagName === 'OL' && el.classList.contains('ted-steps'),
   // Ted.fromBlocks: { "type": "steps", "items": [{ "title": "…", "text": "…" }] }
@@ -5517,6 +5625,7 @@ const FACTS_BLOCK = {
 
 
 registerBlock({
+  defaultBg: 'gray',   // своя серая плашка — в меню «Цвет» → «Фон» по умолчанию отмечен «Стандартный» (заказчик 28.11)
   ...FACTS_BLOCK,
   match: (el) => el.tagName === 'UL' && el.classList.contains('ted-facts'),
   /** Новый блок — две пустые плитки (меньше двух не бывает), остальные добавляются Enter в последней подписи. */
@@ -5542,7 +5651,6 @@ const PROSCONS_BLOCK = {
   "figma": "block-proscons",
   "text": true,
   "toolbar": {
-    "bg": false,
     "align": false,
     "style": false
   },
@@ -5565,6 +5673,12 @@ const PROSCONS_BLOCK = {
 
 registerBlock({
   ...PROSCONS_BLOCK,
+  // фон карточки по умолчанию — свой: плюсы зелёные, минусы красные; в меню «Цвет» отмечен «Успех» / «Ошибка» (заказчик 28.11)
+  // в тёмной теме карточки серые (main/gray/dark) — там отмечен «Стандартный»
+  defaultBg: (el) => (el.closest('[data-ted-theme="dark"]') ? 'gray' : el.classList.contains('ted-pros') ? 'success' : el.classList.contains('ted-cons') ? 'error' : ''),
+  // цвет текста и фон — у карточки, где курсор (меню «Цвет», заказчик 28.11): плюсы и минусы красятся отдельно
+  tcPart: (block, node) => { const el = node.nodeType === 1 ? node : node.parentNode; const card = el && el.closest('ul.ted-proscons > li'); return card && block.contains(card) ? card : null; },
+  bgPart: (block, node) => { const el = node.nodeType === 1 ? node : node.parentNode; const card = el && el.closest('ul.ted-proscons > li'); return card && block.contains(card) ? card : null; },
   match: (el) => el.tagName === 'UL' && el.classList.contains('ted-proscons'),
   /** Макет block-proscons, state=empty: в каждой карточке заголовок и три пустых пункта; курсор — в заголовок плюсов. */
   create: (doc) => {
@@ -5609,7 +5723,7 @@ const BUTTON_BLOCK = {
   "menu": { "group": "Действия", "order": 0, "icon": "button", "words": "кнопка кнопки баннер призыв ссылка cta button banner", "convert": false, "sample": "<div class=\"ted-button\"><a class=\"ted-button__btn\">Подробнее</a><a class=\"ted-button__btn ted-button__btn--secondary\">Каталог</a></div>" },
   "selector": "div.ted-button",
   "html": {},
-  "toolbar": { "bg": false, "align": false, "style": false, "marks": [] },
+  "toolbar": { "align": false, "style": false, "marks": [] },
   "neverEmpty": true,
   "caretBelow": true
 };
@@ -5736,6 +5850,8 @@ function serializeButton(el) {
 
 
 registerBlock({
+  // подложка баннера по умолчанию: светлая тема — main/color1/lighter («Акцентный»), тёмная — main/gray/dark («Стандартный»)
+  defaultBg: (el) => (!el.classList.contains('ted-button--banner') ? '' : el.closest('[data-ted-theme="dark"]') ? 'gray' : 'color1'),
   ...BUTTON_BLOCK,
   match: (el) => el.tagName === 'DIV' && el.classList.contains('ted-button'),
   /** Макет block-button, state=empty: одна кнопка «Текст кнопки»; после вставки сразу открывается окно «Настройки кнопки». */
@@ -5745,6 +5861,8 @@ registerBlock({
   serialize: serializeButton,
   normalize: normalizeButton,
   canAlign: (el) => !el.classList.contains('ted-button--banner'),   // баннер — на всю ширину колонки
+  canBg: () => true,   // фон баннера; на дополнительном фоне кнопка — дополнительного цвета (меню «Цвет», 1.0.4)
+  canTc: (el) => el.classList.contains('ted-button--banner'),   // текст есть только у баннера
   editorUi: (editor) => new ButtonUI(editor),
   editorUiName: 'buttons',
   /** В наборе без кнопки: заголовок баннера жирным, текст, кнопки — ссылками (так же на сервере — button.php). */
@@ -6162,6 +6280,7 @@ registerBlock({
   normalize: normalizeIframe,
   canAlign: () => false,
   canBg: () => false,
+  canTc: () => false,   // карточка: цвет текста не меняется (меню «Цвет», 27.11)
   editorUi: (editor) => new IframeUI(editor),
   editorUiName: 'iframes',
   /** В наборе без iFrame — ссылка на страницу (текст — подпись или адрес); так же на сервере — iframe.php. */
@@ -6513,6 +6632,7 @@ registerBlock({
   normalize: normalizeEmbed,
   canAlign: () => false,
   canBg: () => false,
+  canTc: () => false,   // карточка: цвет текста не меняется (меню «Цвет», 27.11)
   editorUi: (editor) => new EmbedUI(editor),
   editorUiName: 'embeds',
   /** Вставили ссылку отдельным абзацем: «Встроить карточкой» — если CMS подключила opengraph. */
@@ -6763,7 +6883,7 @@ const PRODUCT_BLOCK = {
   "title": "Товар",
   "figma": "block-product (Action/product)",
   "menu": { "group": "Действия", "order": 10, "icon": "product", "words": "товар продукт каталог цена купить корзина product shop", "convert": false, "sample": "<div class=\"ted-product\"><span class=\"ted-product__img\"></span><div class=\"ted-product__text\"><p class=\"ted-product__name\">Наушники Studio 5</p><p class=\"ted-product__price\"><span class=\"ted-product__now\">12 900 ₽</span><s class=\"ted-product__old\">16 900 ₽</s></p></div><a class=\"ted-product__btn\">В корзину</a></div>" },
-  "toolbar": { "bg": false, "align": false, "style": false, "marks": [] },
+  "toolbar": { "align": false, "style": false, "marks": [] },
   "selector": "div.ted-product",
   "html": { "div": ["data-ted-product"], "a": ["data-ted-cart"] },
   "ids": ["data-ted-product", "data-ted-cart"],
@@ -6906,7 +7026,8 @@ registerBlock({
   normalize: normalizeProduct,
   filesOf: productFilesOf,
   canAlign: () => false,
-  canBg: () => false,
+  canBg: () => true,   // цвет карточки и кнопки (меню «Цвет», 1.0.4)
+  canTc: () => true,
   editorUi: (editor) => new ProductUI(editor),
   editorUiName: 'products',
   /** В наборе без товара — «Название — цена» ссылкой на товар; так же на сервере — product.php. */
@@ -8243,7 +8364,7 @@ const TABLE_BLOCK = {
   "selector": "figure.ted-table",
   "html": {},
   "inNarrow": false,
-  "toolbar": { "bg": false, "align": false, "style": false },
+  "toolbar": { "align": false, "style": false },
   "compound": true,
   "neverEmpty": true,
   "lineAfter": true
@@ -8262,7 +8383,7 @@ const TABLE_BLOCK = {
 
 const TABLE_MAX_COLS = 10;
 const TABLE_MAX_ROWS = 100;
-const CELL_TAGS = new Set(['STRONG', 'EM', 'U', 'S', 'CODE', 'A', 'BR']);   // как в абзаце: жирный, курсив, подчёркнутый, зачёркнутый, код, ссылка
+const CELL_TAGS = new Set(['STRONG', 'EM', 'U', 'S', 'CODE', 'A', 'BR', 'MARK']);   // как в абзаце: жирный, курсив, подчёркнутый, зачёркнутый, код, ссылка, цвет и подложка части текста (mark с классом палитры, 1.0.4)
 
 /** figure.ted-table? */
 function isTableBlock(el) {
@@ -8357,6 +8478,8 @@ function cleanTableNode(node, doc, cleanInline, idOk) {
   const fig = doc.createElement('figure');
   fig.className = 'ted-table';
   if (ours && node.classList.contains('ted-table--plain')) fig.classList.add('ted-table--plain');
+  // цвет текста и фон (меню «Цвет», 1.0.4)
+  if (ours) for (const c of node.classList) if (/^ted-(tc|bg)-(gray|color1|color2|error|alert|success)$/.test(c) && c !== 'ted-tc-gray') fig.classList.add(c);
   if (idOk && idOk(node.id)) fig.id = node.id;
   const wrap = doc.createElement('div');
   wrap.className = 'ted-table__wrap';
@@ -8620,6 +8743,7 @@ function parseClipboardTable(html, text, doc = document) {
 
 
 registerBlock({
+  defaultBg: 'gray',   // своя серая плашка — в меню «Цвет» → «Фон» по умолчанию отмечен «Стандартный» (заказчик 28.11)
   toMarkdown: (el, md) => { const t = el.querySelector('table'); const cap = el.querySelector('figcaption'); return (t ? md.table(t) : '') + (cap ? `\n\n*${md.inline(cap).trim()}*` : ''); },   // Ted.toMarkdown (22.11)
   ...TABLE_BLOCK,
   match: (el) => isTableBlock(el),
@@ -8640,7 +8764,6 @@ registerBlock({
     return normalizeTableBlock(fig, doc);
   },
   canAlign: () => false,
-  canBg: () => false,
   editorUi: (editor) => new TableUI(editor),
   editorUiName: 'table',
   /** Меню блока (editor-block-menu-table): шапка и границы; подписи меняются по состоянию, как «Добавить автора» / «Убрать автора». */
@@ -9414,6 +9537,15 @@ function unnestAccordion(inner, doc) {
 }
 
 registerBlock({
+  /** Цвет текста одного вопроса (меню «Цвет», 1.0.4): курсор в вопросе — красится он, остальные нет. */
+  tcPart: (block, node) => {
+    const el = node.nodeType === 1 ? node : node.parentNode;
+    const q = el && el.closest('.ted-accordion__q');
+    if (!q || !block.contains(q) || !q.textContent.trim()) return null;
+    const r = document.createRange();
+    r.selectNodeContents(q);
+    return r;
+  },
   // Ted.toMarkdown (22.11): вопрос жирным, ответ — блоками
   toMarkdown: (el, md) => [...el.querySelectorAll('details')].map((d) => `**${(d.querySelector('summary') || d).textContent.trim()}**\n\n${md.blocks(d.querySelector('.ted-accordion__body') || d)}`).join('\n\n'),
   ...ACCORDION_BLOCK,
@@ -9848,6 +9980,15 @@ function unnestTabs(inner, doc) {
 }
 
 registerBlock({
+  /** Цвет текста одной вкладки (меню «Цвет», 1.0.4): курсор в названии — красится эта вкладка. */
+  tcPart: (block, node) => {
+    const el = node.nodeType === 1 ? node : node.parentNode;
+    const t = el && el.closest('.ted-tabs__title');
+    if (!t || !block.contains(t) || !t.textContent.trim()) return null;
+    const r = document.createRange();
+    r.selectNodeContents(t);
+    return r;
+  },
   // Ted.toMarkdown (22.11): название вкладки жирным, содержимое — блоками
   toMarkdown: (el, md) => [...el.querySelectorAll(':scope > .ted-tabs__panel')].map((p) => `**${(p.querySelector('.ted-tabs__title') || p).textContent.trim()}**\n\n${md.blocks(p.querySelector('.ted-tabs__body') || p)}`).join('\n\n'),
   ...TABS_BLOCK,
@@ -10116,7 +10257,7 @@ const TOC_BLOCK = {
   "menu": { "group": "Интерактив", "order": 0, "icon": "toc", "words": "содержание оглавление навигация главы якоря toc navigation", "convert": false, "sample": "<nav class=\"ted-toc\"><div class=\"ted-toc__progress\"><div class=\"ted-toc__bar\" style=\"width:30%\"></div></div><div class=\"ted-toc__panel\"><p class=\"ted-toc__title\">Содержание</p><ul class=\"ted-toc__list\"><li><a>Как всё начиналось</a></li><li><a>Что мы сделали</a></li><li><a>Что дальше</a></li></ul></div></nav>" },
   "selector": ".ted-toc",
   "html": {},
-  "toolbar": { "bg": false, "align": false, "style": false, "marks": [] },
+  "toolbar": { "tc": false, "align": false, "style": false, "marks": [] },
   "inContainers": false,
   "neverEmpty": true,
   "lineAfter": true
@@ -10175,7 +10316,14 @@ function cleanToc(node, doc, idOk) {
   }).filter((it) => it.title && tocAnchorOk(it.href));
   const toc = makeToc(doc, title ? title.textContent.replace(/\s+/g, ' ').trim() : '', items);
   if (idOk && idOk(node.id)) toc.id = node.id;
+  const bg = tocBg(node);   // цветной фон панели (меню «Цвет» → «Фон», 27.11)
+  if (bg) toc.classList.add(bg);
   return toc;
+}
+
+/** Класс цветного фона содержания: ted-bg-gray / color1 / color2 или ''. */
+function tocBg(node) {
+  return [...(node.classList || [])].find((c) => /^ted-bg-(gray|color1|color2)$/.test(c)) || '';
 }
 
 /** Правка: полоса, панель, заголовок одной строкой, главы — нередактируемые ссылки. */
@@ -10185,7 +10333,7 @@ function normalizeToc(toc, doc) {
   let panel = toc.querySelector(':scope > .ted-toc__panel');
   if (!progress || !panel) {
     const fresh = cleanToc(toc, doc);
-    if (toc.id) fresh.id = toc.id;
+    if (toc.id) fresh.id = toc.id;   // фон cleanToc переносит сам
     toc.replaceWith(fresh);
     return true;
   }
@@ -10212,7 +10360,8 @@ function serializeToc(toc) {
     if (!tocAnchorOk(href)) return '';
     return `<li><a href="${esc(href)}">${esc(a.textContent.trim())}</a></li>`;
   }).filter(Boolean);
-  return `<nav class="ted-toc"${id}><div class="ted-toc__progress"><div class="ted-toc__bar"></div></div><div class="ted-toc__panel"><p class="ted-toc__title">${esc(title ? title.textContent.trim() : '')}</p><ul class="ted-toc__list">${items.join('')}</ul></div></nav>`;
+  const bg = tocBg(toc);
+  return `<nav class="ted-toc${bg ? ` ${bg}` : ''}"${id}><div class="ted-toc__progress"><div class="ted-toc__bar"></div></div><div class="ted-toc__panel"><p class="ted-toc__title">${esc(title ? title.textContent.trim() : '')}</p><ul class="ted-toc__list">${items.join('')}</ul></div></nav>`;
 }
 
 /** Якоря документа для выбора в окне главы: [{ id, text }]. */
@@ -10224,6 +10373,7 @@ function documentAnchors(root) {
 
 
 registerBlock({
+  defaultBg: 'gray',   // своя серая плашка — в меню «Цвет» → «Фон» по умолчанию отмечен «Стандартный» (заказчик 28.11)
   toMarkdown: () => '',   // Ted.toMarkdown (22.11): содержание собирается заново по заголовкам
   ...TOC_BLOCK,
   match: (el) => el.classList.contains('ted-toc'),   // <nav> на сайте, <div> в правке
@@ -10234,7 +10384,6 @@ registerBlock({
   serialize: serializeToc,
   normalize: normalizeToc,   // полоса, панель, заголовок одной строкой, главы — ссылки
   canAlign: () => false,
-  canBg: () => false,
   editorUi: (editor) => new TocUI(editor),
   editorUiName: 'toc',
   /** «Заголовок» в пустом заголовке (макет block-navigation). */
@@ -10265,6 +10414,7 @@ registerBlock({
 
 
 
+
 const cleanId = (v) => String(v || '').trim().replace(/^#/, '').replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
 
 class TocUI {
@@ -10277,7 +10427,12 @@ class TocUI {
     this.addBtn = h('button', { type: 'button', class: 'ted-ui-addauthor ted-ui-tocadd' }, [icon('plus'), h('span', { text: 'Добавить главу' })]);
     this.addBtn.addEventListener('mousedown', (e) => e.preventDefault());
     this.addBtn.addEventListener('click', () => this.openChapter(null));
+    // «Собрать из заголовков» (заказчик 27.11): главы — все заголовки h2 статьи по порядку; рядом с «Добавить главу», тот же вид
+    this.fillBtn = h('button', { type: 'button', class: 'ted-ui-addauthor ted-ui-tocfill' }, [icon('toc'), h('span', { text: 'Собрать из заголовков' })]);
+    this.fillBtn.addEventListener('mousedown', (e) => e.preventDefault());
+    this.fillBtn.addEventListener('click', () => this.fillFromHeadings());
     this.column.appendChild(this.addBtn);
+    this.column.appendChild(this.fillBtn);
     this.onClick = (e) => {
       const toggle = e.target.closest && e.target.closest('.ted-toc__toggle');
       if (toggle && this.root.contains(toggle) && this.editor.mode === 'edit') { e.preventDefault(); this.toggle(toggle.closest('.ted-toc')); return; }
@@ -10340,6 +10495,9 @@ class TocUI {
       progress.style.top = stuck ? `${edge}px` : '';
       progress.style.left = stuck ? `${t.left}px` : '';
       progress.style.width = stuck ? `${t.width}px` : '';
+      // место полосы в тексте остаётся (отступ у блока): прилипая, она уходила из потока — текст ниже прыгал на 20 px
+      // при каждом Enter и первой букве (заказчик 27.11, «внизу трясётся»). Как data-ted-stuck на сайте.
+      toc.toggleAttribute('data-tedui-stuck', stuck);
     }
   }
 
@@ -10398,19 +10556,54 @@ class TocUI {
     if (this.toc && this.toc !== toc) { this.toc.removeAttribute('data-tedui-addbtn'); this.ro?.unobserve(this.toc); }
     if (toc && toc !== this.toc) this.ro?.observe(toc);
     this.toc = toc;
-    if (!toc) { this.addBtn.classList.remove('is-visible'); return; }   // при перетаскивании главы «Добавить главу» остаётся
+    if (!toc) { this.addBtn.classList.remove('is-visible'); this.fillBtn.classList.remove('is-visible'); return; }   // при перетаскивании главы «Добавить главу» остаётся
     toc.setAttribute('data-tedui-addbtn', '');
     this.place();
   }
 
   place() {
     const toc = this.toc;
-    if (!toc || !toc.isConnected) { this.addBtn.classList.remove('is-visible'); return; }
+    if (!toc || !toc.isConnected) { this.addBtn.classList.remove('is-visible'); this.fillBtn.classList.remove('is-visible'); return; }
     const cr = this.column.getBoundingClientRect();
     const r = toc.getBoundingClientRect();
     this.addBtn.style.top = `${r.bottom - cr.top + 20}px`;
     this.addBtn.style.left = `${r.left - cr.left}px`;
     this.addBtn.classList.add('is-visible');
+    // рядом с «Добавить главу»; не помещается в колонку (телефон) — под ней (макет block-navigation, state=edit mobile)
+    const beside = r.left - cr.left + this.addBtn.offsetWidth + 8;
+    const fits = beside + this.fillBtn.offsetWidth <= r.right - cr.left;
+    this.fillBtn.style.top = fits ? this.addBtn.style.top : `${r.bottom - cr.top + 20 + this.addBtn.offsetHeight + 8}px`;
+    this.fillBtn.style.left = fits ? `${beside}px` : `${r.left - cr.left}px`;
+    this.fillBtn.classList.toggle('is-visible', !!this.headings().length);
+  }
+
+  /** Заголовки h2 статьи (не внутри содержания) — главы для «Собрать из заголовков». */
+  headings() {
+    return [...this.root.querySelectorAll('h2')].filter((el) => !el.closest('.ted-toc') && el.textContent.trim());
+  }
+
+  /** Главы = заголовки h2 по порядку; заголовку без якоря ставится якорь из его текста. Отмена — Ctrl+Z. */
+  fillFromHeadings() {
+    const ed = this.editor;
+    const toc = this.toc;
+    const list = toc && toc.querySelector('.ted-toc__list');
+    const heads = this.headings();
+    if (!list || !heads.length) return;
+    ed.popover.close();
+    ed.history.commit();
+    if (toc.hasAttribute('data-tedui-collapsed')) this.toggle(toc);
+    const items = heads.map((el) => {
+      if (!el.id || !/^[A-Za-z][A-Za-z0-9_-]*$/.test(el.id)) {
+        const base = slugify(el.textContent) || 'glava';
+        el.id = uniqueId(this.root, /^[a-z]/.test(base) ? base : `g-${base}`);
+      }
+      return makeTocItem(document, el.textContent.replace(/\s+/g, ' ').trim(), `#${el.id}`);
+    });
+    list.replaceChildren(...items);
+    ed.editable.focus({ preventScroll: true });
+    placeCaret(toc.querySelector('.ted-toc__title'), true);
+    ed.afterChange({ immediate: true });
+    ed.toast('Содержание собрано из заголовков', { undo: true });
   }
 
   /** Окно «Глава содержания»: li — правка главы, null — новая глава в конец списка. */
@@ -10926,7 +11119,7 @@ function smallButton({ name, label, iconName, flat = false, onClick }) {
 }
 
 /** Пункт меню (Dropdown/main item). */
-function menuItem({ value, label, iconName, iconColor = null, active = false, soon = 0, danger = false, submenu = false, onSelect }) {
+function menuItem({ value, label, iconName, iconColor = null, iconClass = null, active = false, soon = 0, danger = false, submenu = false, onSelect }) {
   const item = h('button', {
     type: 'button',
     class: `ted-ui-item${active ? ' is-active' : ''}${soon ? ' is-soon' : ''}${danger ? ' ted-ui-item--danger' : ''}`,
@@ -10935,7 +11128,7 @@ function menuItem({ value, label, iconName, iconColor = null, active = false, so
     'aria-disabled': soon ? 'true' : null,
     'data-tip': soon ? `Появится на этапе ${soon}` : null,
   }, [
-    iconName ? (() => { const i = icon(iconName); if (iconColor) i.style.color = iconColor; return i; })() : null,
+    iconName ? (() => { const i = icon(iconName); if (iconColor) i.style.color = iconColor; if (iconClass) i.classList.add(iconClass); return i; })() : null,
     h('span', { class: 'ted-ui-item__label', text: label }),
     submenu ? icon('chevron-right') : null,
   ]);
@@ -11023,6 +11216,9 @@ class Popover {
       if (this.child && this.child.el && this.child.el.contains(e.target)) return;
       if (this.parent && this.parent.el && this.parent.el.contains(e.target)) return;
       if (this.anchor && this.anchor.contains && this.anchor.contains(e.target)) return;
+      // кнопки блока и пункта (⠿ 🗑): окно закрывает их действие. Закрытие по нажатию укорачивало страницу, она
+      // сдвигалась под курсором — кнопку отпускали мимо, и корзина не срабатывала (сайт texted 27.11, 1.0.4)
+      if (e.target.closest && e.target.closest('.ted-ui-controls, .ted-ui-itemctl')) return;
       this.close();
     };
     this._key = (e) => {
@@ -11086,7 +11282,7 @@ class Popover {
     window.addEventListener('scroll', this._reflow, true);
     if (focus) {
       const f = this.el.querySelector(focus);
-      if (f) setTimeout(() => f.focus({ preventScroll: true }), 0);
+      // кнопка в фокусе при открытии — без рамки фокуса (её видно только при переходе клавиатурой): иначе «Заменить» выглядела/n      // кнопкой не из дизайна (сайт texted 27.11, 1.0.4)/n      if (f) setTimeout(() => f.focus({ preventScroll: true, focusVisible: f.tagName !== /x27BUTTON/x27 }), 0);
     }
     return this.el;
   }
@@ -11235,14 +11431,18 @@ class Popover {
 
   /** Простое меню из пунктов. items: [{value,label,icon,soon}] или '-' (линия). */
   menu(items, anchor, { cls = '', active = null, onSelect, onClose } = {}) {
+    // { heading: 'Текст' } — подпись раздела меню (text/t4, gray/medium; макет editor-dropdown style=color)
+    const isActive = (v) => (Array.isArray(active) ? active.includes(v) : v === active);
     const nodes = items.map((it) => (it === '-'
       ? h('div', { class: 'ted-ui-pop__line' })
+      : it.heading ? h('div', { class: 'ted-ui-pop__label', text: t(it.heading) })
       : menuItem({
         value: it.value,
         label: it.label,
         iconName: it.icon,
         iconColor: it.iconColor,
-        active: it.value === active,
+        iconClass: it.iconClass,
+        active: isActive(it.value),
         soon: it.soon,
         danger: it.danger,
         submenu: it.submenu,
@@ -11313,10 +11513,21 @@ class Toaster {
     let left = timeout;
     let started = Date.now();
     let id = setTimeout(() => this.close(toast), left);
-    toast.addEventListener('mouseenter', () => { clearTimeout(id); left -= Date.now() - started; timer.style.animationPlayState = 'paused'; });
-    toast.addEventListener('mouseleave', () => { started = Date.now(); id = setTimeout(() => this.close(toast), Math.max(300, left)); timer.style.animationPlayState = 'running'; });
-    toast.addEventListener('mouseenter', () => this.layout(true));
-    toast.addEventListener('mouseleave', () => setTimeout(() => { if (!this.stack.matches(':hover')) this.layout(false); }, 30));
+    // только мышь: касание на телефоне браузер выдаёт за mouseenter без mouseleave — тост вставал на паузу навсегда
+    // (заказчик 27.11, «тостер зависает»)
+    let paused = false;
+    toast.addEventListener('pointerenter', (e) => {
+      if (e.pointerType !== 'mouse' || paused) return;
+      paused = true;
+      clearTimeout(id); left -= Date.now() - started; timer.style.animationPlayState = 'paused';
+      this.layout(true);
+    });
+    toast.addEventListener('pointerleave', (e) => {
+      if (e.pointerType !== 'mouse' || !paused) return;
+      paused = false;
+      started = Date.now(); id = setTimeout(() => this.close(toast), Math.max(300, left)); timer.style.animationPlayState = 'running';
+      setTimeout(() => { if (!this.stack.matches(':hover')) this.layout(false); }, 30);
+    });
     this.stack.appendChild(toast);
     this.layout(false);
     return toast;
@@ -11356,6 +11567,7 @@ class Toaster {
 // Перенос статей и нейросети (решения заказчика 22.11): выгрузка и загрузка JSON и Markdown, промт для нейросети.
 // Меню «Ещё ⋯» → «Скопировать промт», «Загрузить .md или .json», «Выгрузить в Markdown», «Выгрузить в JSON». Загрузка заменяет статью — после предупреждения;
 // «Отменить» в уведомлении возвращает прежнюю. Всё загруженное проходит обычную очистку и набор блоков поля.
+
 
 
 
@@ -11475,8 +11687,8 @@ ${json.map((j) => '  ' + j).join('\n')}
 function copyPrompt(ed) {
   const text = aiPrompt();
   const done = () => ed.toast('Промт скопирован — вставьте его в нейросеть вместе с текстом статьи');
-  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, () => ed.toast('Не удалось скопировать промт', { status: 'error' }));
-  else ed.toast('Буфер обмена недоступен в этом браузере', { status: 'error' });
+  // и без https: запасной способ сразу при нажатии (core/clipboard.js, 1.0.4) — раньше на http была только ошибка
+  copyText(text).then((ok) => (ok ? done() : ed.toast('Не удалось скопировать промт', { status: 'error' })));
 }
 
 /** Смена языка интерфейса: название языка, на который переключит, — на нём самом (English / Русский). */
@@ -11596,7 +11808,7 @@ class Toolbar {
     // общие для default и text
     this.styleBtn = b({ name: 'style', label: 'Стиль текста', iconName: 'type', chevron: true, onClick: () => this.openStyleMenu() });
     this.alignBtn = b({ name: 'align', label: 'Выравнивание', iconName: 'align-left', chevron: true, onClick: () => this.openAlignMenu() });
-    this.colorBtn = b({ name: 'color', label: 'Цветной фон', iconName: 'color', chevron: true, onClick: () => this.openColorMenu() });
+    this.colorBtn = b({ name: 'color', label: 'Цвет', iconName: 'color', chevron: true, onClick: () => this.openColorMenu() });
 
     this.common = [this.styleBtn, this.alignBtn, this.colorBtn];
 
@@ -11638,7 +11850,8 @@ class Toolbar {
       default: [...this.common, div(), this.mediaBtn, this.allBlocksBtn, div(), this.magicBtn, this.moreBtn, div(), ...tail],
       // + | B I U S код ссылка якорь | все блоки, ✨, ещё | помощь, сохранить
       text: [...this.common, div(), ...Object.values(this.marks), this.anchorBtn, div(), this.allBlocksBtn, this.magicBtn, this.moreBtn, div(), ...tail],
-      line: [this.moreBtn, div(), ...tail],   // editor-toolbar style=line
+      // editor-toolbar style=line; «Цвет» — у разделителя, кнопки, товара (фон и текст, 1.0.4), у остальных скрыт
+      line: [this.colorBtn, this.lineDiv = div(), this.moreBtn, div(), ...tail],
       view: [this.stats, this.modeBtn],
       viewRo: [this.stats],   // только просмотр: сводка без кнопки «Редактировать»
     };
@@ -11740,12 +11953,15 @@ class Toolbar {
     }
     // кнопки, которые в этом месте не работают, убираем из панели
     const tb = (blockDef(type) || {}).toolbar || {};   // block.json → toolbar: что убрать из панели в этом блоке
-    const noBg = tb.bg === false || !!state.inHost;   // block.json → toolbar.bg; в ответе аккордеона фона тоже нет
-    this.colorBtn.hidden = noBg || !blockAllowed(this.editor.allowedBlocks, 'background');   // фон отключён опцией blocks
+    // «Цвет»: есть цвет текста или фон (block.json → toolbar.bg; в ответе аккордеона фона нет; фон отключён опцией blocks)
+    const parts = this.colorParts();
+    this.colorBtn.hidden = !parts.canTc && !parts.canBgMenu;
+    if (this.lineDiv) this.lineDiv.hidden = this.colorBtn.hidden;
     this.mediaBtn.hidden = !this.mediaItems().length;
     this.alignBtn.hidden = tb.align === false;   // block.json → toolbar.align: код, чек-лист, шаги, цифры, плюсы и минусы, таблица, кнопка
     this.styleBtn.hidden = tb.style === false;
-    this.marks.bold.hidden = !!state.stepTitle;   // заголовок шага уже жирный
+    // заголовок шага и заголовки h2–h6 и так жирные — «Жирный» в них ничего не меняет, кнопку убираем (сайт texted 27.11, 1.0.4)
+    this.marks.bold.hidden = !!state.stepTitle || /^h[2-6]$/.test(type);
     for (const k of ['italic', 'underline', 'strike']) this.marks[k].hidden = false;
     if (Array.isArray(tb.marks)) for (const [k, b] of Object.entries(this.marks)) if (!tb.marks.includes(k)) b.hidden = true;
     this.anchorBtn.classList.toggle('is-active', !!state.anchor);
@@ -11762,10 +11978,12 @@ class Toolbar {
     if (this.pop.isOpen && this.pop.anchor === this.styleBtn) return this.pop.close();
     const ed = this.editor;
     ed.rememberSelection();
+    const noCaret = !ed.saved;
     this.pop.menu(styleTypes().filter((t) => blockAllowed(ed.allowedBlocks, t.type)).map((t) => ({ value: t.type, label: t.label, icon: t.icon })), this.styleBtn, {
       cls: 'ted-ui-pop--text',
       active: ed.state.type,
-      onSelect: (type) => ed.exec(`block:${type}`),
+      // курсора в тексте не было (меню открыли, не ставя курсор) — стиль получает новый блок в конце, а не первый блок статьи (1.0.4)
+      onSelect: (type) => { if (!noCaret) return ed.exec(`block:${type}`); ed.caretToNewBlock(); ed.exec(`block:${type}`); ed.rememberSelection(); },
       onClose: () => ed.restoreRemembered(),
     });
   }
@@ -11782,23 +12000,65 @@ class Toolbar {
     });
   }
 
-  /** Цветной фон (макет editor-dropdown style=color): палитры сайта, «Удалить фон». */
+  /**
+   * «Цвет» (макет editor-dropdown style=color, точки — решение 28.11): «Текст» и «Фон» — по строке точек Switches/radio-color
+   * (Стандартный, Акцентный, Дополнительный, Ошибка, Предупреждение, Успех), название — подсказкой; ниже «Удалить фон».
+   * Разделы, которые в этом месте не работают, не показываются.
+   */
   openColorMenu() {
     if (this.pop.isOpen && this.pop.anchor === this.colorBtn) return this.pop.close();
     const ed = this.editor;
     ed.rememberSelection();
-    this.pop.menu([
-      { value: 'gray', label: 'Стандартный', icon: 'color' },
-      { value: 'color1', label: 'Акцентный', icon: 'color', iconColor: '#1975f7' },
-      { value: 'color2', label: 'Дополнительный', icon: 'color', iconColor: '#6161f2' },
-      '-',
-      { value: 'none', label: 'Удалить фон', icon: 'no-color' },
-    ], this.colorBtn, {
-      cls: 'ted-ui-pop--align',
-      active: ed.state.bg || null,
-      onSelect: (v) => ed.exec(`bg:${v === 'none' ? '' : v}`),
-      onClose: () => ed.restoreRemembered(),
-    });
+    const { canTc, canBgMenu, obj } = this.colorParts();
+    if (!canTc && !canBgMenu) return;
+    const curTc = obj ? (tcOfBlock(obj) || 'gray') : (ed.state.tc || 'gray');
+    // блок со своей серой плашкой (цифры, выноска, код…) — «Стандартный» отмечен и без класса фона (block → defaultBg)
+    const dflt = (el) => { const d = el && defOf(el); const v = d && d.defaultBg; return (typeof v === 'function' ? v(el) : v) || null; };
+    const curBg = obj ? (bgOfBlock(obj) || dflt(obj)) : (ed.state.bg || null);
+    const COLORS = [['gray', 'Стандартный'], ['color1', 'Акцентный'], ['color2', 'Дополнительный'], ['error', 'Ошибка'], ['alert', 'Предупреждение'], ['success', 'Успех']];
+    // наведение (и фокус с клавиатуры) — предпросмотр: цвет сразу примеряется на то, что поменяется (заказчик 28.11)
+    const pick = (cmd) => { ed.clearPreview(); this.pop.close(); ed.exec(cmd); };
+    const row = (kind, active) => {
+      const r = h('div', { class: 'ted-ui-swatches', role: 'radiogroup', 'aria-label': t(kind === 'tc' ? 'Текст' : 'Фон') });
+      for (const [name, label] of COLORS) {
+        const on = name === active;
+        const b = h('button', { type: 'button', class: `ted-ui-swatch${on ? ' is-active' : ''}`, role: 'radio', 'aria-checked': String(on), 'aria-label': t(label), 'data-tip': label, 'data-value': `${kind}:${name}` }, [
+          h('span', { class: `ted-ui-swatch__dot ted-ui-swatch--${kind}-${name}` }),
+        ]);
+        keepFocus(b);
+        b.addEventListener('click', () => pick(`${kind}:${name}`));
+        b.addEventListener('pointerenter', () => ed.previewColor(`${kind}:${name}`));
+        b.addEventListener('focus', () => ed.previewColor(`${kind}:${name}`));
+        r.appendChild(b);
+      }
+      // примерка снимается, когда мышь или фокус ушли с ряда, а не с точки: между точками 4 px, и цвет мигал (заказчик 28.11)
+      r.addEventListener('pointerleave', () => ed.clearPreview());
+      r.addEventListener('focusout', (e) => { if (!r.contains(e.relatedTarget)) ed.clearPreview(); });
+      return r;
+    };
+    const nodes = [];
+    if (canTc) nodes.push(h('div', { class: 'ted-ui-pop__label', text: t('Текст') }), row('tc', curTc));
+    if (canTc && canBgMenu) nodes.push(h('div', { class: 'ted-ui-pop__line' }));
+    if (canBgMenu) nodes.push(h('div', { class: 'ted-ui-pop__label', text: t('Фон') }), row('bg', curBg));
+    // «Сбросить цвет» (заказчик 28.11, вместо «Удалить фон»): секция — к виду по умолчанию: цвет текста, фон, покрашенные слова
+    const reset = menuItem({ value: 'color:reset', label: 'Сбросить цвет', iconName: 'no-color', onSelect: () => pick('color:reset') });
+    reset.addEventListener('pointerenter', () => ed.previewColor('color:reset'));
+    reset.addEventListener('pointerleave', () => ed.clearPreview());
+    nodes.push(h('div', { class: 'ted-ui-pop__line' }), reset);
+    this.pop.open(nodes, this.colorBtn, { cls: 'ted-ui-pop--align ted-ui-pop--color', onClose: () => { ed.clearPreview(); ed.restoreRemembered(); } });
+  }
+
+  /** Что умеет меню «Цвет» в этом месте: цвет текста — блок с текстом; фон — блок с фоном, набор с «Цветным фоном». */
+  colorParts() {
+    const ed = this.editor;
+    const state = ed.state;
+    const obj = ed.pickedObject && ed.pickedObject();   // выбран разделитель, кнопка, товар — меню для него
+    // у блока без курсора (медиа, файл, карточка…) «Цвет» есть, только если блок сам его разрешил (canBg / canTc)
+    if (obj) { const od = defOf(obj) || {}; return { canTc: !!(od.canTc && od.canTc(obj)), canBgMenu: !!(od.canBg && od.canBg(obj)) && blockAllowed(ed.allowedBlocks, 'background'), obj }; }
+    const tb = (blockDef(state.type) || {}).toolbar || {};
+    const canTc = !!state.canTc;
+    const canBgMenu = !(tb.bg === false || !!state.inHost) && blockAllowed(ed.allowedBlocks, 'background');
+    return { canTc, canBgMenu };
   }
 
   /** «Медиа ▾» (editor-dropdown style=media). */
@@ -11880,6 +12140,7 @@ class Toolbar {
 
 
 
+
 /**
  * Вид рамки слоя взаимодействия: у блока с outline (block.json, например линия) рамка рисуется обводкой вокруг элемента,
  * у остальных — подложкой ::after (ui/interaction.css). Признак ставится только на время выделения или перетаскивания.
@@ -11929,7 +12190,15 @@ class BlockHandle {
 
     // правка: ⠿ и 🗑
     this.ctrlGrip = smallButton({ name: 'grip', label: 'Меню блока, перетащить', iconName: 'grip', flat: true });
-    this.ctrlTrash = smallButton({ name: 'trash', label: 'Удалить блок', iconName: 'trash', flat: true, onClick: () => { if (Date.now() < (this.trashLock || 0)) return; this.remove(this.focused); } });   // сразу после удаления корзина следующего блока под курсором не срабатывает (проверка 22.11)
+    this.ctrlTrash = smallButton({ name: 'trash', label: 'Удалить блок', iconName: 'trash', flat: true, onClick: () => {
+      if (Date.now() < (this.trashLock || 0)) return;   // сразу после удаления корзина следующего блока под курсором не срабатывает (проверка 22.11)
+      // блок запомнен при нажатии: открытое окно блока («Настройки товара», «Ссылка»…) закрывается раньше щелчка, и выбранный
+      // блок успевал сброситься — корзина ничего не удаляла (сайт texted 27.11, 1.0.4)
+      const target = this.trashTarget && this.trashTarget.isConnected ? this.trashTarget : this.focused;
+      this.trashTarget = null;
+      this.remove(target);
+    } });
+    this.ctrlTrash.addEventListener('pointerdown', () => { this.trashTarget = this.focused; }, true);
     // якорь: кнопка видна только у блока с id; клик открывает окно «Якорь» (там можно изменить или удалить)
     this.ctrlAnchor = smallButton({ name: 'anchor', label: 'Якорь блока', iconName: 'anchor', flat: true, onClick: () => this.focused && this.editor.openAnchor(this.focused) });
     this.ctrlAnchor.hidden = true;
@@ -12613,30 +12882,12 @@ class BlockHandle {
     return `${base}#${id}`;
   }
 
-  /** Копирует текст в буфер обмена с запасным способом для http. */
-  copyText(url, okMsg = 'Ссылка скопирована', failMsg = 'Не удалось скопировать ссылку') {
+  /** Копирует текст в буфер обмена (core/clipboard.js: без https — запасной способ сразу при нажатии) и говорит, вышло ли. */
+  copyText(text, okMsg = 'Ссылка скопирована', failMsg = 'Не удалось скопировать ссылку') {
     const ed = this.editor;
-    const ok = () => ed.toast(okMsg);
-    const fail = () => ed.toast(failMsg);
-    // запасной способ: Clipboard API есть только на https / localhost, а админка бывает на http
-    const legacy = () => {
-      const ta = document.createElement('textarea');
-      ta.value = url;
-      ta.setAttribute('readonly', '');
-      ta.style.cssText = 'position:fixed;top:0;left:-9999px;opacity:0';
-      document.body.appendChild(ta);
-      ta.select();
-      let done = false;
-      try { done = document.execCommand('copy'); } catch (e) { done = false; }
-      ta.remove();
-      ed.editable.focus({ preventScroll: true });
-      return done;
-    };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(ok, () => (legacy() ? ok() : fail()));
-    } else if (legacy()) ok();
-    else fail();
+    copyText(text).then((ok) => { ed.toast(ok ? okMsg : failMsg, ok ? {} : { status: 'error' }); });
   }
+
   remove(block) {
     const ed = this.editor;
     if (!block || !block.isConnected) return;
@@ -12649,6 +12900,7 @@ class BlockHandle {
       return;
     }
     this.hideGutter();
+    if (ed.popover.isOpen) ed.popover.close();   // окно удаляемого блока («Настройки товара»…) — вместе с ним
     ed.history.commit();
     let next = block.nextElementSibling || block.previousElementSibling;
     block.remove();
@@ -12727,7 +12979,8 @@ class BlockHandle {
       : rects[i].height + (parseFloat(getComputedStyle(b).marginBottom) || 0)));
     const centers = rects.map((r) => r.top + sy + r.height / 2);
     const index = blocks.indexOf(block);
-    this.drag = { block, parent: block.parentNode, blocks, index, tops, slots, centers, startY: (startY ?? rects[index].top) + sy, target: index, shifts: blocks.map(() => 0) };
+    const heights = rects.map((r) => r.height);
+    this.drag = { block, parent: block.parentNode, blocks, index, tops, slots, heights, centers, startY: (startY ?? rects[index].top) + sy, target: index, shifts: blocks.map(() => 0) };
     // окно закрывается, когда перетаскивание уже началось: кнопки выбранного пункта (глава содержания) не пропадают (22.11)
     ed.popover.close();
     ed.tooltip.hide();
@@ -12813,7 +13066,11 @@ class BlockHandle {
       const sx = window.scrollX;
       const i0 = d.index;
       const c0 = d.cells[i0];
-      d.block.style.transform = `translate(${e.clientX + sx - d.startX}px, ${e.clientY + sy - d.startY}px)`;
+      // плитка идёт за курсором, но не выходит за края сетки блока (заказчик 27.11: уносилась за края)
+      const box = d.cells.reduce((b, c) => ({ l: Math.min(b.l, c.x), t: Math.min(b.t, c.y), r: Math.max(b.r, c.x + c.w), b: Math.max(b.b, c.y + c.h) }), { l: Infinity, t: Infinity, r: -Infinity, b: -Infinity });
+      const gx = Math.max(box.l - c0.x, Math.min(box.r - c0.x - c0.w, e.clientX + sx - d.startX));
+      const gy = Math.max(box.t - c0.y, Math.min(box.b - c0.y - c0.h, e.clientY + sy - d.startY));
+      d.block.style.transform = `translate(${gx}px, ${gy}px)`;
       // новое место — ячейка под курсором (или ближайшая по центру)
       const px = e.clientX + sx;
       const py = e.clientY + sy;
@@ -12833,7 +13090,6 @@ class BlockHandle {
         const dy = d.cells[p].y - d.cells[j].y;
         b.style.transform = dx || dy ? `translate(${dx}px, ${dy}px)` : '';
       });
-      void c0;
       const edge = e.clientY < 60 ? -12 : e.clientY > window.innerHeight - 60 ? 12 : 0;
       if (edge) {
         window.scrollBy(0, edge);
@@ -12865,7 +13121,8 @@ class BlockHandle {
     const i = d.index;
     // блок идёт за курсором, но не выходит за пределы списка блоков
     const minDy = d.tops[0] - d.tops[i];
-    const maxDy = (d.tops[n - 1] - d.slots[i] + d.slots[n - 1]) - d.tops[i];
+    // низ — не ниже низа последнего (без его нижнего отступа: пункт содержания уходил под край панели, заказчик 27.11)
+    const maxDy = Math.min((d.tops[n - 1] - d.slots[i] + d.slots[n - 1]) - d.tops[i], d.tops[n - 1] + d.heights[n - 1] - d.heights[i] - d.tops[i]);
     const dy = Math.max(minDy, Math.min(maxDy, e.clientY + sy - d.startY));
     d.block.style.transform = `translateY(${dy}px)`;
     if (!d.itemMode && this.hovered === d.block) this.gutter.style.transform = `translateY(${dy}px)`;   // блок не выбран: ручка «+ ⠿» тоже едет за ним
@@ -14343,7 +14600,9 @@ class Editor {
     }), 0);
   }
 
-  setHTML(html, { silent = false } = {}) {
+  setHTML(html, { silent = false, undoable = false } = {}) {
+    // undoable: замена записывается в историю — Ctrl+Z и «Отменить» в уведомлении вернут прежний текст (сброс демо, 1.0.4)
+    if (undoable) this.history.commit();
     const frag = this.restrict(withoutTokens(() => sanitizeHTML(html || '')));
     this.editable.replaceChildren(frag);
     if (!this.editable.firstChild) {
@@ -14351,7 +14610,8 @@ class Editor {
       this.editable.appendChild(emptyBlock(document, 'p'));
     }
     normalizeRoot(this.editable);
-    this.history.reset();
+    this.seenBlocks = new WeakSet(this.editable.children);   // загруженные блоки — не «новые» для revealCaret
+    if (!undoable) this.history.reset();
     this.refreshBlockUis();
     this.updatePlaceholders();
     if (silent) {
@@ -14462,6 +14722,87 @@ class Editor {
     }
     clearTimeout(this.changeTimer);
     this.changeTimer = setTimeout(() => this.emitChange(), immediate ? 0 : 250);
+    // правка или новый блок за краем окна — экран идёт за ним (сайт texted 27.11, 1.0.4)
+    if (!this.destroyed) requestAnimationFrame(() => this.revealCaret());
+  }
+
+  /**
+   * Место правки (курсор или выделенный блок) ушло за край окна — плавно подводим к нему с запасом: снизу 72 (над нижними
+   * панелями сайта), сверху — под панелью редактора. Высокий блок (больше окна) — показываем его начало.
+   */
+  revealCaret() {
+    // новые блоки верхнего уровня (вставка из меню, дублирование, медиа) — показываем блок целиком, а не только строку
+    // курсора: у вставленной таблицы, выноски, фото курсор в первой строке, а сам блок оставался за нижним краем
+    // (заказчик 27.11). Первый вызов только запоминает блоки.
+    const kids = Array.from(this.editable.children);
+    const seen = this.seenBlocks;
+    this.seenBlocks = new WeakSet(kids);
+    let fresh = seen ? kids.filter((c) => !seen.has(c)) : [];
+    if (fresh.length === kids.length) fresh = [];   // заменено всё (отмена, повтор, загрузка) — ведём только за курсором
+    if (this.destroyed || this.mode !== 'edit' || !this.isFocused()) return;
+    const top = this.toolbar.el.getBoundingClientRect().bottom + 16;
+    const bottom = window.innerHeight - 72;
+    let rect = null;
+    if (fresh.length) {
+      const a = fresh[0].getBoundingClientRect();
+      const b = fresh[fresh.length - 1].getBoundingClientRect();
+      if (b.bottom - a.top <= bottom - top) rect = { top: a.top, bottom: b.bottom, height: b.bottom - a.top };
+    }
+    const r = getRange(this.editable);
+    if (!rect && !r) return;
+    if (!rect) rect = r.getBoundingClientRect();
+    if (!rect.height) {
+      // пустая строка: у свёрнутого курсора нет размеров — берём элемент, где он стоит (абзац, ячейку), а не весь блок
+      const el = r.startContainer.nodeType === 1 ? r.startContainer : r.startContainer.parentElement;
+      if (!el || el === this.editable) return;
+      rect = el.getBoundingClientRect();
+    }
+    let dy = 0;
+    if (rect.height > bottom - top) {
+      if (rect.bottom < top || rect.top > bottom) dy = rect.top - top;   // высокий — только если целиком за краем, к его началу
+    } else if (rect.top < top) dy = rect.top - top;
+    else if (rect.bottom > bottom) dy = rect.bottom - bottom;
+    if (Math.abs(dy) < 1) return;
+    this.scrollFollow(dy);
+  }
+
+  /**
+   * Плавно сдвигает страницу на dy. Одна анимация с общей целью: при наборе каждая клавиша лишь сдвигает цель, а не
+   * запускает новую плавную прокрутку (браузерная smooth на каждое нажатие сбивала предыдущую — экран дёргался, строка
+   * оставалась у края; заказчик 27.11). Колесо или касание пользователя останавливают анимацию. «Уменьшить движение» —
+   * сразу, без анимации.
+   */
+  scrollFollow(dy) {
+    const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const target = Math.min(max, Math.max(0, window.scrollY + dy));   // dy посчитан от текущего положения
+    if (calm) { this.stopFollow(); window.scrollTo(0, target); return; }
+    if (this.follow) { this.follow.target = target; return; }
+    const stop = () => this.stopFollow();
+    const f = this.follow = { target, raf: 0, stop };
+    window.addEventListener('wheel', stop, { passive: true, once: true });
+    window.addEventListener('touchstart', stop, { passive: true, once: true });
+    const step = () => {
+      if (this.follow !== f || this.destroyed) return;
+      const left = f.target - window.scrollY;
+      if (Math.abs(left) < 1) { window.scrollTo(0, f.target); this.stopFollow(); return; }
+      // мягкое замедление к цели: за кадр — пятая часть остатка (≈ 250 мс), не меньше 1 px
+      const move = Math.sign(left) * Math.max(1, Math.abs(left) * 0.2);
+      const before = window.scrollY;
+      window.scrollTo(0, before + move);
+      if (window.scrollY === before) { this.stopFollow(); return; }   // дальше некуда (край страницы)
+      f.raf = requestAnimationFrame(step);
+    };
+    f.raf = requestAnimationFrame(step);
+  }
+
+  stopFollow() {
+    const f = this.follow;
+    if (!f) return;
+    this.follow = null;
+    cancelAnimationFrame(f.raf);
+    window.removeEventListener('wheel', f.stop);
+    window.removeEventListener('touchstart', f.stop);
   }
 
   // -------------------------------------------------------------------------
@@ -14715,6 +15056,7 @@ class Editor {
   destroy() {
     if (this.destroyed) return;
     this.destroyed = true;
+    this.stopFollow();
     this.presence?.destroy();
     this.flush();
     this.popover.close();
@@ -14800,6 +15142,23 @@ class Editor {
     return this.blockFromRange(getRange(this.editable));
   }
 
+  /**
+   * Курсор в новый пустой абзац в конце статьи (сайт texted 27.11, 1.0.4): выбор в панели без курсора создаёт блок, а не меняет
+   * первый. Пустой последний абзац (и единственный пустой в пустой статье) берётся сам — второй пустой не добавляем.
+   */
+  caretToNewBlock() {
+    const last = this.editable.lastElementChild;
+    let p = last && last.tagName === 'P' && !last.className && isEmptyBlock(last) ? last : null;
+    if (!p) {
+      p = emptyBlock(document);
+      this.editable.appendChild(p);
+    }
+    this.editable.focus({ preventScroll: true });
+    placeCaret(p);
+    p.scrollIntoView({ block: 'nearest' });
+    return p;
+  }
+
   scheduleState() {
     if (this._stateFrame) return;
     this._stateFrame = requestAnimationFrame(() => {
@@ -14838,7 +15197,18 @@ class Editor {
     Object.assign(this.state, {
       type: kindOf(block) || type,
       align: alignOfBlock(block),
-      bg: bgOfBlock(block),
+      // фон и цвет части (карточка плюсов или минусов), если блок их так разделяет (bgPart / tcPart → элемент)
+      bg: (() => {
+        const d = block && defOf(block);
+        const part = r && d && d.bgPart ? d.bgPart(block, r.startContainer) : null;
+        const own = bgOfBlock(part) || bgOfBlock(block);   // фон части, иначе всего блока
+        if (own || !d) return own;
+        const v = d.defaultBg;   // своя плашка блока или части (цифры, выноска, карточка плюсов…) — отмечена в меню (28.11)
+        return (typeof v === 'function' ? v(part || block) : v) || '';
+      })(),
+      // цвет текста под курсором: выделение в mark ted-tc-* или класс блока (меню «Цвет» → «Текст»)
+      tc: (() => { const el = r && (r.startContainer.nodeType === 1 ? r.startContainer : r.startContainer.parentNode); const m = el && el.closest && el.closest('mark[class*="ted-tc-"]'); const c = m && this.editable.contains(m) && (m.className.match(/ted-tc-([a-z0-9]+)/) || [])[1]; if (c) return c; const d = block && defOf(block); const part = r && r.collapsed && d && d.tcPart ? d.tcPart(block, r.startContainer) : null; return (part && part.nodeType === 1 ? tcOfBlock(part) : '') || tcOfBlock(block) || 'gray'; })(),
+      canTc: tcAllowed(block),
       anchor: !!(block && block.id),
       marks,
       hasSelection: !!(r && !r.collapsed && r.toString().trim()),
@@ -15002,7 +15372,9 @@ class Editor {
     // «Добавить блок» — только если последний блок уже заполнен
     const last = ed.lastElementChild;
     // строка скрывается плавно (высота и прозрачность), а не пропадает рывком
-    const hideAdd = !last || isEmptyBlock(last);
+    // под пустой строкой (абзац, заголовок) «+» не нужен — в ней и так пишут; под пустыми вкладками, аккордеоном, колонками,
+    // медиа — нужен: иначе после них блок не добавить (сайт texted 27.11, 1.0.4)
+    const hideAdd = !last || (isEmptyBlock(last) && /^(P|H[2-6])$/.test(last.tagName));
     this.addBlock.classList.toggle('is-hidden', hideAdd);
     this.addBlock.setAttribute('aria-hidden', hideAdd ? 'true' : 'false');
     this.addBlock.tabIndex = hideAdd ? -1 : 0;
@@ -15107,7 +15479,7 @@ class Editor {
     if (EXEC_MARKS[cmd]) {
       if (type === 'pre') return;
       // заголовок шага — это <strong>: «Жирный» снимал бы сам заголовок, поэтому в нём команда не действует (и в названии вкладки, заголовке выноски)
-      if (cmd === 'bold' && this.boldLocked(r.startContainer)) return;
+      if (cmd === 'bold' && (this.boldLocked(r.startContainer) || /^h[2-6]$/.test(type))) return;   // и в заголовке h2–h6 — он уже жирный (1.0.4)
       this.history.commit();
       document.execCommand(EXEC_MARKS[cmd], false, null);
       this.afterChange({ immediate: true });
@@ -15127,6 +15499,8 @@ class Editor {
       this.afterChange({ immediate: true });
       return;
     }
+    if (cmd === 'color:reset') return this.resetColor();
+    if (cmd.startsWith('tc:')) return this.applyTc(cmd.slice(3));
     if (cmd.startsWith('bg:')) return blockAllowed(this.allowedBlocks, 'background') ? this.applyBg(cmd.slice(3)) : undefined;
     if (cmd.startsWith('align:')) {
       this.history.commit();
@@ -15139,17 +15513,230 @@ class Editor {
    * Цветной фон. Выделен фрагмент внутри одного блока — подложка только под ним (<mark class="ted-bg-…">, как у кода);
    * курсор, весь блок или несколько блоков — подложка у блока. name '' — убрать фон.
    */
+  /**
+   * Цвет текста (1.0.4): часть текста в одном блоке — <mark class="ted-tc-…">, иначе — класс ted-tc-… у блоков.
+   * 'gray' (Стандартный) снимает цвет; внутри цветного блока выделенная часть становится стандартной (mark ted-tc-gray).
+   */
+  applyTc(name) {
+    // выбран блок без курсора (баннер, товар): красится он
+    const obj = this.pickedObject();
+    if (obj) {
+      if (!tcAllowed(obj)) return;
+      this.history.commit();
+      setTc([obj], name === 'gray' ? '' : name);
+      this.afterChange({ immediate: true });
+      return;
+    }
+    const r = this.ensureRange();
+    if (!r) return;
+    const ed = this.editable;
+    // выделение через несколько блоков (и «Выделить всё»): красятся те, где цвет текста есть; код, медиа, карточки пропускаются
+    const block = topBlockOf(ed, r.startContainer === ed ? ed.childNodes[r.startOffset] || ed.firstChild : r.startContainer);
+    const targets = selectedBlocks(ed).filter((b) => tcAllowed(b));
+    if (!targets.length && !(block && tcAllowed(block))) return;
+    const SEL = 'mark[class*="ted-tc-"]';
+    const unwrap = (marks) => { if (marks.length) withMarkers(ed, () => marks.forEach((m) => m.replaceWith(...m.childNodes))); };
+    const marksIn = (root) => Array.from(root.querySelectorAll(SEL));
+    // курсор без выделения в части блока, которая красится отдельно (вопрос, название вкладки, заголовок или описание шага):
+    // блок отдаёт её диапазон (block.json → tcPart, 1.0.4)
+    const bd = block && defOf(block);
+    const part = r.collapsed && block && tcAllowed(block) && bd && bd.tcPart ? bd.tcPart(block, r.startContainer) : null;
+    if (part && part.nodeType === 1) {   // часть-элемент (карточка плюсов или минусов): класс на ней
+      this.history.commit();
+      for (const n of TC_NAMES) part.classList.remove(`ted-tc-${n}`);
+      if (name && name !== 'gray') part.classList.add(`ted-tc-${name}`);
+      this.afterChange({ immediate: true });
+      return;
+    }
+    const rr = part || r;
+    const sameBlock = block === topBlockOf(ed, r.endContainer);
+    const text = rr.toString();
+    const partial = !!part || (!!block && tcAllowed(block) && !r.collapsed && sameBlock && !!text.trim() && text.trim() !== block.textContent.trim());
+    const startEl = rr.startContainer.nodeType === 1 ? rr.startContainer : rr.startContainer.parentNode;
+    const inMark = part ? null : startEl.closest(SEL);
+    const plain = name === 'gray' || !name;
+    this.history.commit();
+    if (partial) {
+      if (part) unwrap(marksIn(block).filter((m) => rr.intersectsNode(m)));
+      if (plain && !tcOfBlock(block)) {
+        unwrap(marksIn(block).filter((m) => rr.intersectsNode(m)));
+      } else if (inMark && ed.contains(inMark) && inMark.contains(r.endContainer)) {
+        inMark.className = `ted-tc-${plain ? 'gray' : name}`;
+      } else {
+        const frag = rr.extractContents();
+        frag.querySelectorAll(SEL).forEach((m) => m.replaceWith(...m.childNodes));
+        const mark = document.createElement('mark');
+        mark.className = `ted-tc-${plain ? 'gray' : name}`;
+        mark.appendChild(frag);
+        rr.insertNode(mark);
+        block.normalize();
+        const sel = document.getSelection();
+        const nr = document.createRange();
+        nr.selectNodeContents(mark);
+        sel.removeAllRanges();
+        sel.addRange(nr);
+      }
+    } else {
+      const blocks = targets.length ? targets : [block];
+      setTc(blocks, plain ? '' : name);
+      blocks.forEach((b) => unwrap(marksIn(b)));   // весь блок одного цвета — прежние цвета частей снимаются
+    }
+    this.afterChange({ immediate: true });
+  }
+
+  /**
+   * Предпросмотр цвета (меню «Цвет», наведение на точку — заказчик 28.11): то, что поменяется, сразу примеряет цвет —
+   * блок или часть (карточка) — временным классом, кусок текста (выделение, заголовок шага, вопрос) — подсветкой
+   * CSS Highlight. В HTML и историю ничего не попадает; clearPreview() возвращает как было.
+   */
+  /** Плавная смена цвета (CSS .is-recoloring) на время примерки и применения. */
+  smoothRecolor() {
+    this.editable.classList.add('is-recoloring');
+    clearTimeout(this.recolorTimer);
+    this.recolorTimer = setTimeout(() => this.editable.classList.remove('is-recoloring'), 400);
+  }
+
+  previewColor(cmd) {
+    this.smoothRecolor();
+    this.clearPreview();
+    if (cmd === 'color:reset') {   // примерка «Сбросить цвет»: классы цвета снимаются, покрашенные слова — без цвета (data-tedui-pv)
+      const els = this.colorSection();
+      const saved = els.map((el) => [el, el.getAttribute('class')]);
+      for (const el of els) for (const c of Array.from(el.classList)) if (/^ted-(tc|bg)-/.test(c)) el.classList.remove(c);
+      const marks = els.flatMap((el) => Array.from(el.querySelectorAll('mark[class*="ted-tc-"], mark[class*="ted-bg-"]')));
+      marks.forEach((m) => m.setAttribute('data-tedui-pv', ''));
+      this.colorPreview = { saved, hl: null, marks };
+      return;
+    }
+    const [kind, name] = String(cmd).split(':');
+    const isTc = kind === 'tc';
+    const NAMES = isTc ? TC_NAMES : BG_NAMES;
+    const prefix = isTc ? 'ted-tc-' : 'ted-bg-';
+    const can = (b) => (isTc ? tcAllowed(b) : bgAllowed(b));
+    const els = [];
+    let range = null;
+    const obj = this.pickedObject();
+    if (obj) {
+      const od = defOf(obj) || {};
+      if (isTc ? od.canTc && od.canTc(obj) : od.canBg && od.canBg(obj)) els.push(obj);
+    } else {
+      const r = getRange(this.editable);
+      if (!r) return;
+      const ed = this.editable;
+      const block = topBlockOf(ed, r.startContainer === ed ? ed.childNodes[r.startOffset] || ed.firstChild : r.startContainer);
+      const d = block && defOf(block);
+      let part = null;
+      if (r.collapsed && block && d) {
+        if (isTc && d.tcPart && tcAllowed(block)) part = d.tcPart(block, r.startContainer);
+        if (!isTc && d.bgPart) part = d.bgPart(block, r.startContainer);
+      }
+      const sameBlock = !!block && block === topBlockOf(ed, r.endContainer);
+      const text = r.toString().trim();
+      if (part && part.nodeType === 1) els.push(part);
+      else if (part) range = part;
+      else if (!r.collapsed && sameBlock && text && text !== block.textContent.trim() && can(block)) range = r.cloneRange();
+      else els.push(...selectedBlocks(ed).filter(can));
+      if (!els.length && !range && block && can(block)) els.push(block);
+    }
+    const saved = els.map((el) => [el, el.getAttribute('class')]);
+    for (const el of els) {
+      for (const n of NAMES) el.classList.remove(prefix + n);
+      if (NAMES.includes(name) && !(isTc && name === 'gray')) el.classList.add(prefix + name);
+    }
+    let hl = null;
+    if (range && typeof Highlight !== 'undefined' && window.CSS && CSS.highlights) {
+      hl = `ted-pv-${kind}-${name}`;
+      CSS.highlights.set(hl, new Highlight(range));
+    }
+    this.colorPreview = { saved, hl };
+  }
+
+  clearPreview() {
+    const p = this.colorPreview;
+    if (!p) return;
+    this.smoothRecolor();
+    this.colorPreview = null;
+    for (const [el, cls] of p.saved) {
+      if (cls == null) el.removeAttribute('class');
+      else el.setAttribute('class', cls);
+    }
+    if (p.hl && window.CSS && CSS.highlights) CSS.highlights.delete(p.hl);
+    if (p.marks) p.marks.forEach((m) => m.removeAttribute('data-tedui-pv'));
+  }
+
+  /**
+   * Секция для «Сбросить цвет» (заказчик 28.11): выбранный блок без курсора, карточка (часть, bgPart) вместе с её блоком,
+   * иначе блоки под выделением или блок с курсором.
+   */
+  colorSection() {
+    const obj = this.pickedObject();
+    if (obj) return [obj];
+    const r = getRange(this.editable);
+    if (!r) return [];
+    const ed = this.editable;
+    const block = topBlockOf(ed, r.startContainer === ed ? ed.childNodes[r.startOffset] || ed.firstChild : r.startContainer);
+    const d = block && defOf(block);
+    const part = r.collapsed && d && d.bgPart ? d.bgPart(block, r.startContainer) : null;
+    if (part) return [part, block];
+    const list = selectedBlocks(ed);
+    return list.length ? list : (block ? [block] : []);
+  }
+
+  /** «Сбросить цвет»: у секции снимаются цвет текста и фон — и у блока, и у покрашенных слов внутри (Ctrl+Z вернёт). */
+  resetColor() {
+    const els = this.colorSection();
+    if (!els.length) return;
+    this.history.commit();
+    const ed = this.editable;
+    const marks = els.flatMap((el) => Array.from(el.querySelectorAll('mark[class*="ted-tc-"], mark[class*="ted-bg-"]')));
+    if (marks.length) withMarkers(ed, () => marks.forEach((m) => { if (m.isConnected) m.replaceWith(...m.childNodes); }));
+    for (const el of els) {
+      for (const c of Array.from(el.classList)) if (/^ted-(tc|bg)-/.test(c)) el.classList.remove(c);
+      if (!el.className) el.removeAttribute('class');
+    }
+    this.afterChange({ immediate: true });
+  }
+
+  /** Выбранный ручкой блок без курсора внутри (разделитель, кнопка, товар, медиа) — его красит меню «Цвет», 1.0.4. */
+  pickedObject() {
+    const b = this.handle && this.handle.focused;
+    if (!b || !this.editable.contains(b)) return null;
+    const r = getRange(this.editable);
+    if (r && b.contains(r.startContainer) && b.isContentEditable !== false && b.getAttribute('contenteditable') !== 'false' && !isObjectBlock(b)) return null;
+    return isObjectBlock(b) || b.getAttribute('contenteditable') === 'false' ? b : null;
+  }
+
   applyBg(name) {
+    const obj = this.pickedObject();
+    if (obj) {
+      const od = defOf(obj) || {};
+      if (!(od.canBg && od.canBg(obj)) || !bgAllowed(obj)) return;   // фон у блока без курсора — только если он его разрешил
+      this.history.commit();
+      setBg([obj], name);
+      this.afterChange({ immediate: true });
+      return;
+    }
     const r = this.ensureRange();
     if (!r) return;
     const ed = this.editable;
     const block = topBlockOf(ed, r.startContainer);
     if (!block || !bgAllowed(block)) return;
+    const bpd = defOf(block);
+    const bpart = r.collapsed && bpd && bpd.bgPart ? bpd.bgPart(block, r.startContainer) : null;
+    if (bpart) {   // фон части блока (карточка плюсов или минусов), 1.0.4
+      this.history.commit();
+      for (const n of BG_NAMES) bpart.classList.remove(`ted-bg-${n}`);
+      if (BG_NAMES.includes(name)) bpart.classList.add(`ted-bg-${name}`);
+      this.afterChange({ immediate: true });
+      return;
+    }
+    // блок без строчного оформления (block.json → toolbar.marks: []) красится только целиком
+    const wholeOnly = Array.isArray(((defOf(block) || {}).toolbar || {}).marks) && !defOf(block).toolbar.marks.length;
     const unwrap = (marks) => { if (marks.length) withMarkers(ed, () => marks.forEach((m) => m.replaceWith(...m.childNodes))); };
     const marksIn = (root) => Array.from(root.querySelectorAll('mark[class*="ted-bg-"]'));
     const sameBlock = block === topBlockOf(ed, r.endContainer);
     const text = r.toString();
-    const partial = !r.collapsed && sameBlock && !!text.trim() && text.trim() !== block.textContent.trim();
+    const partial = !wholeOnly && !r.collapsed && sameBlock && !!text.trim() && text.trim() !== block.textContent.trim();
     const startEl = r.startContainer.nodeType === 1 ? r.startContainer : r.startContainer.parentNode;
     const inMark = startEl.closest('mark[class*="ted-bg-"]');
 
@@ -15190,7 +15777,9 @@ class Editor {
     const ed = this.editable;
     const r = this.isFocused() ? getRange(ed) : null;
     const all = Array.from(ed.children);
-    const idx = (r ? selectedBlocks(ed) : all).map((b) => all.indexOf(b)).filter((i) => i >= 0);
+    // выделен текст — только эти блоки; просто курсор (ничего не выделено) — вся статья: раньше курсор в одном блоке ограничивал
+    // проверку им, и ✨ отвечал «Текст уже в порядке», хотя править было что (сайт texted 27.11, 1.0.4)
+    const idx = (r && !r.collapsed ? selectedBlocks(ed) : all).map((b) => all.indexOf(b)).filter((i) => i >= 0);
     const cfg = this.options.typograf || {};
     registerYo(cfg.yo);
     const protect = protectRegExp(cfg.protect);
@@ -16160,21 +16749,51 @@ class Editor {
           this.updateState();
           return true;
         }
-        // хвост заголовка после курсора переходит в описание
+        // как в текстовом редакторе — всё после курсора уходит в новый шаг (сайт texted 27.11, 1.0.4; раньше хвост заголовка
+        // приклеивался к описанию: «блокТекст…»):
+        // курсор в конце заголовка — в описание; в начале непустого — пустой шаг перед этим; в середине — новый шаг после:
+        // заголовок — хвост, описание переезжает с ним, у этого шага остаётся начало заголовка и пустое описание
         const tail = doc.createRange();
         tail.setStart(r.startContainer, r.startOffset);
         tail.setEnd(title, title.childNodes.length);
-        const frag = tail.extractContents();
-        if (!title.firstChild) title.appendChild(doc.createElement('br'));
-        if (frag.textContent) {
-          const sep = title.nextSibling;
-          const d = sep && sep.nextSibling;
-          const moved = doc.createTextNode(frag.textContent);
-          if (d && d.nodeType === 3) d.data = frag.textContent + d.data.replace(/​/g, '');
-          else li.insertBefore(moved, d || null);
+        const tailText = tail.cloneContents().textContent.replace(/​/g, '');
+        if (!tailText.trim()) {
+          this.caretToStepDescription(li);
+          this.updateState();
+          return true;
         }
+        const head = doc.createRange();
+        head.setStart(title, 0);
+        head.setEnd(r.startContainer, r.startOffset);
+        if (!head.cloneContents().textContent.replace(/​/g, '').trim()) {
+          li.before(emptyStepItem(doc));
+          normalizeRoot(this.editable);
+          const rr = doc.createRange(); rr.setStart(title, 0); rr.collapse(true);
+          const s0 = doc.getSelection(); s0.removeAllRanges(); s0.addRange(rr);
+          this.afterChange({ immediate: true });
+          return true;
+        }
+        const next = emptyStepItem(doc);
+        const frag = tail.extractContents();
+        next.firstElementChild.replaceChildren(frag);
+        // описание (всё после <br>, кроме вложенного списка) — в новый шаг
+        const sep = title.nextSibling;
+        const nested = li.querySelector(':scope > ul, :scope > ol');
+        if (sep && sep.nodeType === 1 && sep.tagName === 'BR') {
+          const moveDesc = doc.createRange();
+          moveDesc.setStartAfter(sep);
+          if (nested) moveDesc.setEndBefore(nested); else moveDesc.setEnd(li, li.childNodes.length);
+          const desc = moveDesc.extractContents();
+          if (desc.textContent.replace(/​/g, '').trim()) {
+            const zw = next.firstElementChild.nextSibling.nextSibling;
+            next.insertBefore(desc, zw);
+            if (zw && zw.nodeType === 3 && zw.data === ZWSP) zw.remove();
+          }
+        }
+        li.after(next);
         normalizeRoot(this.editable);
-        this.caretToStepDescription(li);
+        const rr = doc.createRange(); rr.setStart(next.firstElementChild, 0); rr.collapse(true);
+        const s1 = doc.getSelection(); s1.removeAllRanges(); s1.addRange(rr);
         this.afterChange({ immediate: true });
         return true;
       }
@@ -16237,23 +16856,22 @@ class Editor {
         return true;
       }
       const next = emptyStepItem(doc);
-      // текст описания после курсора переходит в заголовок нового шага
       const tail = doc.createRange();
       tail.setStart(r.startContainer, r.startOffset);
       tail.setEnd(li, li.childNodes.length);
       const hasNested = li.querySelector(':scope > ul, :scope > ol');
       if (hasNested) tail.setEndBefore(hasNested);
+      // текст описания после курсора переходит в ОПИСАНИЕ нового шага (с оформлением), курсор — в его пустой заголовок.
+      // Раньше хвост становился жирным заголовком, а у пустого описания не оставалось строки — шаги наезжали (сайт 27.11, 1.0.4)
       const frag = tail.extractContents();
-      const text = frag.textContent.replace(/​/g, '');
-      if (text) {
-        const nt = next.firstElementChild;
-        nt.replaceChildren(doc.createTextNode(text));
+      if (frag.textContent.replace(/​/g, '').trim()) {
+        const descStart = next.firstElementChild.nextSibling.nextSibling;   // нулевой пробел пустого описания
+        next.insertBefore(frag, descStart);
+        if (descStart && descStart.nodeType === 3 && descStart.data === ZWSP) descStart.remove();
       }
       li.after(next);
       normalizeRoot(this.editable);
       this.caretToStepTitleEnd(next);
-      const sel = document.getSelection();
-      if (text) { const t = next.firstElementChild.firstChild; const rr = doc.createRange(); rr.setStart(t, 0); rr.collapse(true); sel.removeAllRanges(); sel.addRange(rr); }
       this.afterChange({ immediate: true });
       return true;
     }
@@ -16466,6 +17084,10 @@ class Editor {
         dropEmpty(block);
         if (frag.textContent || frag.querySelector('img')) p.replaceChildren(frag);
         if (!block.textContent && !block.querySelector('br, img')) block.appendChild(document.createElement('br'));
+        // хвост — тот же текст: цвет текста абзаца уходит с ним (1.0.4); новая пустая строка в конце — чистая (решение 23.11)
+        const tc = tcOfBlock(block);
+        if (tc && p.textContent) p.classList.add(`ted-tc-${tc}`);
+        // курсор в начале абзаца: цвет остаётся у текста, пустая строка выше — чистая (ветка выше)
       }
       block.after(p);
       this.afterChange({ immediate: true, focus: p });
@@ -16791,7 +17413,7 @@ function escapeHTML(s) {
 
 
 
-const VERSION = '1.0.3';
+const VERSION = '1.0.4';
 
 const Ted = {
   version: VERSION,

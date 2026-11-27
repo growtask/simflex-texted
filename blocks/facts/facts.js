@@ -6,6 +6,7 @@ import { emptyStepItem } from '../../resources/js/core/blocks.js';
 import { bjEsc, bjLines } from '../../resources/js/core/blocks-json.js';
 
 registerBlock({
+  defaultBg: 'gray',   // своя серая плашка — в меню «Цвет» → «Фон» по умолчанию отмечен «Стандартный» (заказчик 28.11)
   ...FACTS_BLOCK,
   match: (el) => el.tagName === 'UL' && el.classList.contains('ted-facts'),
   /** Новый блок — две пустые плитки (меньше двух не бывает), остальные добавляются Enter в последней подписи. */

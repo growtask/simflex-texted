@@ -17,6 +17,13 @@
 .ted-content .ted-accordion__item[open]::details-content { block-size: auto; transition-duration: var(--ted-motion-slow, 240ms); transition-timing-function: var(--ted-ease-out, ease); }
 /* на сайте ответ проявляется сверху вниз (opacity + сдвиг 4, как Accordion в UI-ките); закрытие быстрее. В редакторе своё раскрытие (accordion.editor.css) */
 .ted-content:not(.ted-ui-editable) .ted-accordion__body { opacity: 0; transform: translateY(-4px); transition: opacity var(--ted-motion-fast, 120ms) var(--ted-ease-in, ease), transform var(--ted-motion-fast, 120ms) var(--ted-ease-in, ease); }
-.ted-content:not(.ted-ui-editable) .ted-accordion__item[open] > .ted-accordion__body { opacity: 1; transform: none; transition: opacity var(--ted-motion-slow, 240ms) var(--ted-ease-out, ease), transform var(--ted-motion-slow, 240ms) var(--ted-ease-out, ease); }
-@starting-style { .ted-content:not(.ted-ui-editable) .ted-accordion__item[open] > .ted-accordion__body { opacity: 0; transform: translateY(-4px); } }
+/* ответ — прямо в пункте или в обёртке разметки FAQ (.ted-accordion__a, schema.org): без неё правило не срабатывало,
+   и раскрытый ответ оставался прозрачным (сайт texted 27.11, 1.0.4) */
+.ted-content:not(.ted-ui-editable) .ted-accordion__item[open] > .ted-accordion__body, .ted-content:not(.ted-ui-editable) .ted-accordion__item[open] > .ted-accordion__a > .ted-accordion__body { opacity: 1; transform: none; transition: opacity var(--ted-motion-slow, 240ms) var(--ted-ease-out, ease), transform var(--ted-motion-slow, 240ms) var(--ted-ease-out, ease); }
+@starting-style { .ted-content:not(.ted-ui-editable) .ted-accordion__item[open] > .ted-accordion__body, .ted-content:not(.ted-ui-editable) .ted-accordion__item[open] > .ted-accordion__a > .ted-accordion__body { opacity: 0; transform: translateY(-4px); } }
 @media (prefers-reduced-motion: reduce) { .ted-content .ted-accordion__item::details-content, .ted-content .ted-accordion__q::after, .ted-content .ted-accordion__body { transition: none; } }
+/* Цвет текста: красится вопрос (ступенью заголовков); ответ — свои блоки, красятся отдельно */
+.ted-content .ted-accordion[class*="ted-tc-"] .ted-accordion__q { color: var(--ted-tc-h); }
+.ted-content .ted-accordion[class*="ted-tc-"] .ted-accordion__body { color: var(--ted-acc-text); }
+/* вопрос одного пункта (курсор в нём, меню «Цвет») — <mark> во всю строку: ступенью заголовков */
+.ted-content .ted-accordion__q mark[class*="ted-tc-"][class*="ted-tc-"] { color: var(--ted-tc-h); }

@@ -9,7 +9,7 @@
 .ted-content .ted-columns__col { display: flow-root; min-width: 0; }
 /* внутри колонки — те же отступы между блоками, что в статье (styles/content.css; решение заказчика 22.11: в колонке любые блоки) */
 .ted-content .ted-columns__col > :last-child { margin-bottom: 0; }
-.ted-content .ted-columns__col > p { font-size: calc(13 * var(--ted-u)); line-height: 1.5; }
+/* текст в колонке — обычный текст статьи (решение заказчика 27.11: в макете t3 13 — мелко и не как остальной текст) */
 .ted-content .ted-columns__col > .ted-media--image > img,
 .ted-content .ted-columns__col > .ted-ui-media > .ted-media--image > img { height: calc(204 * var(--ted-u)); object-fit: cover; }
 @media (width <= 811px) { .ted-content .ted-columns { gap: calc(12 * var(--ted-u)); --ted-cols: 2; } }

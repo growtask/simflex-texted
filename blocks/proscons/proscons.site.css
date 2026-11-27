@@ -70,3 +70,10 @@
 
 /* карточки в сетке: общий отступ между пунктами списка здесь не нужен */
 .ted-content ul.ted-proscons > li + li { margin-top: 0; }
+/* Цвет текста и фон (1.0.4): у всего блока или у одной карточки (курсор в ней — заказчик 28.11). Пункты и значки — цветом,
+   заголовок карточки — ступенью заголовков. По умолчанию как было: значки зелёный и красный */
+.ted-content :is(ul.ted-proscons[class*="ted-tc-"] > li, ul.ted-proscons > li[class*="ted-tc-"]) { color: var(--ted-tc); }
+.ted-content :is(ul.ted-proscons[class*="ted-tc-"] > li, ul.ted-proscons > li[class*="ted-tc-"]) > strong:first-child { color: var(--ted-tc-h); }
+.ted-content :is(ul.ted-proscons[class*="ted-tc-"] > li, ul.ted-proscons > li[class*="ted-tc-"]) > ul > li::before { background: var(--ted-tc); }
+.ted-content ul.ted-proscons[class*="ted-bg-"] { padding: 0; border-radius: 0; background: none; }
+.ted-content :is(ul.ted-proscons[class*="ted-bg-"] > li, ul.ted-proscons > li[class*="ted-bg-"]) { background: var(--ted-bg); }

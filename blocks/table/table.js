@@ -18,7 +18,7 @@ import { structureMap, remapFormulas, formulaAllowed } from './formula.js';
 
 export const TABLE_MAX_COLS = 10;
 export const TABLE_MAX_ROWS = 100;
-const CELL_TAGS = new Set(['STRONG', 'EM', 'U', 'S', 'CODE', 'A', 'BR']);   // как в абзаце: жирный, курсив, подчёркнутый, зачёркнутый, код, ссылка
+const CELL_TAGS = new Set(['STRONG', 'EM', 'U', 'S', 'CODE', 'A', 'BR', 'MARK']);   // как в абзаце: жирный, курсив, подчёркнутый, зачёркнутый, код, ссылка, цвет и подложка части текста (mark с классом палитры, 1.0.4)
 
 /** figure.ted-table? */
 export function isTableBlock(el) {
@@ -113,6 +113,8 @@ export function cleanTableNode(node, doc, cleanInline, idOk) {
   const fig = doc.createElement('figure');
   fig.className = 'ted-table';
   if (ours && node.classList.contains('ted-table--plain')) fig.classList.add('ted-table--plain');
+  // цвет текста и фон (меню «Цвет», 1.0.4)
+  if (ours) for (const c of node.classList) if (/^ted-(tc|bg)-(gray|color1|color2|error|alert|success)$/.test(c) && c !== 'ted-tc-gray') fig.classList.add(c);
   if (idOk && idOk(node.id)) fig.id = node.id;
   const wrap = doc.createElement('div');
   wrap.className = 'ted-table__wrap';
@@ -376,6 +378,7 @@ export function parseClipboardTable(html, text, doc = document) {
 
 
 registerBlock({
+  defaultBg: 'gray',   // своя серая плашка — в меню «Цвет» → «Фон» по умолчанию отмечен «Стандартный» (заказчик 28.11)
   toMarkdown: (el, md) => { const t = el.querySelector('table'); const cap = el.querySelector('figcaption'); return (t ? md.table(t) : '') + (cap ? `\n\n*${md.inline(cap).trim()}*` : ''); },   // Ted.toMarkdown (22.11)
   ...TABLE_BLOCK,
   match: (el) => isTableBlock(el),
@@ -396,7 +399,6 @@ registerBlock({
     return normalizeTableBlock(fig, doc);
   },
   canAlign: () => false,
-  canBg: () => false,
   editorUi: (editor) => new TableUI(editor),
   editorUiName: 'table',
   /** Меню блока (editor-block-menu-table): шапка и границы; подписи меняются по состоянию, как «Добавить автора» / «Убрать автора». */

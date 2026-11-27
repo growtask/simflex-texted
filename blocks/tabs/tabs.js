@@ -172,6 +172,15 @@ function unnestTabs(inner, doc) {
 }
 
 registerBlock({
+  /** Цвет текста одной вкладки (меню «Цвет», 1.0.4): курсор в названии — красится эта вкладка. */
+  tcPart: (block, node) => {
+    const el = node.nodeType === 1 ? node : node.parentNode;
+    const t = el && el.closest('.ted-tabs__title');
+    if (!t || !block.contains(t) || !t.textContent.trim()) return null;
+    const r = document.createRange();
+    r.selectNodeContents(t);
+    return r;
+  },
   // Ted.toMarkdown (22.11): название вкладки жирным, содержимое — блоками
   toMarkdown: (el, md) => [...el.querySelectorAll(':scope > .ted-tabs__panel')].map((p) => `**${(p.querySelector('.ted-tabs__title') || p).textContent.trim()}**\n\n${md.blocks(p.querySelector('.ted-tabs__body') || p)}`).join('\n\n'),
   ...TABS_BLOCK,

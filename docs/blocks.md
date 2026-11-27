@@ -5,7 +5,22 @@
 ## Блоки
 
 Блок добавляют так: набрать `/` и выбрать из списка, нажать «+» у блока, кнопка «Все блоки» в панели или Markdown-сокращение.
-Разметка на выходе чистая: стандартные теги и несколько классов `ted-*`. JavaScript на сайте нужен только аудиоплееру и запуску видео.
+Разметка на выходе чистая: стандартные теги и несколько классов `ted-*`. Без скрипта блоки читаются и работают как обычный HTML; `content.js` на сайте добавляет:
+
+- аудиоплеер по макету и плеер площадки вместо ссылки на видео; обёртка имени файла `.ted-media__name` в блоке «Файл»;
+- «Вкладки»: ряд вкладок, переключение кликом и стрелками ← / →;
+- «Содержание»: кнопка «Показать» / «Скрыть» и полоса прогресса чтения;
+- «Код»: кнопка «Копировать код» и уведомление «Код скопирован» / «Не удалось скопировать код»;
+- «Товар»: кнопка «В корзину» (`data-ted-cart`) шлёт всплывающее событие `ted:add-to-cart` с `detail { id, button }`; CMS кладёт товар в корзину и вызывает `event.preventDefault()` — тогда переход по ссылке отменяется. Без обработчика кнопка ведёт на страницу товара;
+- «iFrame»: высота фрейма из атрибута `height`, если браузер не умеет `attr()` в CSS;
+- «Таблица»: если она шире колонки — атрибут `data-ted-scroll` и отступ 12 px до полосы прокрутки, как в редакторе.
+
+```js
+document.addEventListener('ted:add-to-cart', (e) => {
+  e.preventDefault();               // не переходить по ссылке
+  cart.add(e.detail.id);            // e.detail.button — нажатая ссылка
+});
+```
 
 | Блок | Как получить | HTML |
 |------|--------------|------|
@@ -29,7 +44,11 @@
 | Встраивание | меню блоков | `<div class="ted-embed [ted-embed--compact]" [data-ted-article="id"]>` — шапка (аватар, `__name`, `__sub`), `__text`, `__img`, `__foot` (плашки, `a.ted-embed__open`). Данные — опции `articles` и `opengraph` (`Ted.createOpenGraph(url)` + `src/OpenGraph.php`) |
 | Товар | меню блоков | `<div class="ted-product" [data-ted-product="id"]>` — `img.ted-product__img`, `__name`, `__price` (`__now`, `s.__old`), `a.ted-product__btn` («В корзину» с `data-ted-cart` → событие `ted:add-to-cart` в content.js; вручную — «Перейти»). Каталог — опция `products` |
 | Таблица | меню блоков, вставка из Excel / Google Таблиц | `<figure class="ted-table"><div class="ted-table__wrap"><table data-cols="3"><thead><tr><th>…</th></tr></thead><tbody><tr><td>…</td></tr></tbody></table></div><figcaption>…</figcaption></figure>`; без границ — `ted-table--plain` |
-| Изображение, галерея, видео, аудио, файл | меню «Медиа», вставка и перетаскивание файлов | `<figure class="ted-media ted-media--image">…</figure>` |
+| Изображение | меню «Медиа», вставка и перетаскивание файлов | `<figure class="ted-media ted-media--image"><img src="…" alt="…" [width height] loading="lazy">[<figcaption>…</figcaption>]</figure>` |
+| Галерея | меню «Медиа» | `<figure class="ted-media ted-media--gallery"><figure><img src="…" alt="…" loading="lazy">[<figcaption>…</figcaption>]</figure>…[<figcaption>…</figcaption>]</figure>` |
+| Видео | меню «Медиа»; ссылка YouTube / Rutube / VK Видео | файл: `<figure class="ted-media ted-media--video"><video src="…" controls preload="none" poster="…" playsinline></video>[<figcaption>…</figcaption>]</figure>` (без постера — `preload="metadata"`); по ссылке: `<a href="…" data-ted-video="https://www.youtube-nocookie.com/embed/…">Смотреть видео</a>` внутри той же `figure` |
+| Аудио | меню «Медиа» | `<figure class="ted-media ted-media--audio"><audio src="…" title="Название" controls preload="metadata"></audio>[<figcaption>…</figcaption>]</figure>` |
+| Файл | меню «Медиа» | `<figure class="ted-media ted-media--file"><a href="…" download="">Имя файла</a>…</figure>` |
 
 **Как ведут себя Enter и кнопки в сложных блоках**
 - *Чек-лист, шаги, цифры, плюсы и минусы:* Enter переходит к следующему пункту, в последнем создаёт новый. Пустые хвосты при сохранении отбрасываются. У пункта справа или в углу — ручка ⠿ (перетащить) и корзина.

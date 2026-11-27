@@ -140,6 +140,7 @@ registerBlock({
   normalize: normalizeIframe,
   canAlign: () => false,
   canBg: () => false,
+  canTc: () => false,   // карточка: цвет текста не меняется (меню «Цвет», 27.11)
   editorUi: (editor) => new IframeUI(editor),
   editorUiName: 'iframes',
   /** В наборе без iFrame — ссылка на страницу (текст — подпись или адрес); так же на сервере — iframe.php. */

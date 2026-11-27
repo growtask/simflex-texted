@@ -252,7 +252,7 @@ group('Шаги: ввод, заглушки, рамка, кнопки, лини�
     select(ed, 0, 0);
     ed.caretToStepTitleEnd(lis(ed)[0]);
     ed.updateState();
-    ok(ed.toolbar.colorBtn.hidden, 'кнопки фона нет (убрана из панели)');
+    ok(!ed.toolbar.colorParts().canBgMenu, 'фона нет в меню «Цвет» (цвет текста — есть, 1.0.4)');
     ed.exec('bg:gray');
     ok(!ed.editable.querySelector('[class*="ted-bg-"]'), 'фон не поставился');
     const p = make('<p class="ted-bg-gray">а</p>');
@@ -404,5 +404,69 @@ group('Шаги: Enter переходит к следующему шагу', () 
     ed.editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
     eq(ed.editable.querySelectorAll('li').length, 2, 'шагов по-прежнему два');
     ok(ed.editable.querySelectorAll('li')[1].firstElementChild.contains(getSelection().anchorNode), 'курсор во втором заголовке');
+  });
+});
+
+group('Шаги: Enter в середине описания (сайт texted 27.11, 1.0.4)', () => {
+  const enterAt = (ed, li, offset) => {
+    ed.focus();
+    const d = li.lastChild;
+    const r = document.createRange();
+    r.setStart(d, offset);
+    r.collapse(true);
+    getSelection().removeAllRanges();
+    getSelection().addRange(r);
+    ed.editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+  };
+  test('хвост описания уходит в описание нового шага (не в жирный заголовок), курсор — в пустой заголовок нового шага', () => {
+    const ed = make('<ol class="ted-steps"><li><strong>Один</strong><br>начало и конец</li><li><strong>Два</strong><br>два</li></ol>', {}, { width: 1000 });
+    enterAt(ed, ed.editable.querySelector('li'), 7);
+    const lis = ed.editable.querySelectorAll('li');
+    eq(lis.length, 3);
+    eq(ed.stepDescription(lis[0]), 'начало ', 'в первом шаге — начало описания');
+    eq(lis[1].firstElementChild.textContent.replace(/​/g, ''), '', 'заголовок нового шага пуст');
+    eq(ed.stepDescription(lis[1]), 'и конец', 'хвост — в описании нового шага');
+    ok(lis[1].firstElementChild.contains(getSelection().anchorNode) || getSelection().anchorNode === lis[1].firstElementChild, 'курсор в заголовке нового шага');
+  });
+  test('Enter в начале описания: у шага остаётся пустое описание со строкой — высота шага не проседает, шаги не наезжают', () => {
+    const ed = make('<ol class="ted-steps"><li><strong>Один</strong><br>описание</li><li><strong>Два</strong><br>два</li></ol>', {}, { width: 1000 });
+    const first = ed.editable.querySelector('li');
+    const before = first.getBoundingClientRect().height;
+    enterAt(ed, first, 0);
+    const lis = ed.editable.querySelectorAll('li');
+    eq(ed.stepDescription(lis[1]), 'описание', 'описание ушло в новый шаг');
+    eq(Math.round(lis[0].getBoundingClientRect().height), Math.round(before), 'шаг с пустым описанием той же высоты');
+    eq(ed.getHTML().includes('<strong>описание</strong>'), false, 'описание не стало заголовком');
+  });
+});
+
+group('Шаги: Enter в заголовке (сайт texted 27.11, 1.0.4)', () => {
+  const at = (ed, node, offset) => {
+    ed.focus();
+    const r = document.createRange(); r.setStart(node, offset); r.collapse(true);
+    getSelection().removeAllRanges(); getSelection().addRange(r);
+    ed.editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+  };
+  test('посреди заголовка: новый шаг с хвостом заголовка и описанием, текст не склеивается', () => {
+    const ed = make('<ol class="ted-steps"><li><strong>Выберите блок</strong><br>Описание</li></ol>', {}, { width: 1000 });
+    at(ed, ed.editable.querySelector('strong').firstChild, 9);
+    const lis = ed.editable.querySelectorAll('li');
+    eq(lis.length, 2);
+    eq(lis[0].querySelector('strong').textContent.trim(), 'Выберите');
+    eq(ed.stepDescription(lis[0]), '', 'у первого шага описание пустое');
+    eq(lis[1].querySelector('strong').textContent, 'блок', 'хвост — заголовок нового шага');
+    eq(ed.stepDescription(lis[1]), 'Описание', 'описание переехало вместе с хвостом');
+    ok(!ed.getHTML().includes('блокОписание'), 'ничего не склеилось');
+  });
+  test('в начале заголовка: пустой шаг перед этим; в конце — курсор в описание', () => {
+    const ed = make('<ol class="ted-steps"><li><strong>Шаг</strong><br>д</li></ol>', {}, { width: 1000 });
+    at(ed, ed.editable.querySelector('strong').firstChild, 0);
+    const lis = ed.editable.querySelectorAll('li');
+    eq(lis.length, 2);
+    eq(lis[1].querySelector('strong').textContent, 'Шаг', 'шаг остался с заголовком');
+    const ed2 = make('<ol class="ted-steps"><li><strong>Шаг</strong><br>д</li></ol>', {}, { width: 1000 });
+    at(ed2, ed2.editable.querySelector('strong').firstChild, 3);
+    eq(ed2.editable.querySelectorAll('li').length, 1, 'в конце заголовка шаг не делится');
+    ok(!ed2.editable.querySelector('strong').contains(getSelection().anchorNode), 'курсор в описании');
   });
 });

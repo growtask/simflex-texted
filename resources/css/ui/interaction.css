@@ -99,7 +99,9 @@
   transition: max-height 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), padding 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.18s ease;
 }
 
-.ted-ui-addblock.is-hidden { max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; pointer-events: none; }
+/* скрыта только кнопка, место под ней остаётся: при наборе в пустом последнем абзаце она складывалась и раскрывалась
+   с каждой буквой и Enter — страница меняла высоту, редактор внизу трясся (заказчик 27.11) */
+.ted-ui-addblock.is-hidden { opacity: 0; pointer-events: none; }
 
 .ted-ui-addblock::before,
 .ted-ui-addblock::after {

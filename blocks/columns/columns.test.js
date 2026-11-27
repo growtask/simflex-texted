@@ -132,11 +132,13 @@ group('Колонки: сетка и вид', () => {
     eq(getComputedStyle(phone.editable.querySelector('.ted-columns')).rowGap, '20px');
   });
 
-  test('вид: заголовок h6 16 / 700, текст 13, блоки в колонке — отступы как в статье (заказчик 22.11)', () => {
+  test('вид: заголовок h6 16 / 700, текст — как в статье (заказчик 27.11), блоки в колонке — отступы как в статье (заказчик 22.11)', () => {
     const ed = make(COLS('<h6>Заголовок</h6><p>Текст</p>', '<p>б</p>'), {}, { width: 1000 });
     const h = getComputedStyle(ed.editable.querySelector('.ted-columns__col h6'));
     eq([h.fontSize, h.fontWeight, h.marginTop, h.marginBottom].join(' '), '16px 700 20px 20px', 'как в статье и в аккордеоне');
-    eq(getComputedStyle(ed.editable.querySelector('.ted-columns__col p')).fontSize, '13px');
+    const outside = document.createElement('p'); ed.editable.appendChild(outside);
+    eq(getComputedStyle(ed.editable.querySelector('.ted-columns__col p')).fontSize, getComputedStyle(outside).fontSize, 'размер текста в колонке = обычный абзац');
+    eq(getComputedStyle(ed.editable.querySelector('.ted-columns__col p')).color, getComputedStyle(outside).color, 'цвет — тот же');
   });
 });
 

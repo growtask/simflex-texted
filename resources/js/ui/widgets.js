@@ -93,7 +93,7 @@ export function smallButton({ name, label, iconName, flat = false, onClick }) {
 }
 
 /** Пункт меню (Dropdown/main item). */
-export function menuItem({ value, label, iconName, iconColor = null, active = false, soon = 0, danger = false, submenu = false, onSelect }) {
+export function menuItem({ value, label, iconName, iconColor = null, iconClass = null, active = false, soon = 0, danger = false, submenu = false, onSelect }) {
   const item = h('button', {
     type: 'button',
     class: `ted-ui-item${active ? ' is-active' : ''}${soon ? ' is-soon' : ''}${danger ? ' ted-ui-item--danger' : ''}`,
@@ -102,7 +102,7 @@ export function menuItem({ value, label, iconName, iconColor = null, active = fa
     'aria-disabled': soon ? 'true' : null,
     'data-tip': soon ? `Появится на этапе ${soon}` : null,
   }, [
-    iconName ? (() => { const i = icon(iconName); if (iconColor) i.style.color = iconColor; return i; })() : null,
+    iconName ? (() => { const i = icon(iconName); if (iconColor) i.style.color = iconColor; if (iconClass) i.classList.add(iconClass); return i; })() : null,
     h('span', { class: 'ted-ui-item__label', text: label }),
     submenu ? icon('chevron-right') : null,
   ]);
@@ -190,6 +190,9 @@ export class Popover {
       if (this.child && this.child.el && this.child.el.contains(e.target)) return;
       if (this.parent && this.parent.el && this.parent.el.contains(e.target)) return;
       if (this.anchor && this.anchor.contains && this.anchor.contains(e.target)) return;
+      // кнопки блока и пункта (⠿ 🗑): окно закрывает их действие. Закрытие по нажатию укорачивало страницу, она
+      // сдвигалась под курсором — кнопку отпускали мимо, и корзина не срабатывала (сайт texted 27.11, 1.0.4)
+      if (e.target.closest && e.target.closest('.ted-ui-controls, .ted-ui-itemctl')) return;
       this.close();
     };
     this._key = (e) => {
@@ -253,7 +256,7 @@ export class Popover {
     window.addEventListener('scroll', this._reflow, true);
     if (focus) {
       const f = this.el.querySelector(focus);
-      if (f) setTimeout(() => f.focus({ preventScroll: true }), 0);
+      // кнопка в фокусе при открытии — без рамки фокуса (её видно только при переходе клавиатурой): иначе «Заменить» выглядела/n      // кнопкой не из дизайна (сайт texted 27.11, 1.0.4)/n      if (f) setTimeout(() => f.focus({ preventScroll: true, focusVisible: f.tagName !== /x27BUTTON/x27 }), 0);
     }
     return this.el;
   }
@@ -402,14 +405,18 @@ export class Popover {
 
   /** Простое меню из пунктов. items: [{value,label,icon,soon}] или '-' (линия). */
   menu(items, anchor, { cls = '', active = null, onSelect, onClose } = {}) {
+    // { heading: 'Текст' } — подпись раздела меню (text/t4, gray/medium; макет editor-dropdown style=color)
+    const isActive = (v) => (Array.isArray(active) ? active.includes(v) : v === active);
     const nodes = items.map((it) => (it === '-'
       ? h('div', { class: 'ted-ui-pop__line' })
+      : it.heading ? h('div', { class: 'ted-ui-pop__label', text: t(it.heading) })
       : menuItem({
         value: it.value,
         label: it.label,
         iconName: it.icon,
         iconColor: it.iconColor,
-        active: it.value === active,
+        iconClass: it.iconClass,
+        active: isActive(it.value),
         soon: it.soon,
         danger: it.danger,
         submenu: it.submenu,
@@ -480,10 +487,21 @@ export class Toaster {
     let left = timeout;
     let started = Date.now();
     let id = setTimeout(() => this.close(toast), left);
-    toast.addEventListener('mouseenter', () => { clearTimeout(id); left -= Date.now() - started; timer.style.animationPlayState = 'paused'; });
-    toast.addEventListener('mouseleave', () => { started = Date.now(); id = setTimeout(() => this.close(toast), Math.max(300, left)); timer.style.animationPlayState = 'running'; });
-    toast.addEventListener('mouseenter', () => this.layout(true));
-    toast.addEventListener('mouseleave', () => setTimeout(() => { if (!this.stack.matches(':hover')) this.layout(false); }, 30));
+    // только мышь: касание на телефоне браузер выдаёт за mouseenter без mouseleave — тост вставал на паузу навсегда
+    // (заказчик 27.11, «тостер зависает»)
+    let paused = false;
+    toast.addEventListener('pointerenter', (e) => {
+      if (e.pointerType !== 'mouse' || paused) return;
+      paused = true;
+      clearTimeout(id); left -= Date.now() - started; timer.style.animationPlayState = 'paused';
+      this.layout(true);
+    });
+    toast.addEventListener('pointerleave', (e) => {
+      if (e.pointerType !== 'mouse' || !paused) return;
+      paused = false;
+      started = Date.now(); id = setTimeout(() => this.close(toast), Math.max(300, left)); timer.style.animationPlayState = 'running';
+      setTimeout(() => { if (!this.stack.matches(':hover')) this.layout(false); }, 30);
+    });
     this.stack.appendChild(toast);
     this.layout(false);
     return toast;

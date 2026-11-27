@@ -17,7 +17,7 @@ php bin/build.php                      # dist/: ted.js, ted.css, ted.vw.css, con
 
 ```
 php bin/test.php                       # сборка, все наборы tests/run.html и PHP-проверки — после каждой правки
-php bin/test.php --full                # + dist/ в git = сборка из исходников, загрузка файлов на демо-сервере — по завершении этапа
+php bin/test.php --full                # + dist/ в git = сборка из исходников, загрузка файлов на демо-сервере
 php bin/test.php --suite=blocks        # один набор
 php bin/test.php --only="слово"        # только тесты с этим словом в названии
 ```

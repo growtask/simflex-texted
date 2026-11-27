@@ -63,6 +63,18 @@
 
 .ted-ui-toolbar[data-variant="viewRo"] { justify-content: flex-start; }
 
+/* сводка и «Редактировать» — по ширине колонки текста (700 / 628 / 480, поля 64 / 16, как .ted-ui-column), а не по краям
+   окна: на широком экране кнопка уезжала далеко от текста (сайт texted 27.11, 1.0.4) */
+.ted-ui-toolbar:is([data-variant="view"], [data-variant="viewRo"]) {
+  --col: 700px;
+  --edge: 64px;
+  padding-inline: max(8px, calc((100cqw - min(var(--col), 100cqw - 2 * var(--edge))) / 2));
+}
+.ted-ui-toolbar:is([data-variant="view"], [data-variant="viewRo"]) .ted-ui-stats { padding-left: 0; }
+@container ted (width < 980px) { .ted-ui-toolbar:is([data-variant="view"], [data-variant="viewRo"]) { --col: 628px; } }
+@container ted (width < 840px) { .ted-ui-toolbar:is([data-variant="view"], [data-variant="viewRo"]) { --col: 480px; } }
+@container ted (width < 480px) { .ted-ui-toolbar:is([data-variant="view"], [data-variant="viewRo"]) { --edge: 16px; } }
+
 .ted-ui-stats {
   min-width: 0;
   padding: 0 12px;

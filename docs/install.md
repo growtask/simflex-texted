@@ -14,6 +14,7 @@ composer require simflex/texted
 ```
 /texted/ted.js       ← скрипт редактора           (vendor/simflex/texted/dist/ted.js)
 /texted/ted.css      ← стили редактора и оформления блоков
+/texted/ted.vw.css   ← vw-размеры блоков (только для сайтов на vw)
 /texted/content.js   ← поведение блоков на сайте
 /texted/fonts/       ← шрифты
 /texted/tiles/       ← картинки для меню блоков (нужны только админке)
@@ -35,7 +36,7 @@ composer require simflex/texted
 
 Редактор сам записывает HTML обратно в `textarea`. Форма отправляется как обычно.
 
-**3. Очистите HTML на сервере перед сохранением** (это обязательно, см. [Безопасность](#безопасность-прочитайте-обязательно)):
+**3. Очистите HTML на сервере перед сохранением** (это обязательно, см. [Безопасность](security.md#безопасность-прочитайте-обязательно)):
 
 ```php
 $clean = Sanitizer::clean($_POST['content']);   // класс загружает автозагрузка composer; сохраняйте и выводите только $clean
@@ -64,7 +65,9 @@ $ted->createStorage()->respondToUpload($pagePath);    // маршрут загр
 <?= $page['content'] ?>   <!-- уже обёрнут в <div class="ted-content"> -->
 ```
 
-Чтобы работали аудиоплеер (тот же, что в редакторе, по макету Media/audio) и запуск видео с площадок по клику, добавьте `<script src="/texted/content.js" defer></script>`. Этот файл **собирается** (`bin/build.php` или `php bin/build.php`) из `resources/js/core/audio-player.js` и `resources/js/site/content.js`; вручную его не правьте. Без него на сайте остаётся родной `<audio controls>`.
+Поведение блоков на сайте — `<script src="/texted/content.js" defer></script>`: аудиоплеер по макету Media/audio, плеер видеоплощадки, вкладки, свёртывание и прогресс «Содержания», копирование кода, «В корзину» у товара, высота iFrame, прокрутка широкой таблицы (подробнее — [Блоки](blocks.md)). Этот файл **собирается** (`php bin/build.php`) по списку `bin/build.json` → `content`: `blocks/media/file-names.js`, `video-link.js`, `audio-player.js`, `resources/js/site/blocks.js`, файлы блоков `blocks/<тип>/<тип>.site.js` и `resources/js/site/content.js`; вручную его не правьте. Без него блоки остаются обычным HTML: родной `<audio controls>`, видео — ссылкой, вкладки — разделами подряд.
+
+`content.js` запускается сам по всем `.ted-content` страницы (кроме редактора). Для содержимого, добавленного позже (подгрузка без перезагрузки страницы), вызовите `window.TedContent.mount(элемент)`; `mount()` без аргумента — снова все `.ted-content`, `mount(элемент, { embed: false })` — видео площадок остаются ссылками.
 
 Посмотреть всё в работе: откройте двойным кликом `examples/index.html` (демо работают прямо с диска, сервер не нужен).
 
@@ -107,3 +110,27 @@ Ted.init({
 
 **Удаление и повторное создание.** `ed.destroy()`, `Ted.destroy(editor)`, `Ted.destroy(element)` и `Ted.destroy('#селектор')` равнозначны:
 снимаются все слушатели и окна, редактор убирается из `Ted.editors`. Повторный вызов безопасен.
+
+**Карточка по ссылке (блок «Встраивание»).** Страницу читает сервер, не браузер. Маршрут CMS — после проверки входа и CSRF:
+
+```php
+$ted->respondToOpenGraph();   // тело запроса — JSON { "url": "…" }; ответ — { url, title, text, image, site } или { error }; учитывает opengraph вкл./выкл. и лимит частоты
+```
+
+```js
+Ted.init({ selector: '#content', server: …, opengraph: Ted.createOpenGraph('/admin/ted/og', { headers: { 'X-CSRF-Token': csrfToken } }) });
+```
+
+Без `ted.config.php` — `OpenGraph::respondToRequest($isEnabled = true)` (без лимита частоты).
+
+## PHP-классы
+
+Пространство имён `Simflex\Texted`, классы загружает автозагрузка composer.
+
+| Класс | Методы |
+|-------|--------|
+| `Config` | `load($file = null)`, `fromArray($values)`; `clean($html, $preset = null)`, `save($html, $preset, $canEdit)`, `isEditable($preset, $canEdit)`; `respondToUpload($pagePath, $preset, $canEdit, $isReferenced = null)`, `respondToOpenGraph()`; `getClient($preset = null, $canEdit = true)`, `getClientJson(…)`; `getPreset($name)`, `getPresets()`; `getLimit($kind)`, `getLimits()`, `getFilesDir()`, `getFilesUrl()`, `getFfmpeg()`, `isOpenGraphEnabled()`, `getIframeHosts()`, `getRates()`; `createStorage()` → `MediaStorage`, `createRateLimit($kind)` (`upload` / `fetch`) |
+| `Sanitizer` | `clean($html, $allowHosts = [], $frameHosts = null)` — `$allowHosts`: свои https-хосты для `iframe` сверх видеоплощадок; `$frameHosts`: сайты блока «iFrame», `null` — любой https (так делает `Config::clean`); `urlOk($value, $kind = 'link')` |
+| `MediaStorage` | `new MediaStorage($filesDir, $filesUrl = '/uf', $limits = [], $ffmpeg = 'auto')`; `respondToUpload($pagePath, $isReferenced = null)`; `store($_FILES['file'], $kind, $pagePath, $maxSide = null)`, `storeFromUrl($url, $pagePath)` → `{ url, name, type, size, originalSize, converted, … }`; `deleteFiles($pagePath, $urls, $isReferenced = null)`, `removeUnused($pagePath, $before, $after, $isReferenced = null)` → сколько удалено; `slugify($name)`, `findFfmpeg($path = null)` (статические), `hasFfmpeg()` |
+| `OpenGraph` | `respondToRequest($isEnabled = true)`, `fetch($url)` → карточка |
+| `Exception\AccessDenied` | Полное имя `Simflex\Texted\Exception\AccessDenied`: нет права на правку (`Config::save`) — ответьте 403 |

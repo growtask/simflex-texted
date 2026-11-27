@@ -31,3 +31,10 @@
   .ted-content .ted-button:has(> .ted-button__btn + .ted-button__btn), .ted-content .ted-button--banner { flex-direction: column; align-items: stretch; }
   .ted-content .ted-button:has(> .ted-button__btn + .ted-button__btn) > .ted-button__btn, .ted-content .ted-button--banner > .ted-button__btn { width: 100%; }
 }
+/* Цвет (1.0.4): баннер — текст (заголовок ступенью заголовков, описание цветом) и фон; простая кнопка без подложки.
+   На дополнительном фоне кнопка — дополнительного цвета (main/color2), на остальных — синяя: других кнопок в ДС нет */
+.ted-content .ted-button[class*="ted-tc-"] .ted-button__title { color: var(--ted-tc-h); }
+.ted-content .ted-button[class*="ted-tc-"] .ted-button__desc { color: var(--ted-tc); }
+.ted-content .ted-button--banner[class*="ted-bg-"] { padding: calc(24 * var(--ted-u)); border-radius: calc(24 * var(--ted-u)); background: var(--ted-bg); }
+.ted-content .ted-button:not(.ted-button--banner)[class*="ted-bg-"] { padding: 0; border-radius: 0; background: none; }
+.ted-content .ted-button.ted-bg-color2 { --ted-btn-bg: var(--color-main-color2-main, #6161f2); --ted-btn-hover: var(--color-main-color2-dark, #4d4dbf); --ted-btn-press: var(--color-main-color2-darker, #38388c); }

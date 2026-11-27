@@ -57,7 +57,7 @@ final class Presets
         return $def ? $def['type'] : $t;
     }
     private const MODES = ['edit', 'view', 'readonly'];
-    private const BG_NAMES = ['gray', 'color1', 'color2'];
+    private const BG_NAMES = ['gray', 'color1', 'color2', 'error', 'alert', 'success'];
 
     /**
      * Проверить описание своего набора; вернуть ['blocks' => 'all' | [виды], 'mode' => …].

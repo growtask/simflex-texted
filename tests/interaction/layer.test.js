@@ -166,7 +166,7 @@ group('Слой взаимодействия: шапка редактора', ()
         const name = btn.getAttribute('aria-label');
         btn.click();
         const pop = ed.popover.isOpen && ed.popover.anchor === btn ? ed.popover.el : null;
-        const list = pop && pop.querySelectorAll('.ted-ui-item').length > 1 && !pop.classList.contains('ted-ui-pop--help');
+        const list = pop && pop.querySelectorAll('.ted-ui-item, .ted-ui-swatch').length > 1 && !pop.classList.contains('ted-ui-pop--help');
         const arrow = btn.querySelector('.ted-ui-btn__chevron');
         if (list && !arrow) problems.push(`${variant} «${name}»: список без стрелки`);
         if (arrow) {

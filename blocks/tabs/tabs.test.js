@@ -114,10 +114,10 @@ group('Вкладки: правка', () => {
   test('в содержимом — любые блоки, кроме фона; в названии — только строчное форматирование', () => {
     const ed = make(T3);
     caret(ed, titles(ed)[0]);
-    ok(ed.toolbar.styleBtn.hidden && ed.toolbar.colorBtn.hidden && ed.toolbar.alignBtn.hidden);
+    ok(ed.toolbar.styleBtn.hidden && !ed.toolbar.colorParts().canBgMenu && ed.toolbar.alignBtn.hidden);
     caret(ed, bodies(ed)[0].querySelector('p'));
     eq(ed.state.type, 'p');
-    ok(ed.toolbar.colorBtn.hidden && !ed.toolbar.styleBtn.hidden);
+    ok(!ed.toolbar.colorParts().canBgMenu && !ed.toolbar.styleBtn.hidden);
     ed.exec('block:ul');
     ok(bodies(ed)[0].querySelector(':scope > ul'), 'список в содержимом');
   });

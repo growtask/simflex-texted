@@ -9,6 +9,7 @@
 import { h, icon, smallButton, menuItem } from '../../resources/js/ui/widgets.js';
 import { getRange, placeCaret } from '../../resources/js/core/selection.js';
 import { makeTocItem, documentAnchors, tocAnchorOk } from './toc.js';
+import { slugify, uniqueId } from '../../resources/js/ui/handle.js';
 
 const cleanId = (v) => String(v || '').trim().replace(/^#/, '').replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
 
@@ -22,7 +23,12 @@ export class TocUI {
     this.addBtn = h('button', { type: 'button', class: 'ted-ui-addauthor ted-ui-tocadd' }, [icon('plus'), h('span', { text: 'Добавить главу' })]);
     this.addBtn.addEventListener('mousedown', (e) => e.preventDefault());
     this.addBtn.addEventListener('click', () => this.openChapter(null));
+    // «Собрать из заголовков» (заказчик 27.11): главы — все заголовки h2 статьи по порядку; рядом с «Добавить главу», тот же вид
+    this.fillBtn = h('button', { type: 'button', class: 'ted-ui-addauthor ted-ui-tocfill' }, [icon('toc'), h('span', { text: 'Собрать из заголовков' })]);
+    this.fillBtn.addEventListener('mousedown', (e) => e.preventDefault());
+    this.fillBtn.addEventListener('click', () => this.fillFromHeadings());
     this.column.appendChild(this.addBtn);
+    this.column.appendChild(this.fillBtn);
     this.onClick = (e) => {
       const toggle = e.target.closest && e.target.closest('.ted-toc__toggle');
       if (toggle && this.root.contains(toggle) && this.editor.mode === 'edit') { e.preventDefault(); this.toggle(toggle.closest('.ted-toc')); return; }
@@ -85,6 +91,9 @@ export class TocUI {
       progress.style.top = stuck ? `${edge}px` : '';
       progress.style.left = stuck ? `${t.left}px` : '';
       progress.style.width = stuck ? `${t.width}px` : '';
+      // место полосы в тексте остаётся (отступ у блока): прилипая, она уходила из потока — текст ниже прыгал на 20 px
+      // при каждом Enter и первой букве (заказчик 27.11, «внизу трясётся»). Как data-ted-stuck на сайте.
+      toc.toggleAttribute('data-tedui-stuck', stuck);
     }
   }
 
@@ -143,19 +152,54 @@ export class TocUI {
     if (this.toc && this.toc !== toc) { this.toc.removeAttribute('data-tedui-addbtn'); this.ro?.unobserve(this.toc); }
     if (toc && toc !== this.toc) this.ro?.observe(toc);
     this.toc = toc;
-    if (!toc) { this.addBtn.classList.remove('is-visible'); return; }   // при перетаскивании главы «Добавить главу» остаётся
+    if (!toc) { this.addBtn.classList.remove('is-visible'); this.fillBtn.classList.remove('is-visible'); return; }   // при перетаскивании главы «Добавить главу» остаётся
     toc.setAttribute('data-tedui-addbtn', '');
     this.place();
   }
 
   place() {
     const toc = this.toc;
-    if (!toc || !toc.isConnected) { this.addBtn.classList.remove('is-visible'); return; }
+    if (!toc || !toc.isConnected) { this.addBtn.classList.remove('is-visible'); this.fillBtn.classList.remove('is-visible'); return; }
     const cr = this.column.getBoundingClientRect();
     const r = toc.getBoundingClientRect();
     this.addBtn.style.top = `${r.bottom - cr.top + 20}px`;
     this.addBtn.style.left = `${r.left - cr.left}px`;
     this.addBtn.classList.add('is-visible');
+    // рядом с «Добавить главу»; не помещается в колонку (телефон) — под ней (макет block-navigation, state=edit mobile)
+    const beside = r.left - cr.left + this.addBtn.offsetWidth + 8;
+    const fits = beside + this.fillBtn.offsetWidth <= r.right - cr.left;
+    this.fillBtn.style.top = fits ? this.addBtn.style.top : `${r.bottom - cr.top + 20 + this.addBtn.offsetHeight + 8}px`;
+    this.fillBtn.style.left = fits ? `${beside}px` : `${r.left - cr.left}px`;
+    this.fillBtn.classList.toggle('is-visible', !!this.headings().length);
+  }
+
+  /** Заголовки h2 статьи (не внутри содержания) — главы для «Собрать из заголовков». */
+  headings() {
+    return [...this.root.querySelectorAll('h2')].filter((el) => !el.closest('.ted-toc') && el.textContent.trim());
+  }
+
+  /** Главы = заголовки h2 по порядку; заголовку без якоря ставится якорь из его текста. Отмена — Ctrl+Z. */
+  fillFromHeadings() {
+    const ed = this.editor;
+    const toc = this.toc;
+    const list = toc && toc.querySelector('.ted-toc__list');
+    const heads = this.headings();
+    if (!list || !heads.length) return;
+    ed.popover.close();
+    ed.history.commit();
+    if (toc.hasAttribute('data-tedui-collapsed')) this.toggle(toc);
+    const items = heads.map((el) => {
+      if (!el.id || !/^[A-Za-z][A-Za-z0-9_-]*$/.test(el.id)) {
+        const base = slugify(el.textContent) || 'glava';
+        el.id = uniqueId(this.root, /^[a-z]/.test(base) ? base : `g-${base}`);
+      }
+      return makeTocItem(document, el.textContent.replace(/\s+/g, ' ').trim(), `#${el.id}`);
+    });
+    list.replaceChildren(...items);
+    ed.editable.focus({ preventScroll: true });
+    placeCaret(toc.querySelector('.ted-toc__title'), true);
+    ed.afterChange({ immediate: true });
+    ed.toast('Содержание собрано из заголовков', { undo: true });
   }
 
   /** Окно «Глава содержания»: li — правка главы, null — новая глава в конец списка. */

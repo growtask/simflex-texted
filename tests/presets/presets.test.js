@@ -47,7 +47,7 @@ group('Наборы: что доступно в редакторе', () => {
     ed.focus();
     select(ed, 0, 1);
     ed.updateState();
-    ok(ed.toolbar.colorBtn.hidden, 'нет «Цветного фона»');
+    ok(!ed.toolbar.colorParts().canBgMenu, 'нет «Фона» в меню «Цвет» (цвет текста — есть)');
     ok(!ed.toolbar.mediaBtn.hidden, 'есть «Медиа»');
     ed.toolbar.openMediaMenu();
     const items = [...document.querySelectorAll('.ted-ui-pop .ted-ui-item')].map((n) => n.textContent.trim());

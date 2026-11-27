@@ -10,6 +10,8 @@ import { bjEsc, bjLines } from '../../resources/js/core/blocks-json.js';
 const CALLOUT_ZW = new RegExp(String.fromCharCode(0x200b), 'g');
 
 registerBlock({
+  // светлая тема — main/gray/lighter («Стандартный»); в тёмной подложка main/gray/darker — такой точки нет, ничего не отмечено
+  defaultBg: (el) => (el.closest('[data-ted-theme="dark"]') ? '' : 'gray'),
   // Markdown (22.11): выноска — «> [!NOTE] Заголовок» и строки «> текст»; обратно — fromMarkdownAlert
   toMarkdown: (el, md) => { const [title, ...rest] = [...el.children]; return [`> [!NOTE] ${title ? title.textContent.trim() : ''}`, ...rest.map((p) => '> ' + md.inline(p).trim())].join('\n'); },
   fromMarkdownAlert: (title, html) => `<blockquote class="ted-callout"><p><strong>${title}</strong></p>${html}</blockquote>`,

@@ -147,5 +147,48 @@
   background: var(--ui-line);
 }
 
+/* Меню «Цвет» (editor-dropdown style=color, точки — решение 28.11): подпись раздела «Текст» / «Фон» — text/t4 gray/medium;
+   точки — Switches/radio-color m (заказчик 28.11: s мелкие): 32, кружок 24 с обводкой 1 main/gray/medium (тёмная main/gray/dark), кольцо 2:
+   выбранная — text-icon/color1/main (тёмная color1/light), наведение — color1/light, нажатие — color1/dark; между точками 4 (6 × 32 + 5 × 4 = 212 в меню 240).
+   Заливка кружка — цвет палитры: текст — dark-ступени (тёмная — light), фон — lighter / states light (тёмная — gray/dark,
+   darker, states dark). Название — подсказкой (data-tip) и aria-label */
+.ted-ui .ted-ui-pop__label { flex: none; margin: 0; color: var(--ui-muted); font: 400 11px/16px var(--ui-font); }   /* 11 × 1.45 = 15.95 — точки под подписью вставали на дробный пиксель и рисовались кривыми (заказчик 28.11) */
+.ted-ui-swatches { display: flex; flex: none; gap: 4px; }
+.ted-ui .ted-ui-swatch { position: relative; display: grid; flex: none; place-items: center; width: 32px; height: 32px; margin: 0; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
+.ted-ui .ted-ui-swatch::after { content: ''; position: absolute; inset: 0; border: 2px solid transparent; border-radius: 50%; transition: border-color 0.12s ease; }
+.ted-ui-swatch:hover::after { border-color: var(--ui-color-text-icon-color1-light); }
+.ted-ui-swatch:active::after { border-color: var(--ui-color-text-icon-color1-dark); }
+.ted-ui .ted-ui-swatch.is-active::after { border-color: var(--ui-color-text-icon-color1-main); }   /* выбранная — и при наведении (заказчик 28.11) */
+.ted-ui-swatch:focus-visible { outline: none; }
+.ted-ui-swatch:focus-visible::after { border-color: var(--ui-accent); }
+.ted-ui-swatch__dot { box-sizing: border-box; width: 24px; height: 24px; border: 1px solid var(--ui-color-main-gray-medium); border-radius: 50%; background: var(--sw); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch__dot { border-color: var(--ui-color-main-gray-dark); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch:hover::after { border-color: var(--ui-color-text-icon-color1-main); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch.is-active::after { border-color: var(--ui-color-text-icon-color1-light); }
+.ted-ui-swatch--tc-gray { --sw: var(--ui-color-text-icon-gray-dark); }
+.ted-ui-swatch--tc-color1 { --sw: var(--ui-color-text-icon-color1-dark); }
+.ted-ui-swatch--tc-color2 { --sw: var(--ui-color-text-icon-color2-dark); }
+.ted-ui-swatch--tc-error { --sw: var(--ui-color-states-error-dark); }
+.ted-ui-swatch--tc-alert { --sw: var(--ui-color-states-alert-dark); }
+.ted-ui-swatch--tc-success { --sw: var(--ui-color-states-success-dark); }
+.ted-ui-swatch--bg-gray { --sw: var(--ui-color-main-gray-lighter); }
+.ted-ui-swatch--bg-color1 { --sw: var(--ui-color-main-color1-lighter); }
+.ted-ui-swatch--bg-color2 { --sw: var(--ui-color-main-color2-lighter); }
+.ted-ui-swatch--bg-error { --sw: var(--ui-color-states-error-light); }
+.ted-ui-swatch--bg-alert { --sw: var(--ui-color-states-alert-light); }
+.ted-ui-swatch--bg-success { --sw: var(--ui-color-states-success-light); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--tc-gray { --sw: var(--ui-color-text-icon-gray-light); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--tc-color1 { --sw: var(--ui-color-text-icon-color1-light); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--tc-color2 { --sw: var(--ui-color-text-icon-color2-light); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--tc-error { --sw: var(--ui-color-states-error-light); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--tc-alert { --sw: var(--ui-color-states-alert-light); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--tc-success { --sw: var(--ui-color-states-success-light); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--bg-gray { --sw: var(--ui-color-main-gray-dark); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--bg-color1 { --sw: var(--ui-color-main-color1-darker); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--bg-color2 { --sw: var(--ui-color-main-color2-darker); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--bg-error { --sw: var(--ui-color-states-error-dark); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--bg-alert { --sw: var(--ui-color-states-alert-dark); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--bg-success { --sw: var(--ui-color-states-success-dark); }
+
 /* подменю открылось слева (не хватило места справа) — стрелка пункта смотрит влево (22.11) */
 .ted-ui-item.is-sub-left > svg:last-child { transform: scaleX(-1); }

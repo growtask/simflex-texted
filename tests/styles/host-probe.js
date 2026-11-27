@@ -6,7 +6,8 @@
   const js = (src) => new Promise((r) => { const s = document.createElement('script'); s.src = src; s.onload = r; s.onerror = r; document.head.append(s); });
   const fnv = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
   // все вычисленные свойства, кроме переменных (--*) и тех, что зависят от положения курсора и анимаций
-  const SKIP = /^(--|transition|animation)/;
+  // scroll-margin-top заголовков = --ted-sticky-top: высота панели редактора, измеренная JS (как координаты) — от момента замера
+  const SKIP = /^(--|transition|animation|scroll-margin)/;
   const sig = (el, pseudo) => {
     const cs = getComputedStyle(el, pseudo || null);
     if (pseudo && (cs.content === 'none' || cs.content === 'normal')) return '-';

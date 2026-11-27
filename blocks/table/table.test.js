@@ -249,7 +249,7 @@ group('Таблица: правка', () => {
     ed.updateState();
     const tb = ed.toolbar;
     ok(['bold', 'italic', 'underline', 'strike', 'code', 'link'].every((k) => !tb.marks[k].hidden), 'Ж К Ч З код ссылка видны');
-    ok(tb.styleBtn.hidden && tb.alignBtn.hidden && tb.colorBtn.hidden, 'стиль, выравнивание, фон скрыты');
+    ok(tb.styleBtn.hidden && tb.alignBtn.hidden && tb.colorParts().canBgMenu, 'стиль и выравнивание скрыты; «Цвет» с фоном — есть (1.0.4)');
     const r = document.createRange();
     r.selectNodeContents(td.firstChild);
     getSelection().removeAllRanges();

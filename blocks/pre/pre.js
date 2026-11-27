@@ -6,6 +6,8 @@ import { registerBlock } from '../../resources/js/core/registry.js';
 import { bjEsc } from '../../resources/js/core/blocks-json.js';
 
 registerBlock({
+  defaultBg: 'gray',   // своя серая плашка — в меню «Цвет» → «Фон» по умолчанию отмечен «Стандартный» (заказчик 28.11)
+  canBg: () => true,   // у кода меняется только фон (меню «Цвет», 1.0.4)
   ...PRE_BLOCK,
   match: (el) => el.tagName === 'PRE',
   create: (doc) => { const pre = doc.createElement('pre'); pre.appendChild(doc.createElement('code')); return pre; },

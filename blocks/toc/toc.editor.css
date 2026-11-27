@@ -9,6 +9,8 @@
 .ted-ui-editable .ted-toc__title[data-tedui-ph]::before { top: 0; }
 .ted-ui-editable .ted-toc__title { position: relative; }
 .ted-ui-editable .ted-toc[data-tedui-addbtn] { margin-bottom: calc(var(--ted-gap) * var(--ted-u) + 60px); }
+/* колонка телефона: «Собрать из заголовков» — под «Добавить главу», место под второй строкой кнопок */
+@container ted (width < 480px) { .ted-ui-editable .ted-toc[data-tedui-addbtn] { margin-bottom: calc(var(--ted-gap) * var(--ted-u) + 104px); } }
 
 /* глава при перетаскивании — рамка, как у шагов и пунктов (общие правила — styles/ui/blocks.css) */
 .ted-ui-editable .ted-toc__list > li[data-tedui-drag] {
@@ -21,3 +23,6 @@
 .ted-ui.is-dragging .ted-ui-editable .ted-toc__list > li { transition: transform 0.22s var(--ui-ease); }
 .ted-ui.is-dragging .ted-ui-editable .ted-toc__list > li[data-tedui-drag] { transition: none; }
 .ted-ui.is-dropping .ted-ui-editable .ted-toc__list > li { transition: none !important; }
+
+/* полоса прилипла (position: fixed) — её место в тексте держит отступ, как data-ted-stuck на сайте */
+.ted-ui-editable .ted-toc[data-tedui-stuck] { padding-top: calc(20 * var(--ted-u)); }

@@ -141,6 +141,15 @@ function unnestAccordion(inner, doc) {
 }
 
 registerBlock({
+  /** Цвет текста одного вопроса (меню «Цвет», 1.0.4): курсор в вопросе — красится он, остальные нет. */
+  tcPart: (block, node) => {
+    const el = node.nodeType === 1 ? node : node.parentNode;
+    const q = el && el.closest('.ted-accordion__q');
+    if (!q || !block.contains(q) || !q.textContent.trim()) return null;
+    const r = document.createRange();
+    r.selectNodeContents(q);
+    return r;
+  },
   // Ted.toMarkdown (22.11): вопрос жирным, ответ — блоками
   toMarkdown: (el, md) => [...el.querySelectorAll('details')].map((d) => `**${(d.querySelector('summary') || d).textContent.trim()}**\n\n${md.blocks(d.querySelector('.ted-accordion__body') || d)}`).join('\n\n'),
   ...ACCORDION_BLOCK,

@@ -30,6 +30,21 @@ group('Содержание: разметка и очистка', () => {
 });
 
 group('Содержание: правка', () => {
+  test('«Собрать из заголовков»: главы = все h2 по порядку, заголовку без якоря ставится якорь; Ctrl+Z возвращает (заказчик 27.11)', () => {
+    const ed = make('<h2 id="start">Начало</h2><p>а</p>' + TOC('<li><a href="#start">Старое</a></li>') + '<h2>Новая глава</h2><p>б</p><h3>Подглава</h3>');
+    const toc = ed.editable.querySelector('.ted-toc');
+    ed.focus();
+    placeCaretIn(toc.querySelector('.ted-toc__title'));
+    ed.updateState();
+    ok(ed.toc.fillBtn.classList.contains('is-visible'), 'кнопка видна рядом с «Добавить главу»');
+    ed.toc.fillBtn.click();
+    const links = [...toc.querySelectorAll('.ted-toc__list a')].map((a) => `${a.textContent} ${a.getAttribute('href')}`);
+    eq(links.join(' | '), 'Начало #start | Новая глава #novaya-glava');
+    eq(ed.editable.querySelectorAll('h2')[1].id, 'novaya-glava', 'якорь у заголовка');
+    ed.history.undo();
+    eq(ed.editable.querySelectorAll('.ted-toc__list a').length, 1, 'отмена вернула старые главы');
+  });
+
   test('из меню блоков: заглушка «Заголовок», курсор в заголовке, «Добавить главу» под блоком, «Скрыть» внизу панели', async () => {
     const ed = make('<p>до</p>');
     ed.blockMenu.openPicker(blocks(ed)[0]);
@@ -130,7 +145,7 @@ group('Содержание: правка', () => {
     ed.editable.dispatchEvent(e);
     ok(e.defaultPrevented);
     eq(ed.editable.querySelectorAll('.ted-toc__title').length, 1);
-    ok(ed.toolbar.styleBtn.hidden && ed.toolbar.colorBtn.hidden && ed.toolbar.marks.bold.hidden && ed.toolbar.marks.link.hidden);
+    ok(ed.toolbar.styleBtn.hidden && !ed.toolbar.colorParts().canTc && ed.toolbar.marks.bold.hidden && ed.toolbar.marks.link.hidden);
   });
 });
 
@@ -176,6 +191,24 @@ group('Содержание: прогресс в правке и под пане
     ed.toc.updateProgress();
     ok(ed.editable.querySelector('.ted-toc__bar').style.width !== '', 'прогресс посчитан в правке');
     ok(!/style=/.test(ed.getHTML()), 'в HTML нет style полосы');
+  });
+
+  test('полоса прилипла: текст ниже не сдвигается, при наборе (чистка разметки) полоса не отлипает (заказчик 27.11)', () => {
+    const ed = make(DOC + '<p>текст</p>'.repeat(120), {}, { width: 1000 });
+    const toc = ed.editable.querySelector('.ted-toc');
+    const next = toc.nextElementSibling;
+    window.scrollTo(0, 0);
+    ed.toc.updateProgress();
+    const y0 = next.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo(0, toc.getBoundingClientRect().bottom + window.scrollY + 200);
+    ed.toc.updateProgress();
+    const progress = toc.querySelector('.ted-toc__progress');
+    eq(progress.style.position, 'fixed', 'полоса прилипла');
+    eq(Math.round(next.getBoundingClientRect().top + window.scrollY), Math.round(y0), 'блок под содержанием на том же месте');
+    ed.editable.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: 'а' }));   // как набор буквы
+    eq(progress.style.position, 'fixed', 'после правки полоса по-прежнему прилипла');
+    ok(!/data-tedui-stuck|style=/.test(ed.getHTML()), 'в HTML ни отступа, ни стилей полосы');
+    window.scrollTo(0, 0);
   });
 
   test('--ted-sticky-top на редакторе = шапка сайта снаружи + липкая панель редактора', () => {
@@ -261,7 +294,7 @@ group('Содержание: точки подключения реестра', 
   test('toolbar (block.json): в заголовке — без стиля, фона, выравнивания и форматирования (inContainers: false проверяет тест колонок)', () => {
     const ed = make(TOC);
     ed.toolbar.update({ ...ed.state, type: 'toc', mode: 'edit', focused: true, marks: {} });
-    ok(ed.toolbar.styleBtn.hidden && ed.toolbar.alignBtn.hidden && ed.toolbar.colorBtn.hidden, 'стиль, выравнивание, фон');
+    ok(ed.toolbar.styleBtn.hidden && ed.toolbar.alignBtn.hidden && !ed.toolbar.colorParts().canTc && ed.toolbar.colorParts().canBgMenu, 'стиль и выравнивание скрыты; цвета текста нет, фон — есть (1.0.4)');
     ok(Object.values(ed.toolbar.marks).every((b) => b.hidden), 'Ж К Ч З код ссылка');
     ed.destroy();
   });

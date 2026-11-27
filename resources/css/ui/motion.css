@@ -147,3 +147,8 @@
 .ted-ui.is-appearing .ted-ui-editable > :nth-child(15) { animation-delay: 480ms; }
 .ted-ui.is-appearing .ted-ui-editable > :nth-child(16) { animation-delay: 510ms; }
 @media (prefers-reduced-motion: reduce) { .ted-ui.is-appearing .ted-ui-editable > *, .ted-ui.is-appearing .ted-ui-toolbar { animation: none; } }
+
+/* полоса не залезает на скругление окна или блока: дорожка начинается после радиуса (сайт texted 27.11, 1.0.4) —
+   у окон и меню сверху и снизу, у кода слева и справа */
+.ted-ui :is(.ted-ui-menu__list, .ted-ui-picker__scroll, .ted-ui-pop__box)::-webkit-scrollbar-track { margin-block: 12px; }
+.ted-ui .ted-ui-editable pre::-webkit-scrollbar-track { margin-inline: 12px; }
