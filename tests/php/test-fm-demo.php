@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-// Проверка демо файлового менеджера (bin/demo/fm-demo.php) с настоящим пакетом simflex-file-manager:
-// обёртка для Windows совместима с текущим Manager (23.11 пакет поменял resolvePath — менеджер в демо перестал видеть файлы),
-// корень и вложенная папка отдают файлы, выход из корня — отказ. Пакет не найден — проверка пропускается.
+// Проверка демо файлового менеджера (bin/demo/fm-demo.php) с настоящим пакетом simflex-file-manager: загрузчик демо
+// находит классы пакета без composer, корень и вложенная папка отдают файлы, выход из корня — отказ.
+// Пакет не найден — проверка пропускается.
 // Папка пакета: переменная TED_DEMO_FILE_MANAGER или «Документы\GitHub\simflex-file-manager» (как bin/demo.php).
 
 $package = getenv('TED_DEMO_FILE_MANAGER') ?: '';
@@ -22,14 +22,12 @@ if ($package === '' || !is_file($package . '/src/FileManager/Manager.php')) {
     exit(0);
 }
 
-// менеджер с 25.11 берёт настройки из ядра Simflex (Container) — без ядра демо его не запустит: пропуск с причиной
-if (str_contains((string) file_get_contents($package . '/src/FileManager/Manager.php'), 'Simflex\\Core\\') && !class_exists('Simflex\\Core\\System\\Container')) {
-    echo "  Файловый менеджер требует ядро Simflex (simflex/core) — демо без ядра его не запускает, пропущено\n";
+require_once dirname(__DIR__, 2) . '/bin/demo/fm-demo.php';
+ted_demo_load_file_manager(realpath($package . '/src'));
+if (!class_exists(\Simflex\FileManager\Request::class)) {
+    echo "  Старая версия файлового менеджера (нет Simflex\\FileManager\\Request) — пропущено\n";
     exit(0);
 }
-
-require_once dirname(__DIR__, 2) . '/bin/demo/fm-demo.php';
-require_once $package . '/src/FileManager/Manager.php';
 
 $root = sys_get_temp_dir() . '/ted-fm-demo-' . bin2hex(random_bytes(4));
 mkdir($root . '/images/company', 0775, true);
@@ -44,11 +42,9 @@ $check = static function (string $name, bool $ok) use (&$failed): void {
     }
 };
 $call = static function (string $method, string $path) use ($root): array {
-    $_REQUEST = ['method' => $method, 'path' => $path];
-    $manager = ted_demo_windows_manager($root, static fn(): bool => true);
-    ob_start();
-    @$manager->handleRequest();   // header() в консоли после вывода — предупреждение, не ошибка
-    return json_decode((string) ob_get_clean(), true) ?: [];
+    $request = new \Simflex\FileManager\Request(['method' => $method, 'path' => $path]);
+    [, $body] = (new \Simflex\FileManager\Manager($root, static fn(): bool => true, null, $request))->process();
+    return $body;
 };
 $names = static fn(array $json): array => array_column($json['items'] ?? [], 'name');
 

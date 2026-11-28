@@ -873,17 +873,20 @@ group('Медиа: итог загрузки, кнопки при открыто
 
   test('пока открыто окно у карандаша, кнопки плитки видны и нажатая подсвечена (и у файлов, и у галереи)', () => {
     const ed = make(fig('file', '<a href="/uf/files/company/a.pdf" download>А</a>') + fig('gallery', '<figure><img src="/a.webp" alt=""></figure><figure><img src="/b.webp" alt=""></figure>'), mgr);
+    // устройство без наведения (сенсорный экран, headless Chrome на Linux без мыши) показывает кнопки всегда —
+    // @media (hover: none) в media.editor.css; проверки «скрыты» там не имеют смысла
+    const hoverable = !matchMedia('(hover: none)').matches;
     try {
       for (const tools of ed.editable.querySelectorAll('.ted-ui-media__tile-tools')) {
         tools.style.transition = 'none';
-        eq(getComputedStyle(tools).opacity, '0', 'без наведения кнопок не видно');
+        if (hoverable) eq(getComputedStyle(tools).opacity, '0', 'без наведения кнопок не видно');
         const pencil = tools.querySelector('[data-act="media-settings"]');
         pencil.style.transition = 'none';
         pencil.click();
         eq(getComputedStyle(tools).opacity, '1', 'при открытом окне видны: ' + tools.parentElement.localName);
         ok(getComputedStyle(pencil).backgroundColor !== 'rgba(0, 0, 0, 0)', 'нажатая кнопка подсвечена');
         ed.popover.close();
-        eq(getComputedStyle(tools).opacity, '0', 'после закрытия снова скрыты');
+        if (hoverable) eq(getComputedStyle(tools).opacity, '0', 'после закрытия снова скрыты');
       }
     } finally { ed.destroy(); }
   });
