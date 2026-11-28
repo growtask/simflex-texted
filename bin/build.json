@@ -32,6 +32,7 @@
     "resources/js/core/highlight.js",
     "resources/js/core/sanitize.js",
     "resources/js/core/selection.js",
+    "resources/js/core/clipboard.js",
     "resources/js/core/history.js",
     "resources/js/core/upload.js",
     "resources/js/core/presets.js",
