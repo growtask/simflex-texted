@@ -2,6 +2,7 @@
 import './registry.test.js';
 import './fixes-2211.test.js';
 import './fixes-2311.test.js';
+import './docx.test.js';
 
 const BUILD = await (await fetch(new URL('../../bin/build.json', import.meta.url), { cache: 'no-store' })).json();
 for (const b of BUILD.blocks) await import(`../../blocks/${b}/${b}.test.js`);

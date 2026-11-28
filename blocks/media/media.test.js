@@ -551,7 +551,8 @@ group('Медиа: единый вид с окнами редактора (ра�
     try {
       await wait(60);
       eq(ed.editable.querySelector('.ted-ui-media__info')?.textContent, 'WebP · 600×400 · 96 КБ');
-      eq(asked.join(), 'HEAD /uf/images/company/saved-photo.webp', 'вес узнаётся HEAD-запросом, файл не качается');
+      // только запросы к этому фото: редакторы прошлых тестов могут ещё догружать свои картинки (Firefox)
+      eq(asked.filter((a) => a.includes('saved-photo')).join(), 'HEAD /uf/images/company/saved-photo.webp', 'вес узнаётся HEAD-запросом, файл не качается');
       ok(!ed.getInnerHTML().includes('ted-ui-media__info'), 'строки нет в HTML');
     } finally { ed.destroy(); window.fetch = real; }
   });
