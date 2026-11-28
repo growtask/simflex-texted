@@ -27,7 +27,7 @@ ed.readDraft(); ed.clearDraft();
 ed.setLang('en');        // язык интерфейса ('ru' | 'en'), запоминается
 ed.lang;                 // текущий язык интерфейса
 
-Ted.version;                     // версия пакета, например '1.1.0'
+Ted.version;                     // версия пакета, например '1.1.1'
 Ted.create(el, options);         // один редактор: элемент или селектор; у уже подключённого вернёт тот же
 Ted.Editor;                      // класс редактора (new Ted.Editor(el, options) не попадает в Ted.editors и Ted.get)
 Ted.editors;                     // открытые редакторы
