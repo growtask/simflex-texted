@@ -1,4 +1,4 @@
-/*! Ted 1.0.4 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-28 12:19 */
+/*! Ted 1.0.4 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-28 14:11 */
 (function () {
 'use strict';
 
@@ -3999,6 +3999,23 @@ function tcOfBlock(b) {
 
 const INLINE_ROOT = /^(#text|B|STRONG|I|EM|U|S|STRIKE|DEL|CODE|A|SPAN|FONT|SUB|SUP|BR|MARK|SMALL|BIG)$/;
 
+/** Большой код (от CODE_SPLIT_LINES строк) держим по строке в текстовом узле: Firefox рисует подсветку (CSS Highlight)
+ *  квадратично от числа диапазонов в одном узле — 2000 строк одним узлом ~1 с на каждую отрисовку, по строкам ~40 мс.
+ *  Пока курсор в коде, узлы не трогаем (курсор не сбивается); меньший код — одним узлом, как раньше. */
+const CODE_SPLIT_LINES = 200;
+function splitCodeLines(code, doc) {
+  const nodes = code.childNodes;
+  if (!nodes.length || ![...nodes].every((n) => n.nodeType === 3)) return;
+  const text = code.textContent;
+  const lines = (text.match(/\n/g) || []).length + 1;
+  if (lines < CODE_SPLIT_LINES) { if (nodes.length > 1) code.normalize(); return; }
+  const sel = document.getSelection();
+  if (sel && sel.rangeCount && code.contains(sel.anchorNode)) return;
+  const parts = text.split(/(?<=\n)/);
+  if (nodes.length === parts.length && parts.every((p, i) => nodes[i].data === p)) return;
+  code.replaceChildren(...parts.map((p) => doc.createTextNode(p)));
+}
+
 function normalizeRoot(root) {
   const doc = root.ownerDocument;
   let changed = false;
@@ -4214,7 +4231,7 @@ function normalizeRoot(root) {
       code.textContent = code.textContent;
       changed = true;
     }
-    if (code.childNodes.length > 1 && !code.querySelector('[data-tedui-m]')) code.normalize();   // тысячи соседних текстовых узлов (после загрузки) склеиваем
+    if (!code.querySelector('[data-tedui-m]')) splitCodeLines(code, doc);
     if (!pre.hasAttribute('data-lang') && !pre.hasAttribute('data-tedui-auto')) pre.setAttribute('data-tedui-auto', '');
     if (pre.hasAttribute('data-nums')) {
       const before = pre.getAttribute('data-nums');
@@ -11931,6 +11948,11 @@ class Toolbar {
     const need = kids.reduce((sum, el) => sum + el.offsetWidth, 0) + Math.max(0, kids.length - 1) * (parseFloat(cs.columnGap) || 0)
       + (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
     this.el.classList.toggle('is-scroll', need > this.el.clientWidth + 1);
+    // толщина полосы как в браузере: Chrome — 4 px (::-webkit-scrollbar), Firefox — 0 (полоса поверх) или своя; высота шапки та же
+    if (this.el.classList.contains('is-scroll')) {
+      const sb = this.el.offsetHeight - this.el.clientHeight - (parseFloat(cs.borderTopWidth) || 0) - (parseFloat(cs.borderBottomWidth) || 0);
+      this.el.style.setProperty('--ted-ui-sb', Math.max(0, Math.min(8, Math.round(sb))) + 'px');
+    }
   }
 
   setVariant(name) {
@@ -15239,7 +15261,17 @@ class Editor {
   }
 
   currentBlock() {
-    return this.blockFromRange(getRange(this.editable));
+    return this.blockFromRange(this.fieldRange() || getRange(this.editable));
+  }
+
+  /** Фокус в поле внутри блока (поле товара): Firefox не переносит туда выделение документа — блок берём по полю. */
+  fieldRange() {
+    const a = document.activeElement;
+    if (!a || a === this.editable || !this.editable.contains(a) || !a.matches('input, textarea, select')) return null;
+    const r = document.createRange();
+    r.selectNode(a);
+    r.collapse(true);
+    return r;
   }
 
   /**
@@ -15271,7 +15303,7 @@ class Editor {
   updateState() {
     const r = getRange(this.editable);
     if (r) this.lastRange = r.cloneRange();   // последнее место курсора: меню, открытое с клавиатуры (Esc → Tab), знает, что красить
-    const block = this.blockFromRange(r);
+    const block = this.blockFromRange(this.fieldRange() || r);
     const type = blockType(block) || 'p';
     const inNode = (sel) => {
       if (!r) return false;

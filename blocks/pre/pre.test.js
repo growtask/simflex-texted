@@ -275,7 +275,11 @@ group('Загрузка больших блоков кода', () => {
     const ms = performance.now() - t;
     ok(ms < 2500, 'загрузка: ' + Math.round(ms) + ' мс');
     const code = ed.editable.querySelector('pre > code');
-    eq(code.childNodes.length, 1, 'код — один текстовый узел, а не тысячи');
+    // большой код — по строке в текстовом узле (Firefox иначе рисует подсветку секунды), без лишних узлов и тегов
+    eq(code.childNodes.length, 2000, 'по текстовому узлу на строку');
+    ok([...code.childNodes].every((n, i) => n.nodeType === 3 && n.data.includes(`>${i} привет<`)), 'строка — свой узел');
+    const small = make('<pre><code>a\nb\nc</code></pre>');
+    eq(small.editable.querySelector('pre > code').childNodes.length, 1, 'небольшой код — один узел, как раньше');
     eq(ed.editable.querySelector('pre').getAttribute('data-nums').split('\n').length, 2000);
     const t2 = performance.now();
     const saved = ed.getInnerHTML();

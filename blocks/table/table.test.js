@@ -407,9 +407,11 @@ group('Таблица: вид по макету block-table', () => {
     ed.table.measure();
     const wrap = ed.editable.querySelector('.ted-table__wrap');
     ok(wrap.hasAttribute('data-ted-scroll'), 'отмечена прокрутка');
-    eq(getComputedStyle(wrap).paddingBottom, '6px', '12 до видимой полосы: 6 отступ + 6 прозрачной рамки зоны захвата 20 px');
+    // Chrome: 6 отступ + 6 прозрачной рамки зоны захвата 20 px; Firefox: у полосы рамки нет — весь отступ 12
+    const webkitBar = CSS.supports('selector(::-webkit-scrollbar)');
+    eq(getComputedStyle(wrap).paddingBottom, webkitBar ? '6px' : '12px', '12 до видимой полосы');
     // заказчик 17.11: «полоса слишком тонкая» — видна 8 px, а ухватить можно в зоне 20 px
-    eq(wrap.offsetHeight - wrap.clientHeight, 20, 'зона захвата полосы 20 px');
+    if (webkitBar) eq(wrap.offsetHeight - wrap.clientHeight, 20, 'зона захвата полосы 20 px');   // Firefox: полоса браузера, своей зоны нет
     ok(!/data-ted-scroll/.test(html(ed)), 'отметка не сохраняется');
     const ed2 = make(T3, {}, { width: 1000 });
     ed2.table.measure();

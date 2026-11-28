@@ -24,10 +24,10 @@
 /* панель шире экрана: тонкая полоса 4 px (Scrollbar, #919599 / 60 %) внутри нижнего отступа; высота панели та же, что без полосы —
    содержимое под панелью не сдвигается, когда кнопки перестают помещаться или снова помещаются (смена блока под курсором) */
 .ted-ui-toolbar:not(.is-scroll) { overflow-x: hidden; }   /* кнопки помещаются: при плавном переезде кнопок (смена набора) полоса не мелькает */
-.ted-ui-toolbar.is-scroll { padding-bottom: 4px; }   /* 8 + 40 + 4 + полоса 4 + линия 1 = 57, как 8 + 40 + 8 + 1 */
+.ted-ui-toolbar.is-scroll { padding-bottom: calc(8px - var(--ted-ui-sb, 4px)); }   /* 8 + 40 + 4 + полоса 4 + линия 1 = 57, как 8 + 40 + 8 + 1; полоса поверх (Firefox) — 8 */
 @container ted (width < 480px) {
   .ted-ui-toolbar { padding-top: 7.5px; padding-bottom: 7.5px; }   /* editor-toolbar mobile: 7,5 + 40 + 7,5 + 1 = 56 */
-  .ted-ui-toolbar.is-scroll { padding-bottom: 3.5px; }   /* 7,5 + 40 + 3,5 + полоса 4 + линия 1 = 56 */
+  .ted-ui-toolbar.is-scroll { padding-bottom: max(0px, calc(7.5px - var(--ted-ui-sb, 4px))); }   /* 7,5 + 40 + 3,5 + полоса 4 + линия 1 = 56 */
 }
 
 /* как editor-toolbar mobile: кнопки на y = 7,5; 7,5 + 40 + 3,5 + полоса 4 + линия 1 = 56 */

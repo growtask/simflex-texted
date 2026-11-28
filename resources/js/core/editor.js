@@ -856,7 +856,17 @@ export class Editor {
   }
 
   currentBlock() {
-    return this.blockFromRange(getRange(this.editable));
+    return this.blockFromRange(this.fieldRange() || getRange(this.editable));
+  }
+
+  /** Фокус в поле внутри блока (поле товара): Firefox не переносит туда выделение документа — блок берём по полю. */
+  fieldRange() {
+    const a = document.activeElement;
+    if (!a || a === this.editable || !this.editable.contains(a) || !a.matches('input, textarea, select')) return null;
+    const r = document.createRange();
+    r.selectNode(a);
+    r.collapse(true);
+    return r;
   }
 
   /**
@@ -888,7 +898,7 @@ export class Editor {
   updateState() {
     const r = getRange(this.editable);
     if (r) this.lastRange = r.cloneRange();   // последнее место курсора: меню, открытое с клавиатуры (Esc → Tab), знает, что красить
-    const block = this.blockFromRange(r);
+    const block = this.blockFromRange(this.fieldRange() || r);
     const type = blockType(block) || 'p';
     const inNode = (sel) => {
       if (!r) return false;
