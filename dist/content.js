@@ -1,4 +1,4 @@
-/*! Ted content 1.0.4 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-28 10:26 */
+/*! Ted content 1.0.4 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-28 12:19 */
 (function () {
 'use strict';
 

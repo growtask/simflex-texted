@@ -1,4 +1,4 @@
-/*! Ted 1.0.4 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-28 10:26 */
+/*! Ted 1.0.4 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-28 12:19 */
 (function () {
 'use strict';
 
@@ -11895,8 +11895,9 @@ class Toolbar {
     this.sets = {
       // стиль ▾ выравнивание ▾ цвет ▾ | медиа ▾, все блоки | ✨, ещё | помощь, сохранить
       default: [...this.common, div(), this.mediaBtn, this.allBlocksBtn, div(), this.magicBtn, this.moreBtn, div(), ...tail],
-      // + | B I U S код ссылка якорь | все блоки, ✨, ещё | помощь, сохранить
-      text: [...this.common, div(), ...Object.values(this.marks), this.anchorBtn, div(), this.allBlocksBtn, this.magicBtn, this.moreBtn, div(), ...tail],
+      // + | B I U S код ссылка якорь | медиа ▾, все блоки, ✨, ещё | помощь, сохранить
+      // «Медиа ▾» остаётся и при наборе текста (28.11): вставка как из меню «/» — на место пустого абзаца или под блоком
+      text: [...this.common, div(), ...Object.values(this.marks), this.anchorBtn, div(), this.mediaBtn, this.allBlocksBtn, this.magicBtn, this.moreBtn, div(), ...tail],
       // editor-toolbar style=line; «Цвет» — у разделителя, кнопки, товара (фон и текст, 1.0.4), у остальных скрыт
       line: [this.colorBtn, this.lineDiv = div(), this.moreBtn, div(), ...tail],
       view: [this.stats, this.modeBtn],
