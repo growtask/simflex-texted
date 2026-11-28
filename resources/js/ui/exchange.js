@@ -1,4 +1,4 @@
-// Перенос статей и нейросети (решения заказчика 22.11): выгрузка и загрузка JSON и Markdown, промт для нейросети.
+// Перенос статей и нейросети (решения заказчика 22.11): выгрузка и загрузка JSON, Markdown и Word (.docx, 1.0.5), промт для нейросети.
 // Меню «Ещё ⋯» → «Скопировать промт», «Загрузить .md или .json», «Выгрузить в Markdown», «Выгрузить в JSON». Загрузка заменяет статью — после предупреждения;
 // «Отменить» в уведомлении возвращает прежнюю. Всё загруженное проходит обычную очистку и набор блоков поля.
 
@@ -11,10 +11,11 @@ import { blocksToHtml, htmlToBlocks } from '../core/blocks-json.js';
 import { registeredBlocks } from '../core/registry.js';
 import { detectTedCss } from './preview.js';
 import { markdownToHtml, htmlToMarkdown } from '../core/markdown.js';
+import { docxToHtml, htmlToDocx, WORD_IMAGE } from '../core/docx.js';
 
-/** Сохранить текст файлом (скачивание в браузере). */
+/** Сохранить текст (или Blob) файлом — скачивание в браузере. */
 function download(name, text, type) {
-  const url = URL.createObjectURL(new Blob([text], { type }));
+  const url = URL.createObjectURL(text instanceof Blob ? text : new Blob([text], { type }));
   const a = h('a', { href: url, download: name });
   document.body.appendChild(a);
   a.click();
@@ -62,9 +63,10 @@ export function toHtml(kind, text) {
 }
 
 /** Заменить статью загруженным: история сохраняется — «Отменить» вернёт прежнюю. */
-export function replaceDoc(ed, html, skipped = []) {
+export function replaceDoc(ed, html, skipped = [], prepare = null) {
   ed.history.commit();
   ed.editable.replaceChildren(ed.restrict(sanitizeHTML(html)));
+  if (prepare) prepare();   // до записи в историю: «Отменить» сразу возвращает прежнюю статью
   if (!ed.editable.firstElementChild) ed.editable.appendChild(h('p', {}, [h('br')]));
   normalizeRoot(ed.editable);
   ed.afterChange({ immediate: true });
@@ -93,6 +95,71 @@ export async function importFile(ed, anchor) {
   const { html, error, skipped } = toHtml(kind, file.text);
   if (error) { ed.toast(error, { status: 'error' }); return; }
   confirmReplace(ed, anchor, () => replaceDoc(ed, html, skipped));
+}
+
+/** Выбрать файл и прочитать его целиком (ArrayBuffer). */
+function pickBinary(accept) {
+  return new Promise((resolve) => {
+    const input = h('input', { type: 'file', accept, hidden: true });
+    input.addEventListener('change', async () => {
+      const file = input.files && input.files[0];
+      input.remove();
+      resolve(file ? { name: file.name, size: file.size, buffer: await file.arrayBuffer() } : null);
+    });
+    document.body.appendChild(input);
+    input.click();
+  });
+}
+
+/** «Выгрузить в Word»: .docx; картинки встраиваются, не скачанные (чужой сайт без разрешения) — ссылкой. */
+export async function exportWord(ed) {
+  const { blob, missedImages } = await htmlToDocx(ed.getInnerHTML(), { title: ed.options.fileName || document.title || '' });
+  download(fileName(ed, 'docx'), blob);
+  if (missedImages) ed.toast(tf('Выгружено в Word. Картинок не удалось встроить: {n} — вместо них ссылки', { n: missedImages }), { timeout: 8000 });
+}
+
+/** Word (.docx) → HTML статьи; ошибка — понятное сообщение. */
+export async function wordToHtml(name, buffer) {
+  if (/\.doc$/i.test(name)) return { error: 'Старый формат .doc не поддерживается — сохраните файл в Word как .docx' };
+  try {
+    return await docxToHtml(buffer);
+  } catch {
+    return { error: 'Файл не похож на документ Word (.docx)' };
+  }
+}
+
+/**
+ * Заменить статью документом Word. Картинки: на месте метки [[texted-word-image-N]] — блок «Изображение» с загрузкой
+ * файла на сервер, как при вставке файла (хук pasteFiles блоков). Загрузки нет (upload) или блок не встал (набор без
+ * изображений) — метка убирается. → сколько картинок не встало.
+ */
+export function replaceWithWord(ed, { html, images = [], skippedImages = 0 }) {
+  const canUpload = typeof ed.options.upload === 'function';
+  const slots = [];
+  let missed = skippedImages;
+  replaceDoc(ed, html, [], () => {
+    for (const p of [...ed.editable.querySelectorAll('p')]) {
+      const text = p.textContent.trim();
+      if (!text.startsWith(WORD_IMAGE)) continue;
+      const file = images[parseInt(text.slice(WORD_IMAGE.length), 10) - 1];
+      if (canUpload && file) { p.replaceChildren(h('br')); slots.push([p, file]); } else { p.remove(); missed++; }
+    }
+  });
+  for (const [p, file] of slots) {
+    const event = { clipboardData: { files: [file] } };
+    if (!p.isConnected || !ed.blockUis.some((u) => u.pasteFiles && u.pasteFiles(event, p))) { if (p.isConnected) p.remove(); missed++; }
+  }
+  if (missed) ed.toast(tf('Статья заменена. Картинок не загружено: {n}', { n: missed }), { undo: true, timeout: 8000 });
+  return missed;
+}
+
+/** «Загрузить из Word»: .docx и, после предупреждения, замена статьи. */
+export async function importWord(ed, anchor) {
+  const file = await pickBinary('.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+  if (!file) return;
+  const doc = await wordToHtml(file.name, file.buffer);
+  if (doc.error) { ed.toast(doc.error, { status: 'error' }); return; }
+  confirmReplace(ed, anchor, () => replaceWithWord(ed, doc));
 }
 
 /** Промт для нейросети: как вернуть статью, чтобы редактор её принял (Markdown или JSON блоков). Собирается из реестра блоков. */
@@ -143,8 +210,10 @@ export function exchangeItems(ed, anchor) {
   return [
     menuItem({ value: 'ai-prompt', label: 'Скопировать промт', iconName: 'copy', onSelect: () => { close(); copyPrompt(ed); } }),
     menuItem({ value: 'import', label: 'Загрузить .md или .json', iconName: 'file', onSelect: () => { close(); importFile(ed, anchor); } }),
+    menuItem({ value: 'import-word', label: 'Загрузить из Word', iconName: 'file', onSelect: () => { close(); importWord(ed, anchor); } }),
     menuItem({ value: 'out-md', label: 'Выгрузить в Markdown', iconName: 'save', onSelect: () => { close(); exportMarkdown(ed); } }),
     menuItem({ value: 'out-json', label: 'Выгрузить в JSON', iconName: 'save', onSelect: () => { close(); exportJson(ed); } }),
+    menuItem({ value: 'out-word', label: 'Выгрузить в Word', iconName: 'save', onSelect: () => { close(); exportWord(ed); } }),
     // «Microsoft Print to PDF» пишет файл со сдвигом ссылок — Яндекс Браузер его не открывает (22.11); подсказываем пункт браузера
     menuItem({ value: 'print', label: 'Печать и PDF', iconName: 'file', onSelect: () => { close(); ed.toast('Для PDF выберите в окне печати «Сохранить как PDF»', { timeout: 6000 }); printDoc(ed); } }),
     langItem(ed),

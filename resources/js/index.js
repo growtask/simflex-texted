@@ -40,7 +40,7 @@ import '../../blocks/tabs/tabs.js';
 import '../../blocks/toc/toc.js';
 import '../../blocks/columns/columns.js';
 
-const VERSION = '1.0.4';
+const VERSION = '1.1.0';
 
 const Ted = {
   version: VERSION,

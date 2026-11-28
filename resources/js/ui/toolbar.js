@@ -126,6 +126,11 @@ export class Toolbar {
     const need = kids.reduce((sum, el) => sum + el.offsetWidth, 0) + Math.max(0, kids.length - 1) * (parseFloat(cs.columnGap) || 0)
       + (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
     this.el.classList.toggle('is-scroll', need > this.el.clientWidth + 1);
+    // толщина полосы как в браузере: Chrome — 4 px (::-webkit-scrollbar), Firefox — 0 (полоса поверх) или своя; высота шапки та же
+    if (this.el.classList.contains('is-scroll')) {
+      const sb = this.el.offsetHeight - this.el.clientHeight - (parseFloat(cs.borderTopWidth) || 0) - (parseFloat(cs.borderBottomWidth) || 0);
+      this.el.style.setProperty('--ted-ui-sb', Math.max(0, Math.min(8, Math.round(sb))) + 'px');
+    }
   }
 
   setVariant(name) {

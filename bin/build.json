@@ -44,6 +44,7 @@
     "blocks/media/audio-player.js",
     "resources/js/core/blocks-json.js",
     "resources/js/core/markdown.js",
+    "resources/js/core/docx.js",
     "resources/js/core/presence.js",
     "resources/js/core/blocks.js",
     "resources/js/core/yo.js",

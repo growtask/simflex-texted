@@ -767,7 +767,7 @@ group('Markdown, JSON и нейросети (22.11)', () => {
     const ed = make('<p>x</p>', {}, { width: 1000 });
     ed.toolbar.openMoreMenu();
     const labels = [...ed.popover.el.querySelectorAll('.ted-ui-item')].map((i) => i.textContent.trim());
-    eq(labels.filter((l) => /промт|Загрузить|Выгрузить|Очистить/.test(l)).join(','), 'Скопировать промт,Загрузить .md или .json,Выгрузить в Markdown,Выгрузить в JSON,Очистить всё');
+    eq(labels.filter((l) => /промт|Загрузить|Выгрузить|Очистить/.test(l)).join(','), 'Скопировать промт,Загрузить .md или .json,Загрузить из Word,Выгрузить в Markdown,Выгрузить в JSON,Выгрузить в Word,Очистить всё');
     ok(!labels.includes('Нейросети'), 'без отдельного подменю «Нейросети»');
     ed.popover.close();
     const p = aiPrompt();

@@ -553,6 +553,23 @@ export function tcOfBlock(b) {
 
 const INLINE_ROOT = /^(#text|B|STRONG|I|EM|U|S|STRIKE|DEL|CODE|A|SPAN|FONT|SUB|SUP|BR|MARK|SMALL|BIG)$/;
 
+/** Большой код (от CODE_SPLIT_LINES строк) держим по строке в текстовом узле: Firefox рисует подсветку (CSS Highlight)
+ *  квадратично от числа диапазонов в одном узле — 2000 строк одним узлом ~1 с на каждую отрисовку, по строкам ~40 мс.
+ *  Пока курсор в коде, узлы не трогаем (курсор не сбивается); меньший код — одним узлом, как раньше. */
+const CODE_SPLIT_LINES = 200;
+function splitCodeLines(code, doc) {
+  const nodes = code.childNodes;
+  if (!nodes.length || ![...nodes].every((n) => n.nodeType === 3)) return;
+  const text = code.textContent;
+  const lines = (text.match(/\n/g) || []).length + 1;
+  if (lines < CODE_SPLIT_LINES) { if (nodes.length > 1) code.normalize(); return; }
+  const sel = document.getSelection();
+  if (sel && sel.rangeCount && code.contains(sel.anchorNode)) return;
+  const parts = text.split(/(?<=\n)/);
+  if (nodes.length === parts.length && parts.every((p, i) => nodes[i].data === p)) return;
+  code.replaceChildren(...parts.map((p) => doc.createTextNode(p)));
+}
+
 export function normalizeRoot(root) {
   const doc = root.ownerDocument;
   let changed = false;
@@ -768,7 +785,7 @@ export function normalizeRoot(root) {
       code.textContent = code.textContent;
       changed = true;
     }
-    if (code.childNodes.length > 1 && !code.querySelector('[data-tedui-m]')) code.normalize();   // тысячи соседних текстовых узлов (после загрузки) склеиваем
+    if (!code.querySelector('[data-tedui-m]')) splitCodeLines(code, doc);
     if (!pre.hasAttribute('data-lang') && !pre.hasAttribute('data-tedui-auto')) pre.setAttribute('data-tedui-auto', '');
     if (pre.hasAttribute('data-nums')) {
       const before = pre.getAttribute('data-nums');
