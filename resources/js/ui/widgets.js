@@ -256,7 +256,9 @@ export class Popover {
     window.addEventListener('scroll', this._reflow, true);
     if (focus) {
       const f = this.el.querySelector(focus);
-      // кнопка в фокусе при открытии — без рамки фокуса (её видно только при переходе клавиатурой): иначе «Заменить» выглядела/n      // кнопкой не из дизайна (сайт texted 27.11, 1.0.4)/n      if (f) setTimeout(() => f.focus({ preventScroll: true, focusVisible: f.tagName !== /x27BUTTON/x27 }), 0);
+      // кнопка в фокусе при открытии — без рамки фокуса (её видно только при переходе клавиатурой): иначе «Заменить» выглядела
+      // кнопкой не из дизайна (сайт texted 27.11, 1.0.4)
+      if (f) setTimeout(() => f.focus({ preventScroll: true, focusVisible: f.tagName !== 'BUTTON' }), 0);
     }
     return this.el;
   }

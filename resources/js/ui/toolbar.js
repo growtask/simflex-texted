@@ -251,6 +251,13 @@ export class Toolbar {
     if (this.pop.isOpen && this.pop.anchor === this.colorBtn) return this.pop.close();
     const ed = this.editor;
     ed.rememberSelection();
+    // открыли с клавиатуры (Esc → Tab, фокус на панели, курсора в тексте нет): курсор — на последнее место, чтобы меню знало
+    // секцию (только для «Цвета»: «Стиль текста» без курсора по-прежнему ставит новый блок)
+    if (!ed.saved && !ed.pickedObject() && ed.lastRange && ed.editable.contains(ed.lastRange.startContainer)) {
+      ed.saved = ed.lastRange.cloneRange();
+      ed.restoreRemembered();
+      ed.updateState();
+    }
     const { canTc, canBgMenu, obj } = this.colorParts();
     if (!canTc && !canBgMenu) return;
     const curTc = obj ? (tcOfBlock(obj) || 'gray') : (ed.state.tc || 'gray');
@@ -264,7 +271,9 @@ export class Toolbar {
       const r = h('div', { class: 'ted-ui-swatches', role: 'radiogroup', 'aria-label': t(kind === 'tc' ? 'Текст' : 'Фон') });
       for (const [name, label] of COLORS) {
         const on = name === active;
-        const b = h('button', { type: 'button', class: `ted-ui-swatch${on ? ' is-active' : ''}`, role: 'radio', 'aria-checked': String(on), 'aria-label': t(label), 'data-tip': label, 'data-value': `${kind}:${name}` }, [
+        // Tab попадает в ряд на выбранную точку (или первую), дальше — стрелки (радиогруппа, заказчик 28.11)
+        const first = active ? on : name === COLORS[0][0];
+        const b = h('button', { type: 'button', class: `ted-ui-swatch${on ? ' is-active' : ''}`, role: 'radio', 'aria-checked': String(on), tabindex: first ? '0' : '-1', 'aria-label': t(label), 'data-tip': label, 'data-value': `${kind}:${name}` }, [
           h('span', { class: `ted-ui-swatch__dot ted-ui-swatch--${kind}-${name}` }),
         ]);
         keepFocus(b);
@@ -287,7 +296,50 @@ export class Toolbar {
     reset.addEventListener('pointerenter', () => ed.previewColor('color:reset'));
     reset.addEventListener('pointerleave', () => ed.clearPreview());
     nodes.push(h('div', { class: 'ted-ui-pop__line' }), reset);
-    this.pop.open(nodes, this.colorBtn, { cls: 'ted-ui-pop--align ted-ui-pop--color', onClose: () => { ed.clearPreview(); ed.restoreRemembered(); } });
+    // Клавиатура (заказчик 28.11): стрелки — по точкам (← →) и между рядами (↑ ↓), точка под рамкой сразу примеряется;
+    // Enter или пробел — выбрать; Esc — закрыть (окно). Работает и без фокуса в меню (курсор остаётся в тексте), и с фокусом на точке
+    let el = null;
+    let pos = null;
+    const grid = () => [...el.querySelectorAll('.ted-ui-swatches')].map((r) => [...r.children]).concat([[reset]]);
+    const show = (r, c) => {
+      const g = grid();
+      r = (r + g.length) % g.length;
+      c = Math.max(0, Math.min(c, g[r].length - 1));
+      pos = [r, c];
+      el.querySelectorAll('.is-focus').forEach((x) => x.classList.remove('is-focus'));
+      const it = g[r][c];
+      it.classList.add('is-focus');
+      if (el.contains(document.activeElement) && document.activeElement !== it) it.focus({ preventScroll: true });
+      ed.previewColor(it.dataset.value);
+    };
+    const startPos = () => {
+      const g = grid();
+      const fromFocus = g.findIndex((row) => row.includes(document.activeElement));
+      if (fromFocus >= 0) return [fromFocus, g[fromFocus].indexOf(document.activeElement)];
+      const c = g[0].findIndex((x) => x.classList.contains('is-active'));
+      return [0, Math.max(0, c)];
+    };
+    const keyHandler = (e) => {
+      const dir = { ArrowRight: [0, 1], ArrowLeft: [0, -1], ArrowDown: [1, 0], ArrowUp: [-1, 0] }[e.key];
+      if (dir) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!pos) pos = startPos();   // первое нажатие — сразу от выбранной точки (или первой) на соседнюю
+        const row = grid()[pos[0]];
+        if (dir[1]) return show(pos[0], (pos[1] + dir[1] + row.length) % row.length);
+        return show(pos[0] + dir[0], pos[1]);
+      }
+      if ((e.key === 'Enter' || e.key === ' ') && pos) {
+        e.preventDefault();
+        e.stopPropagation();
+        grid()[pos[0]][pos[1]].click();
+      }
+    };
+    el = this.pop.open(nodes, this.colorBtn, { cls: 'ted-ui-pop--align ted-ui-pop--color', keyHandler, onClose: () => { ed.clearPreview(); ed.restoreRemembered(); } });
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-label', t('Цвет'));
+    // фокус Tab-ом на точке: рамка и примерка идут за фокусом (стрелки дальше двигают от неё)
+    el.addEventListener('focusin', (e) => { const g = grid(); const r = g.findIndex((row) => row.includes(e.target)); if (r >= 0) { pos = [r, g[r].indexOf(e.target)]; el.querySelectorAll('.is-focus').forEach((x) => x.classList.remove('is-focus')); e.target.classList.add('is-focus'); } });
   }
 
   /** Что умеет меню «Цвет» в этом месте: цвет текста — блок с текстом; фон — блок с фоном, набор с «Цветным фоном». */

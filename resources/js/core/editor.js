@@ -887,6 +887,7 @@ export class Editor {
 
   updateState() {
     const r = getRange(this.editable);
+    if (r) this.lastRange = r.cloneRange();   // последнее место курсора: меню, открытое с клавиатуры (Esc → Tab), знает, что красить
     const block = this.blockFromRange(r);
     const type = blockType(block) || 'p';
     const inNode = (sel) => {

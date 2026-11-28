@@ -1400,3 +1400,57 @@ group('«Сбросить цвет» и фон по умолчанию в тём
     light.destroy();
   });
 });
+
+group('Меню «Цвет» с клавиатуры (заказчик 28.11)', () => {
+  const key = (k) => document.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
+  test('стрелки: → со «Стандартного» на «Акцентный» с примеркой, ↓ в «Фон», ↑ обратно, Enter — выбрать', async () => {
+    const ed = make('<p>текст</p>', {}, { width: 1000 });
+    const p = ed.editable.querySelector('p');
+    ed.focus(); const r = document.createRange(); r.setStart(p.firstChild, 2); r.collapse(true);
+    getSelection().removeAllRanges(); getSelection().addRange(r); ed.updateState();
+    ed.toolbar.colorBtn.click();
+    await wait(20);
+    const focused = () => [...ed.popover.el.querySelectorAll('.is-focus')].map((x) => x.dataset.value).join();
+    key('ArrowRight');
+    eq(focused(), 'tc:color1', 'первое нажатие — сразу на соседнюю');
+    ok(p.classList.contains('ted-tc-color1'), 'примерка');
+    key('ArrowRight'); key('ArrowLeft');
+    eq(focused(), 'tc:color1');
+    key('ArrowDown');
+    eq(focused(), 'bg:color1', 'в ряд фона на ту же позицию');
+    ok(p.classList.contains('ted-bg-color1') && !p.classList.contains('ted-tc-color1'), 'примерка фона вместо текста');
+    key('ArrowUp');
+    key('Enter');
+    ok(!ed.popover.isOpen, 'меню закрыто');
+    eq(p.className, 'ted-tc-color1', 'выбран цвет текста');
+    ed.destroy();
+  });
+  test('меню открыли с панели (курсора в тексте нет) — красится блок, где курсор был последним', async () => {
+    const ed = make('<p>один</p><p>два</p>', {}, { width: 1000 });
+    const p2 = ed.editable.children[1];
+    ed.focus(); const r = document.createRange(); r.setStart(p2.firstChild, 1); r.collapse(true);
+    getSelection().removeAllRanges(); getSelection().addRange(r); ed.updateState();
+    ed.toolbar.colorBtn.focus();
+    getSelection().removeAllRanges();
+    ed.toolbar.colorBtn.click();
+    await wait(20);
+    ok(ed.popover.el.querySelector('[data-value="tc:error"]'), 'ряд «Текст» есть');
+    ed.popover.el.querySelector('[data-value="tc:error"]').click();
+    eq(p2.className, 'ted-tc-error');
+    ed.destroy();
+  });
+});
+
+group('Окна ставят фокус в поле при открытии (28.11: строка была испорчена)', () => {
+  test('«Якорь»: поле названия в фокусе', async () => {
+    const ed = make('<p>текст</p>', {}, { width: 1000 });
+    const p = ed.editable.querySelector('p');
+    ed.focus(); const r = document.createRange(); r.setStart(p.firstChild, 1); r.collapse(true);
+    getSelection().removeAllRanges(); getSelection().addRange(r); ed.updateState();
+    ed.exec('anchor');
+    await wait(30);
+    ok(document.activeElement && document.activeElement.classList.contains('ted-ui-input'), document.activeElement && document.activeElement.className);
+    ed.popover.close();
+    ed.destroy();
+  });
+});
