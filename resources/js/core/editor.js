@@ -2524,7 +2524,7 @@ export class Editor {
         // плитки цифр: текст подписи никогда не переезжает в заголовок другой плитки
         const list = li.parentNode;
         if (titleEmpty && descEmpty) {
-          // пустая последняя плитка + Enter — выход из блока (PRINCIPLES п.5); меньше двух плиток не бывает — тогда плитка остаётся
+          // пустая последняя плитка + Enter — выход из блока, как у списков; меньше двух плиток не бывает — тогда плитка остаётся
           if (li === list.lastElementChild) {
             if (list.children.length > 2) li.remove();
             let p = list.nextElementSibling;

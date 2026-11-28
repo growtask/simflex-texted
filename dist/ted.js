@@ -1,4 +1,4 @@
-/*! Ted 1.0.4 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-28 10:02 */
+/*! Ted 1.0.4 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-28 10:26 */
 (function () {
 'use strict';
 
@@ -16906,7 +16906,7 @@ class Editor {
         // плитки цифр: текст подписи никогда не переезжает в заголовок другой плитки
         const list = li.parentNode;
         if (titleEmpty && descEmpty) {
-          // пустая последняя плитка + Enter — выход из блока (PRINCIPLES п.5); меньше двух плиток не бывает — тогда плитка остаётся
+          // пустая последняя плитка + Enter — выход из блока, как у списков; меньше двух плиток не бывает — тогда плитка остаётся
           if (li === list.lastElementChild) {
             if (list.children.length > 2) li.remove();
             let p = list.nextElementSibling;

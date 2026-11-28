@@ -7,7 +7,7 @@
    Ted — интерфейс редактора. Источник: макет TextEd (editor-ui) на компонентах
    библиотеки «Симфлекс АИ»: Tabs/main soft (кнопки), Tooltip/main,
    Dropdown/main (меню), Inputs/main, Buttons/main, Buttons/icon-small.
-   Классы интерфейса: ted-ui-*. Размеры и цвета — см. LAYOUT.md.
+   Классы интерфейса: ted-ui-*. Размеры и цвета — токены дизайн-системы (ui/tokens.css).
    ========================================================================== */
 .ted-ui {
   /* light */

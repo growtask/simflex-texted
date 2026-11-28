@@ -1,6 +1,6 @@
-/* Оболочка демо-страниц Ted — только компоненты дизайн-системы «Симфлекс АИ» (значения: LAYOUT.md §10).
+/* Оболочка демо-страниц Ted — только компоненты дизайн-системы «Симфлекс АИ» .
    Buttons/menu (horizontal, l, flat), Tabs/main (soft, s), Buttons/main (primary), Cards/main (fullhd → mobile).
-   Тёмные состояния меню в библиотеке ещё не сняты — используются токены темы (см. LAYOUT.md §10). */
+   Тёмные состояния меню в библиотеке ещё не сняты — используются токены темы . */
 :root {
   --d-page: #ffffff; --d-card: #edf3fa; --d-line: #edf3fa; --d-text: #262626; --d-muted: #919599; --d-text2: #4d4d4d;
   --d-hover: #edf3fa; --d-press: #d2e2f7; --d-active: #edf3fa; --d-active-text: #104fa6; --d-link: #1975f7;
