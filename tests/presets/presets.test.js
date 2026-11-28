@@ -240,4 +240,12 @@ group('Наборы: таблицы из старых статей (28.11)', () 
     }
     eq(Ted.clean('<figure><img src="/a.png" alt=""><figcaption>Фото</figcaption></figure>').includes('ted-table'), false, 'figure с картинкой таблицей не становится');
   });
+  test('картинка в наборе без картинок: подпись остаётся абзацем (старая статья и своё изображение), как на сервере', () => {
+    const flat = (s) => s.replace(/>\s+</g, '><').trim();
+    const legacy = '<figure><img src="/uf/a.jpg" alt="Альт"><figcaption>Подпись к фото</figcaption></figure>';
+    const own = '<figure class="ted-media ted-media--image"><img src="/uf/a.jpg" alt="Альт"><figcaption>Своя подпись</figcaption></figure>';
+    eq(flat(Ted.clean(legacy, { preset: 'text' })), '<p>Подпись к фото</p>', 'text: старая картинка — подпись');
+    eq(flat(Ted.clean(own, { preset: 'text' })), '<p>Своя подпись</p>', 'text: своё изображение — подпись');
+    eq(flat(Ted.clean('<figure class="ted-media ted-media--image"><img src="/uf/a.jpg" alt=""></figure>', { preset: 'text' })), '', 'text: картинка без подписи исчезает');
+  });
 });

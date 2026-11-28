@@ -1,4 +1,4 @@
-/*! Ted 1.0.4 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-28 06:49 */
+/*! Ted 1.0.4 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-28 09:46 */
 (function () {
 'use strict';
 
@@ -3591,7 +3591,14 @@ function degradeBlock(el, kind, doc) {
     case 'blockquote': return Array.from(el.children).filter((c) => c.tagName === 'P' && !c.classList.contains('ted-author')).map((c) => textNodesOf(c, doc));
     case 'pre': return [p(esc(el.textContent).replace(/\n/g, '<br>'))];
     case 'ul': case 'ol': return Array.from(el.children).map((li) => textNodesOf(li, doc));
-    case 'raw': return [];
+    // картинка из старой статьи (<figure> без класса, в редакторе — HTML-блок): подпись — абзацем,
+    // как на сервере и у блока «Изображение» (28.11); прочий HTML-блок исчезает
+    case 'raw': case 'figure': {
+      const fig = el.tagName === 'FIGURE' ? el : el.querySelector(':scope > figure');
+      if (!fig || !fig.querySelector('img')) return kind === 'raw' ? [] : [textNodesOf(el, doc)];
+      const t = text(fig.querySelector('figcaption'));
+      return t ? [p(esc(t))] : [];
+    }
     default:
       if (/^h[2-6]$/.test(kind)) return [textNodesOf(el, doc)];
       return [textNodesOf(el, doc)];
@@ -7290,7 +7297,6 @@ const MEDIA_BLOCK = {
       "type": "image",
       "title": "Изображение",
       "selector": "figure.ted-media--image",
-      "degrade": "drop",
       "insertMenu": "media",
       "menu": {
         "group": "Медиа",
@@ -7532,7 +7538,9 @@ function serializeMedia(figure, wrap = null) {
   return out.outerHTML;
 }
 
-/** В наборе без вида: файлы и видео — ссылками (так же на сервере — media.php), остальное исчезает (degrade: drop). */
+/** В наборе без вида: файлы и видео — ссылками (так же на сервере — Media.php); у изображения остаётся подпись абзацем
+ * (28.11: подпись старой статьи не пропадает), галерея и аудио исчезают (degrade: drop). */
+const captionToText = (el, { p, text, esc }) => { const t = text(el.querySelector("figcaption")); return t ? [p(esc(t))] : []; };
 const linksToText = (el, { doc }) => [...el.querySelectorAll('a[href]')].map((a) => {
   const n = doc.createElement('p'); const link = doc.createElement('a');
   link.href = a.getAttribute('href'); link.textContent = a.textContent || a.getAttribute('href');
@@ -7574,6 +7582,7 @@ for (const v of MEDIA_VARIANTS) {
     editorUi: mediaUi,
     editorUiName: 'media',
     ...(v.type === 'file' || v.type === 'video' ? { toText: linksToText } : {}),
+    ...(v.type === 'image' ? { toText: captionToText } : {}),
     ...(v.type === 'image' ? { fromRaw: imageFromRaw } : {}),
   });
 }

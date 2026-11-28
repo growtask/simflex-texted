@@ -9,7 +9,6 @@
       "type": "image",
       "title": "Изображение",
       "selector": "figure.ted-media--image",
-      "degrade": "drop",
       "insertMenu": "media",
       "menu": {
         "group": "Медиа",

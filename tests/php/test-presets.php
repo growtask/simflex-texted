@@ -112,6 +112,14 @@ foreach ([
     }
 }
 $ok($c->clean('<p><b>a</b> <i>b</i> <strike>c</strike> <del>d</del> <kbd>e</kbd> <b onclick="x()">f</b></p>', 'full') === '<p><strong>a</strong> <em>b</em> <s>c</s> <s>d</s> <code>e</code> <strong>f</strong></p>', 'старое оформление b, i, strike, del, kbd — стандартными тегами, без атрибутов');
+// картинка в наборе без картинок (28.11): подпись остаётся абзацем — старая статья, своё изображение (как в браузере)
+foreach ([
+    '<figure><img src="/uf/a.jpg" alt="Альт"><figcaption>Подпись к фото</figcaption></figure>' => '<p>Подпись к фото</p>',
+    '<figure class="ted-media ted-media--image"><img src="/uf/a.jpg" alt="Альт"><figcaption>Своя подпись</figcaption></figure>' => '<p>Своя подпись</p>',
+    '<figure class="ted-media ted-media--image"><img src="/uf/a.jpg" alt=""></figure>' => '',
+] as $img => $want) {
+    $ok($c->clean($img, 'text') === $want, 'text: картинка — подпись абзацем: ' . $img, $c->clean($img, 'text'));
+}
 $keep = '<figure class="ted-iframe"><iframe src="https://example.com/"></iframe></figure>';
 $ok(str_contains($c->clean($keep, 'full'), '<iframe'), 'full: iFrame остаётся');
 $ok(str_contains(Config::fromArray(['presets' => ['acc' => ['blocks' => ['accordion']]]])->clean('<div class="ted-accordion"><details class="ted-accordion__item"><summary class="ted-accordion__q">q</summary><div class="ted-accordion__body"><p>a</p></div></details></div>', 'acc'), '<details'), 'набор с аккордеоном: свой details остаётся');

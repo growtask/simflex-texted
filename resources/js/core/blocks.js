@@ -173,7 +173,14 @@ function degradeBlock(el, kind, doc) {
     case 'blockquote': return Array.from(el.children).filter((c) => c.tagName === 'P' && !c.classList.contains('ted-author')).map((c) => textNodesOf(c, doc));
     case 'pre': return [p(esc(el.textContent).replace(/\n/g, '<br>'))];
     case 'ul': case 'ol': return Array.from(el.children).map((li) => textNodesOf(li, doc));
-    case 'raw': return [];
+    // картинка из старой статьи (<figure> без класса, в редакторе — HTML-блок): подпись — абзацем,
+    // как на сервере и у блока «Изображение» (28.11); прочий HTML-блок исчезает
+    case 'raw': case 'figure': {
+      const fig = el.tagName === 'FIGURE' ? el : el.querySelector(':scope > figure');
+      if (!fig || !fig.querySelector('img')) return kind === 'raw' ? [] : [textNodesOf(el, doc)];
+      const t = text(fig.querySelector('figcaption'));
+      return t ? [p(esc(t))] : [];
+    }
     default:
       if (/^h[2-6]$/.test(kind)) return [textNodesOf(el, doc)];
       return [textNodesOf(el, doc)];

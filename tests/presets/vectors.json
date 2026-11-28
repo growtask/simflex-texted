@@ -162,8 +162,8 @@
    "html": "<figure class=\"ted-media ted-media--image\"><img src=\"/uf/images/a.webp\" alt=\"\" loading=\"lazy\"><figcaption>Подпись</figcaption></figure>",
    "expect": {
     "mini": "<figure class=\"ted-media ted-media--image\"><img src=\"/uf/images/a.webp\" alt=\"\" loading=\"lazy\"><figcaption>Подпись</figcaption></figure>",
-    "text": "",
-    "custom": ""
+    "text": "<p>Подпись</p>",
+    "custom": "<p>Подпись</p>"
    }
   },
   {
