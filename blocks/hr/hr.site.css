@@ -11,3 +11,5 @@
   border-radius: calc(32 * var(--ted-u));
   background: var(--ted-c-line);
 }
+/* Разделитель (1.0.4): цвет линии — из меню «Цвет» → «Фон» */
+.ted-content hr[class*="ted-bg-"] { padding: 0; border-radius: calc(32 * var(--ted-u)); background: var(--ted-bg); }

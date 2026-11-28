@@ -5,7 +5,6 @@
   "figma": "block-proscons",
   "text": true,
   "toolbar": {
-    "bg": false,
     "align": false,
     "style": false
   },

@@ -71,3 +71,40 @@
 }
 
 .ted-ui[lang="en"] .ted-ui-editable .ted-ui-raw::after { content: "HTML block from old content"; }
+
+/* выбранный пустой блок (меню блока, перетаскивание): подсказка на подсветке темнее — светлая на ней не читалась
+   (text-icon/gray/medium; в тёмной теме — gray/light; сайт texted 27.11, 1.0.4) */
+.ted-ui-editable [data-tedui-selected][data-tedui-ph]::before,
+.ted-ui-editable [data-tedui-selected] [data-tedui-ph]::before { color: var(--ui-color-text-icon-gray-medium); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-editable [data-tedui-selected][data-tedui-ph]::before,
+.ted-ui[data-ted-theme="dark"] .ted-ui-editable [data-tedui-selected] [data-tedui-ph]::before { color: var(--ui-color-text-icon-gray-light); }
+/* заглушки на цветном фоне (таблица, абзац, выноска…): светлая серая пропадала — темнее, text-icon/gray/medium (заказчик 28.11) */
+.ted-ui-editable [class*="ted-bg-"][data-tedui-ph]::before,
+.ted-ui-editable [class*="ted-bg-"] [data-tedui-ph]::before { color: var(--ui-color-text-icon-gray-medium); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-editable [class*="ted-bg-"][data-tedui-ph]::before,
+.ted-ui[data-ted-theme="dark"] .ted-ui-editable [class*="ted-bg-"] [data-tedui-ph]::before { color: var(--ui-color-text-icon-gray-light); }
+
+/* предпросмотр цвета куска текста (наведение на точку меню «Цвет», 1.0.4): CSS Highlight, в разметку не попадает */
+.ted-ui-editable ::highlight(ted-pv-tc-gray) { color: var(--ted-c-text); }
+.ted-ui-editable ::highlight(ted-pv-tc-color1) { color: var(--ted-tc-color1); }
+.ted-ui-editable ::highlight(ted-pv-tc-color2) { color: var(--ted-tc-color2); }
+.ted-ui-editable ::highlight(ted-pv-tc-error) { color: var(--ted-tc-error); }
+.ted-ui-editable ::highlight(ted-pv-tc-alert) { color: var(--ted-tc-alert); }
+.ted-ui-editable ::highlight(ted-pv-tc-success) { color: var(--ted-tc-success); }
+.ted-ui-editable ::highlight(ted-pv-bg-gray) { background-color: var(--ted-bg-gray); }
+.ted-ui-editable ::highlight(ted-pv-bg-color1) { background-color: var(--ted-bg-color1); }
+.ted-ui-editable ::highlight(ted-pv-bg-color2) { background-color: var(--ted-bg-color2); }
+.ted-ui-editable ::highlight(ted-pv-bg-error) { background-color: var(--ted-bg-error); }
+.ted-ui-editable ::highlight(ted-pv-bg-alert) { background-color: var(--ted-bg-alert); }
+.ted-ui-editable ::highlight(ted-pv-bg-success) { background-color: var(--ted-bg-success); }
+.ted-ui-editable ::highlight(ted-pv-bg-none) { background-color: transparent; }
+
+/* Плавная смена цвета текста и фона (меню «Цвет», предпросмотр наведением — заказчик 28.11): только на время смены
+   (класс is-recoloring ставит редактор на 400 мс), чтобы не задевать другие эффекты (наведение на чек-бокс и т. п.) */
+@media (prefers-reduced-motion: no-preference) {
+  .ted-ui-editable.is-recoloring :where(*), .ted-ui-editable.is-recoloring :where(*)::before {
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  }
+}
+/* примерка «Сбросить цвет»: покрашенные слова — как обычный текст */
+.ted-ui-editable mark[data-tedui-pv][data-tedui-pv][data-tedui-pv] { color: inherit; background: none; }

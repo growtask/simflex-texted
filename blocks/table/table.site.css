@@ -21,7 +21,8 @@
 .ted-content .ted-table__wrap::-webkit-scrollbar-thumb { border-radius: 9999px; background: rgba(99, 161, 247, 0.4); }   /* как у кода (решение заказчика 17.11) */
 .ted-content .ted-table__wrap::-webkit-scrollbar-thumb:hover { background: rgba(25, 117, 247, 0.5); }
 .ted-content .ted-table__wrap::-webkit-scrollbar-thumb:active { background: rgba(20, 97, 204, 0.5); }
-.ted-content .ted-table__wrap::-webkit-scrollbar-track, .ted-content .ted-table__wrap::-webkit-scrollbar-thumb { border-block: 6px solid transparent; background-clip: padding-box !important; }   /* !important: background у :hover сбрасывает clip */
+.ted-content .ted-table__wrap::-webkit-scrollbar-track, .ted-content .ted-table__wrap::-webkit-scrollbar-thumb { border: 6px solid transparent;   /* со всех сторон: при рамке только сверху и снизу скругление концов вытягивалось в овал (заказчик 28.11) */
+ background-clip: padding-box !important; }   /* !important: background у :hover сбрасывает clip */
 .ted-content .ted-table table { box-sizing: border-box; width: 100%; margin: 0; border: calc(2 * var(--ted-u)) solid var(--ted-table-line); border-collapse: separate; border-spacing: 0; border-radius: calc(8 * var(--ted-u)); table-layout: fixed; overflow: hidden; }
 .ted-content .ted-table table[data-cols="1"] { min-width: calc(124 * var(--ted-u)); }
 .ted-content .ted-table table[data-cols="2"] { min-width: calc(244 * var(--ted-u)); }
@@ -48,3 +49,8 @@
 
 /* пустая ячейка — высотой строки текста, пустая строка таблицы на сайте не схлопывается в полоску (проверка 22.11) */
 .ted-content .ted-table :is(td, th):empty::before { content: "\200b"; }
+/* Цвет текста: шапка — ступенью заголовков, ячейки — цветом; подпись остаётся серой */
+.ted-content .ted-table[class*="ted-tc-"] th { color: var(--ted-tc-h); }
+.ted-content .ted-table[class*="ted-tc-"] td { color: var(--ted-tc); }
+/* Цветной фон (1.0.4): шапка, рамка и линии — цветом фона, без подложки блока «Цветной фон» */
+.ted-content figure.ted-table[class*="ted-bg-"] { padding: 0; border-radius: 0; background: none; --ted-table-head-bg: var(--ted-bg); --ted-table-line: var(--ted-bg); }

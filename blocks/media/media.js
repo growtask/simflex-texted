@@ -187,7 +187,9 @@ function serializeMedia(figure, wrap = null) {
   return out.outerHTML;
 }
 
-/** В наборе без вида: файлы и видео — ссылками (так же на сервере — media.php), остальное исчезает (degrade: drop). */
+/** В наборе без вида: файлы и видео — ссылками (так же на сервере — Media.php); у изображения остаётся подпись абзацем
+ * (28.11: подпись старой статьи не пропадает), галерея и аудио исчезают (degrade: drop). */
+const captionToText = (el, { p, text, esc }) => { const t = text(el.querySelector("figcaption")); return t ? [p(esc(t))] : []; };
 const linksToText = (el, { doc }) => [...el.querySelectorAll('a[href]')].map((a) => {
   const n = doc.createElement('p'); const link = doc.createElement('a');
   link.href = a.getAttribute('href'); link.textContent = a.textContent || a.getAttribute('href');
@@ -229,6 +231,7 @@ for (const v of MEDIA_VARIANTS) {
     editorUi: mediaUi,
     editorUiName: 'media',
     ...(v.type === 'file' || v.type === 'video' ? { toText: linksToText } : {}),
+    ...(v.type === 'image' ? { toText: captionToText } : {}),
     ...(v.type === 'image' ? { fromRaw: imageFromRaw } : {}),
   });
 }

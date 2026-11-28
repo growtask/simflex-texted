@@ -27,3 +27,11 @@
   .ted-content .ted-product__text { flex-basis: 0; }
   .ted-content .ted-product__btn { width: 100%; }
 }
+/* Цвет (1.0.4): название и цена — цветом текста (название ступенью заголовков), старая цена серая; фон карточки — из
+   «Фона»; на дополнительном фоне кнопка — дополнительного цвета, на остальных — синяя */
+.ted-content .ted-product[class*="ted-tc-"] .ted-product__name { color: var(--ted-tc-h); }
+.ted-content .ted-product[class*="ted-tc-"] .ted-product__now { color: var(--ted-tc); }
+.ted-content .ted-product[class*="ted-bg-"] { background: var(--ted-bg); border-color: var(--ted-bg); }
+.ted-content .ted-product.ted-bg-color2 .ted-product__btn { background: var(--color-main-color2-main, #6161f2); }
+.ted-content .ted-product.ted-bg-color2 .ted-product__btn:hover { background: var(--color-main-color2-dark, #4d4dbf); }
+.ted-content .ted-product.ted-bg-color2 .ted-product__btn:active { background: var(--color-main-color2-darker, #38388c); }

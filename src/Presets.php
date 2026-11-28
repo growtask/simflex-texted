@@ -57,7 +57,7 @@ final class Presets
         return $def ? $def['type'] : $t;
     }
     private const MODES = ['edit', 'view', 'readonly'];
-    private const BG_NAMES = ['gray', 'color1', 'color2'];
+    private const BG_NAMES = ['gray', 'color1', 'color2', 'error', 'alert', 'success'];
 
     /**
      * Проверить описание своего набора; вернуть ['blocks' => 'all' | [виды], 'mode' => …].
@@ -305,6 +305,16 @@ final class Presets
             return $def['type'];
         }
         $tag = strtolower($el->localName);
+        // таблица из старой статьи: голая <table> или <figure> без класса с таблицей и подписью — блок «Таблица»
+        // (как adopt в blocks/table/table.js): в наборе без таблиц — строки абзацами, а не пропажа или слитный текст (28.11)
+        if ($tag === 'figure' && !$el->hasAttribute('class')) {
+            $kids = self::elements($el);
+            $tables = array_filter($kids, static fn($k) => strtolower($k->localName) === 'table');
+            $other = array_filter($kids, static fn($k) => !in_array(strtolower($k->localName), ['table', 'figcaption'], true));
+            if (count($tables) === 1 && !$other) {
+                return 'table';
+            }
+        }
         return $tag;
     }
 

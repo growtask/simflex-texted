@@ -1,4 +1,4 @@
-/*! Ted content 1.0.3 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-27 12:32 */
+/*! Ted content 1.0.4 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-28 12:19 */
 (function () {
 'use strict';
 
@@ -261,6 +261,37 @@ function siteText(node, ru, en) {
   return /^en/i.test((el && el.getAttribute('lang')) || '') ? en : ru;
 }
 
+/**
+ * Тост на сайте — тот же Feedback/toast, что в редакторе (.ted-ui-toast из ted.css): внизу по центру, 3,5 с; на тёмной
+ * странице — светлый (как редактор в тёмной теме), ошибка — красный (1.0.4)
+ */
+function siteToast(node, text, status = '') {
+  const doc = node.ownerDocument || node;
+  let stack = doc.querySelector('body > .ted-ui-toasts[data-ted-site]');
+  if (!stack) {
+    stack = doc.createElement('div');
+    stack.className = 'ted-ui-toasts';
+    stack.setAttribute('data-ted-site', '');
+    stack.setAttribute('role', 'status');
+    stack.setAttribute('aria-live', 'polite');
+    doc.body.appendChild(stack);
+  }
+  const dark = !!(node.closest && node.closest('[data-ted-theme="dark"]')) || doc.documentElement.getAttribute('data-ted-theme') === 'dark';
+  const toast = doc.createElement('div');
+  toast.className = 'ted-ui-toast' + (status ? ' ted-ui-toast--' + status : dark ? ' ted-ui-toast--on-dark' : '');
+  const p = doc.createElement('p');
+  p.className = 'ted-ui-toast__text';
+  p.textContent = text;
+  const timer = doc.createElement('span');
+  timer.className = 'ted-ui-toast__timer';
+  timer.style.animationDuration = '3500ms';
+  toast.append(p, timer);
+  while (stack.children.length >= 3) stack.firstElementChild.remove();
+  stack.appendChild(toast);
+  setTimeout(() => { toast.classList.add('is-closing'); setTimeout(() => toast.remove(), 160); }, 3500);
+  return toast;
+}
+
 // ---- blocks/pre/pre.site.js ----
 // Блок «Код» на сайте: в шапке справа кнопка «Копировать код» (как в редакторе). Собирается в content.js
 // (build.json → content → @blocks.content); siteBlock — из resources/js/site/blocks.js.
@@ -268,19 +299,30 @@ function siteText(node, ru, en) {
 const SITE_COPY_ICON = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 3.5v-.5a1.5 1.5 0 0 0-1.5-1.5H3.5A1.5 1.5 0 0 0 2 3v5.5A1.5 1.5 0 0 0 3.5 10H4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
 const SITE_CHECK_ICON = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-async function siteCopyText(doc, text) {
-  try { await navigator.clipboard.writeText(text); return true; } catch { /* нет доступа к буферу (http, старый браузер) — пробуем запасной способ */ }
-  try {
-    const field = doc.createElement('textarea');
-    field.value = text;
-    field.setAttribute('readonly', '');
-    field.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
-    doc.body.appendChild(field);
-    field.select();
-    const ok = doc.execCommand('copy');
-    field.remove();
-    return ok;
-  } catch { return false; }
+/**
+ * Копирование в буфер. Без https (и не на localhost) браузер не даёт Clipboard API — сразу запасной способ, пока ещё
+ * идёт нажатие (после await браузер его уже не разрешает). На https — Clipboard API, при отказе — запасной (1.0.4)
+ */
+function siteCopyText(doc, text) {
+  const legacy = () => {
+    try {
+      const field = doc.createElement('textarea');
+      field.value = text;
+      field.setAttribute('readonly', '');
+      field.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+      const active = doc.activeElement;
+      doc.body.appendChild(field);
+      field.select();
+      const ok = doc.execCommand('copy');
+      field.remove();
+      if (active && active.focus) active.focus({ preventScroll: true });
+      return ok;
+    } catch { return false; }
+  };
+  const win = doc.defaultView || window;
+  const api = win.isSecureContext && win.navigator.clipboard && win.navigator.clipboard.writeText;
+  if (!api) return Promise.resolve(legacy());
+  return win.navigator.clipboard.writeText(text).then(() => true, () => legacy());
 }
 
 function siteCodeCopy(root) {
@@ -302,6 +344,8 @@ function siteCodeCopy(root) {
       button.classList.toggle('is-failed', !ok);
       button.innerHTML = ok ? SITE_CHECK_ICON : SITE_COPY_ICON;
       button.setAttribute('aria-label', ok ? siteText(pre, 'Код скопирован', 'Code copied') : siteText(pre, 'Не удалось скопировать код', 'Could not copy the code'));
+      // как в редакторе: тост «Код скопирован» / «Не удалось скопировать код»
+      siteToast(pre, ok ? siteText(pre, 'Код скопирован', 'Code copied') : siteText(pre, 'Не удалось скопировать код', 'Could not copy the code'), ok ? '' : 'error');
       timer = setTimeout(() => { button.classList.remove('is-copied', 'is-failed'); button.innerHTML = SITE_COPY_ICON; button.setAttribute('aria-label', siteText(pre, 'Копировать код', 'Copy code')); }, 1600);
     });
     pre.prepend(button);

@@ -79,3 +79,5 @@
 }
 .ted-content blockquote > p.ted-author > strong:first-child + br { display: none; }
 .ted-content blockquote > p.ted-author > strong:last-child { margin-bottom: 0; }
+/* Цвет текста (1.0.4): линия цитаты — цветом текста; автор остаётся серым */
+.ted-content blockquote[class*="ted-tc-"]:not(.ted-callout)::before { background: var(--ted-tc); }

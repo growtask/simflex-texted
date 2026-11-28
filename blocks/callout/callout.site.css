@@ -39,6 +39,7 @@
 .ted-content blockquote.ted-callout > * + * { margin-top: calc(4 * var(--ted-u)); }
 
 /* «Цветной фон» перекрашивает плашку выноски */
-.ted-content blockquote.ted-callout.ted-bg-gray { background: var(--ted-bg-gray); }
-.ted-content blockquote.ted-callout.ted-bg-color1 { background: var(--ted-bg-color1); }
-.ted-content blockquote.ted-callout.ted-bg-color2 { background: var(--ted-bg-color2); }
+.ted-content blockquote.ted-callout[class*="ted-bg-"] { background: var(--ted-bg); }
+/* Цвет текста: заголовок выноски и значок — ступенью заголовков, текст — цветом */
+.ted-content blockquote.ted-callout[class*="ted-tc-"] > p:first-child { color: var(--ted-tc-h); }
+.ted-content blockquote.ted-callout[class*="ted-tc-"]::before { background: var(--ted-tc-h); }

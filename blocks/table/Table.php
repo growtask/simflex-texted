@@ -15,34 +15,61 @@ use Simflex\Texted\ServerBlock;
  */
 final class Table implements ServerBlock
 {
-    /** @return DOMElement[] строки таблицы: figure > .ted-table__wrap > table > thead|tbody > tr */
-    private function getRows(DOMElement $fig): array
+    /**
+     * Сама таблица: блок редактора — figure > .ted-table__wrap > table; таблица из старой статьи или вставки — голая
+     * <table> (или figure > table) — тоже читается, иначе в наборе без таблиц пропадала вместе с текстом (28.11).
+     */
+    private function getTable(DOMElement $el): ?DOMElement
     {
-        $rows = [];
-        foreach (Presets::elements($fig) as $wrap) {
-            if (!Presets::has($wrap, 'ted-table__wrap')) {
-                continue;
+        if (strtolower($el->localName) === 'table') {
+            return $el;
+        }
+        foreach (Presets::elements($el) as $c) {
+            if (strtolower($c->localName) === 'table') {
+                return $c;
             }
-            foreach (Presets::elements($wrap) as $table) {
-                if (strtolower($table->localName) !== 'table') {
-                    continue;
-                }
-                foreach (['thead', 'tbody'] as $part) {
-                    foreach (Presets::elements($table) as $sec) {
-                        if (strtolower($sec->localName) !== $part) {
-                            continue;
-                        }
-                        foreach (Presets::elements($sec) as $tr) {
-                            if (strtolower($tr->localName) === 'tr') {
-                                $rows[] = $tr;
-                            }
-                        }
+            if (Presets::has($c, 'ted-table__wrap')) {
+                foreach (Presets::elements($c) as $t) {
+                    if (strtolower($t->localName) === 'table') {
+                        return $t;
                     }
                 }
-                return $rows;
             }
         }
-        return $rows;
+        return null;
+    }
+
+    /** @return DOMElement[] строки таблицы по порядку: шапка, тело (и строки прямо в table), итог */
+    private function getRows(DOMElement $el): array
+    {
+        $table = $this->getTable($el);
+        if (!$table) {
+            return [];
+        }
+        $head = $body = $foot = [];
+        foreach (Presets::elements($table) as $sec) {
+            $name = strtolower($sec->localName);
+            if ($name === 'tr') {
+                $body[] = $sec;
+                continue;
+            }
+            if (!in_array($name, ['thead', 'tbody', 'tfoot'], true)) {
+                continue;
+            }
+            foreach (Presets::elements($sec) as $tr) {
+                if (strtolower($tr->localName) !== 'tr') {
+                    continue;
+                }
+                if ($name === 'thead') {
+                    $head[] = $tr;
+                } elseif ($name === 'tfoot') {
+                    $foot[] = $tr;
+                } else {
+                    $body[] = $tr;
+                }
+            }
+        }
+        return [...$head, ...$body, ...$foot];
     }
 
     public function degrade(DOMElement $element, DOMDocument $document): array
@@ -64,8 +91,10 @@ final class Table implements ServerBlock
                 $out[] = $p;
             }
         }
-        foreach (Presets::elements($element) as $c) {
-            if (strtolower($c->localName) === 'figcaption' && Presets::text($c) !== '') {
+        $table = $this->getTable($element);
+        $captions = [...Presets::elements($element), ...($table && $table !== $element ? Presets::elements($table) : [])];
+        foreach ($captions as $c) {
+            if (in_array(strtolower($c->localName), ['figcaption', 'caption'], true) && Presets::text($c) !== '') {
                 $out[] = Presets::para($document, [$document->createTextNode(Presets::text($c))]);
                 break;
             }

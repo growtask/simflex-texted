@@ -173,7 +173,14 @@ function degradeBlock(el, kind, doc) {
     case 'blockquote': return Array.from(el.children).filter((c) => c.tagName === 'P' && !c.classList.contains('ted-author')).map((c) => textNodesOf(c, doc));
     case 'pre': return [p(esc(el.textContent).replace(/\n/g, '<br>'))];
     case 'ul': case 'ol': return Array.from(el.children).map((li) => textNodesOf(li, doc));
-    case 'raw': return [];
+    // картинка из старой статьи (<figure> без класса, в редакторе — HTML-блок): подпись — абзацем,
+    // как на сервере и у блока «Изображение» (28.11); прочий HTML-блок исчезает
+    case 'raw': case 'figure': {
+      const fig = el.tagName === 'FIGURE' ? el : el.querySelector(':scope > figure');
+      if (!fig || !fig.querySelector('img')) return kind === 'raw' ? [] : [textNodesOf(el, doc)];
+      const t = text(fig.querySelector('figcaption'));
+      return t ? [p(esc(t))] : [];
+    }
     default:
       if (/^h[2-6]$/.test(kind)) return [textNodesOf(el, doc)];
       return [textNodesOf(el, doc)];
@@ -368,7 +375,7 @@ function fill(el, nodes) {
 }
 
 function alignOf(block) {
-  return Array.from(block.classList).filter((c) => /^ted-(align|bg)-/.test(c));
+  return Array.from(block.classList).filter((c) => /^ted-(align|bg|tc)-/.test(c));   // выравнивание, фон и цвет текста (1.0.4) переходят в новый вид
 }
 
 /**
@@ -480,10 +487,10 @@ export function alignOfBlock(b) {
 }
 
 // Цветной фон (подложка): палитры сайта gray / color1 / color2 → класс ted-bg-<имя>
-export const BG_NAMES = ['gray', 'color1', 'color2'];
+export const BG_NAMES = ['gray', 'color1', 'color2', 'error', 'alert', 'success'];
 
 // Блоки со своим видом (чек-лист, шаги, плюсы и минусы): цветной фон запрещён; выноска и цифры красятся целиком
-const NO_BG_KINDS = new Set(['checklist', 'steps', 'proscons']);
+const NO_BG_KINDS = new Set(['checklist', 'steps']);
 export function bgAllowed(b) {
   const bd = b && b.nodeType === 1 ? defOf(b) : null;
   if (bd && bd.toolbar && bd.toolbar.bg === false) return false;   // block.json → toolbar.bg
@@ -494,7 +501,10 @@ export function bgAllowed(b) {
 export function setBg(blocks, name) {
   for (const b of blocks) {
     const t = blockType(b);
-    if (!t || t === 'raw' || t === 'pre' || isObjectBlock(b)) continue;
+    if (!t || t === 'raw') continue;
+    // код и объекты (разделитель, кнопка, товар) — только если блок сам разрешил фон (canBg, 1.0.4)
+    const bd = defOf(b);
+    if ((t === 'pre' || isObjectBlock(b)) && !(bd && bd.canBg && bd.canBg(b))) continue;
     if (!bgAllowed(b)) continue;
     for (const n of BG_NAMES) b.classList.remove(`ted-bg-${n}`);
     if (BG_NAMES.includes(name)) b.classList.add(`ted-bg-${name}`);
@@ -505,6 +515,36 @@ export function setBg(blocks, name) {
 export function bgOfBlock(b) {
   if (!b || !b.classList) return '';
   return BG_NAMES.find((n) => b.classList.contains(`ted-bg-${n}`)) || '';
+}
+
+// Цвет текста (меню «Цвет» → «Текст», 1.0.4): класс ted-tc-<имя> на блоке или <mark class="ted-tc-<имя>"> на выделении.
+// «Стандартный» снимает цвет с блока; внутри цветного блока выделение «Стандартным» — mark ted-tc-gray.
+// Заголовки того же цвета — на ступень сильнее (светлая darker, тёмная lighter) — в стилях (content.css).
+export const TC_NAMES = ['color1', 'color2', 'error', 'alert', 'success'];
+
+/** Можно ли красить текст блока: не код, не сырой HTML, не объект; блок из реестра решает сам (block.json → toolbar.tc, canTc). */
+export function tcAllowed(b) {
+  if (!b || b.nodeType !== 1) return false;
+  const t = blockType(b);
+  if (!t || t === 'raw') return false;
+  const bd = defOf(b);
+  if (bd && bd.toolbar && bd.toolbar.tc === false) return false;
+  if (bd && bd.canTc) return !!bd.canTc(b);   // блок решает сам (баннер, товар — да; карточки — нет)
+  return !(t === 'pre' || isObjectBlock(b));
+}
+
+export function setTc(blocks, name) {
+  for (const b of blocks) {
+    if (!tcAllowed(b)) continue;
+    for (const n of TC_NAMES) b.classList.remove(`ted-tc-${n}`);
+    if (TC_NAMES.includes(name)) b.classList.add(`ted-tc-${name}`);
+    if (!b.className) b.removeAttribute('class');
+  }
+}
+
+export function tcOfBlock(b) {
+  if (!b || !b.classList) return '';
+  return TC_NAMES.find((n) => b.classList.contains(`ted-tc-${n}`)) || '';
 }
 
 // ---------------------------------------------------------------------------
@@ -584,7 +624,8 @@ export function normalizeRoot(root) {
     changed = true;
   }
   for (const el of Array.from(root.querySelectorAll('[style]'))) {
-    if (el.closest(`.ted-ui-raw, ${wrapSelector()}`)) continue;
+    // нередактируемые части блоков (полоса прогресса содержания и т. п.): их положение задаёт сам блок, при наборе не сбрасываем
+    if (el.closest(`.ted-ui-raw, [contenteditable="false"], ${wrapSelector()}`)) continue;
     el.removeAttribute('style');
     changed = true;
   }
@@ -796,6 +837,11 @@ export function fixStepItem(li, doc) {
   if (!desc || (desc.nodeType === 1 && /^(UL|OL)$/.test(desc.tagName))) {
     li.insertBefore(doc.createTextNode(ZWSP), desc);
     changed = true;
+  } else if (desc.nodeType === 3 && !desc.data) {
+    // пустой текст (описание целиком ушло в новый шаг) строки не даёт — шаг ниже, и следующий наезжает (1.0.4)
+    let rest = '';
+    for (let n = desc.nextSibling; n && !(n.nodeType === 1 && /^(UL|OL)$/.test(n.tagName)); n = n.nextSibling) rest += n.textContent;
+    if (!rest) { desc.data = ZWSP; changed = true; }
   }
   return changed;
 }

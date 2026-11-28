@@ -1,4 +1,4 @@
-/*! Ted 1.0.3 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-27 12:32 */
+/*! Ted 1.0.4 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-28 12:19 */
 
 /* ---- resources/css/fonts.css ---- */
 /* ==========================================================================
@@ -270,6 +270,46 @@
   --ted-c-code-text: var(--color-text-icon-gray-lighter, #edf3fa);
 }
 
+/* ---------- Цвет текста (меню «Цвет» → «Текст», 1.0.4) ----------
+   Класс ted-tc-<имя> у блока или <mark class="ted-tc-<имя>"> у части текста. Текст — dark (тёмная тема — light),
+   заголовки того же цвета — на ступень сильнее: darker (тёмная — lighter); у ошибки и успеха в дизайн-системе такой
+   ступени нет — dark / light. Цветные части блока (цифры, заголовки карточек и т. п.) красятся тоже; ссылки — нет. */
+.ted-content {
+  --ted-tc-color1: var(--color-text-icon-color1-dark, #1461cc);
+  --ted-tc-color1-h: var(--color-text-icon-color1-darker, #104fa6);
+  --ted-tc-color2: var(--color-text-icon-color2-dark, #4d4dbf);
+  --ted-tc-color2-h: var(--color-text-icon-color2-darker, #38388c);
+  --ted-tc-error: var(--color-states-error-dark, #cc2929);
+  --ted-tc-alert: var(--color-states-alert-dark, #737300);
+  --ted-tc-success: var(--color-states-success-dark, #0e8c0e);
+}
+[data-ted-theme="dark"] .ted-content,
+.ted-content[data-ted-theme="dark"] {
+  --ted-tc-color1: var(--color-text-icon-color1-light, #63a1f7);
+  --ted-tc-color1-h: var(--color-text-icon-color1-lighter, #d2e2f7);
+  --ted-tc-color2: var(--color-text-icon-color2-light, #9191f2);
+  --ted-tc-color2-h: var(--color-text-icon-color2-lighter, #e5e5ff);
+  --ted-tc-error: var(--color-states-error-light, #ffcccc);
+  --ted-tc-alert: var(--color-states-alert-light, #f2f2aa);
+  --ted-tc-success: var(--color-states-success-light, #c3e5c3);
+}
+.ted-content .ted-tc-gray { --ted-tc: var(--ted-c-text); --ted-tc-h: var(--ted-c-heading); }
+.ted-content .ted-tc-color1 { --ted-tc: var(--ted-tc-color1); --ted-tc-h: var(--ted-tc-color1-h); }
+.ted-content .ted-tc-color2 { --ted-tc: var(--ted-tc-color2); --ted-tc-h: var(--ted-tc-color2-h); }
+.ted-content .ted-tc-error { --ted-tc: var(--ted-tc-error); --ted-tc-h: var(--ted-tc-error); }
+.ted-content .ted-tc-alert { --ted-tc: var(--ted-tc-alert); --ted-tc-h: var(--ted-tc-alert); }
+.ted-content .ted-tc-success { --ted-tc: var(--ted-tc-success); --ted-tc-h: var(--ted-tc-success); }
+/* часть текста: только цвет букв, без подложки <mark> */
+.ted-content mark[class*="ted-tc-"] { background: none; }
+/* Правила сильнее правил блоков (стили блоков идут после content.css): двойной [class*] поднимает вес.
+   Цветной блок красит свой основной текст и заголовки (своей ступенью); описания и подписи (подпись под цифрой,
+   описание шага, автор цитаты, подписи медиа и таблиц) остаются серыми, ссылки, код и «Содержание» — своего цвета.
+   Акцентные части блоков (число, заголовок шага, вопрос…) красит сам блок в своём .site.css */
+.ted-content [class*="ted-tc-"][class*="ted-tc-"] { color: var(--ted-tc); }
+.ted-content :is(h2, h3, h4, h5, h6)[class*="ted-tc-"][class*="ted-tc-"],
+.ted-content [class*="ted-tc-"][class*="ted-tc-"] :is(h2, h3, h4, h5, h6),
+.ted-content :is(h2, h3, h4, h5, h6) mark[class*="ted-tc-"][class*="ted-tc-"] { color: var(--ted-tc-h); }
+
 /* ---- blocks/hr/hr.site.css ---- */
 /* Блок «Разделитель» — вид на сайте и в редакторе (макет block-line, Layout/line): 2 px, main/gray/lighter (--ted-c-line),
    скругление blocks. Переменные — из темы блоков (styles/theme.default.css, этап 4). */
@@ -284,6 +324,8 @@
   border-radius: calc(32 * var(--ted-u));
   background: var(--ted-c-line);
 }
+/* Разделитель (1.0.4): цвет линии — из меню «Цвет» → «Фон» */
+.ted-content hr[class*="ted-bg-"] { padding: 0; border-radius: calc(32 * var(--ted-u)); background: var(--ted-bg); }
 
 /* ---- blocks/p/p.site.css ---- */
 /* Блок «Текст» — вид на сайте и в редакторе (макет block-body, Text/body type main): шрифт, размер и цвет текста —
@@ -340,6 +382,8 @@
 .ted-content :is(li + li, li > ul, li > ol) {
   margin-top: calc(var(--ted-gap-li) * var(--ted-u));
 }
+/* Цвет текста (1.0.4): точки и номера списка — цветом текста */
+.ted-content :is(ul, ol)[class*="ted-tc-"] { --ted-c-marker: var(--ted-tc); }
 
 /* ---- blocks/blockquote/blockquote.site.css ---- */
 /* Блок «Цитата» — вид на сайте и в редакторе (макет block-quote): линия 3 main/color1/main, отступ 20, текст t1 (20 / 1.5)
@@ -423,6 +467,8 @@
 }
 .ted-content blockquote > p.ted-author > strong:first-child + br { display: none; }
 .ted-content blockquote > p.ted-author > strong:last-child { margin-bottom: 0; }
+/* Цвет текста (1.0.4): линия цитаты — цветом текста; автор остаётся серым */
+.ted-content blockquote[class*="ted-tc-"]:not(.ted-callout)::before { background: var(--ted-tc); }
 
 /* ---- blocks/callout/callout.site.css ---- */
 /* Блок «Выноска» — вид на сайте и в редакторе (макет block-callout): плашка r16, поля 12 / 12 / 12 / 44, значок «информация» 24,
@@ -466,9 +512,10 @@
 .ted-content blockquote.ted-callout > * + * { margin-top: calc(4 * var(--ted-u)); }
 
 /* «Цветной фон» перекрашивает плашку выноски */
-.ted-content blockquote.ted-callout.ted-bg-gray { background: var(--ted-bg-gray); }
-.ted-content blockquote.ted-callout.ted-bg-color1 { background: var(--ted-bg-color1); }
-.ted-content blockquote.ted-callout.ted-bg-color2 { background: var(--ted-bg-color2); }
+.ted-content blockquote.ted-callout[class*="ted-bg-"] { background: var(--ted-bg); }
+/* Цвет текста: заголовок выноски и значок — ступенью заголовков, текст — цветом */
+.ted-content blockquote.ted-callout[class*="ted-tc-"] > p:first-child { color: var(--ted-tc-h); }
+.ted-content blockquote.ted-callout[class*="ted-tc-"]::before { background: var(--ted-tc-h); }
 
 /* ---- blocks/background/background.site.css ---- */
 /* Блок «Цветной фон» — вид на сайте и в редакторе (макет block-background): подложка r24, поля 20, палитры сайта
@@ -481,6 +528,10 @@
   --ted-bg-gray: var(--color-main-gray-lighter, #edf3fa);
   --ted-bg-color1: var(--color-main-color1-lighter, #d2e2f7);
   --ted-bg-color2: var(--color-main-color2-lighter, #e5e5ff);
+  /* состояния (1.0.4): ошибка, предупреждение, успех — светлые ступени states */
+  --ted-bg-error: var(--color-states-error-light, #ffcccc);
+  --ted-bg-alert: var(--color-states-alert-light, #f2f2aa);
+  --ted-bg-success: var(--color-states-success-light, #c3e5c3);
 }
 
 /* Тёмная тема: версии «dark» тех же палитр (на сайте задаются теми же переменными) */
@@ -489,11 +540,18 @@
   --ted-bg-gray: var(--color-main-gray-dark, #4d4d4d);
   --ted-bg-color1: var(--color-main-color1-darker, #104fa6);
   --ted-bg-color2: var(--color-main-color2-darker, #38388c);
+  --ted-bg-error: var(--color-states-error-dark, #cc2929);
+  --ted-bg-alert: var(--color-states-alert-dark, #737300);
+  --ted-bg-success: var(--color-states-success-dark, #0e8c0e);
 }
 
-.ted-content .ted-bg-gray { background: var(--ted-bg-gray); }
-.ted-content .ted-bg-color1 { background: var(--ted-bg-color1); }
-.ted-content .ted-bg-color2 { background: var(--ted-bg-color2); }
+/* --ted-bg — цвет фона этого блока: им же красят свою часть блоки со своим видом (выноска, цифры, содержание, таблица…) */
+.ted-content .ted-bg-gray { --ted-bg: var(--ted-bg-gray); background: var(--ted-bg); }
+.ted-content .ted-bg-color1 { --ted-bg: var(--ted-bg-color1); background: var(--ted-bg); }
+.ted-content .ted-bg-color2 { --ted-bg: var(--ted-bg-color2); background: var(--ted-bg); }
+.ted-content .ted-bg-error { --ted-bg: var(--ted-bg-error); background: var(--ted-bg); }
+.ted-content .ted-bg-alert { --ted-bg: var(--ted-bg-alert); background: var(--ted-bg); }
+.ted-content .ted-bg-success { --ted-bg: var(--ted-bg-success); background: var(--ted-bg); }
 
 /* Блок с подложкой (макет block-background): r24, внутренние отступы 20, расстояние до соседей — снаружи, чтобы подложка его не захватывала */
 :is(.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-columns__col) > [class*="ted-bg-"] {
@@ -599,6 +657,8 @@
 .ted-content pre > code::-webkit-scrollbar { height: 8px; }
 .ted-content pre > code::-webkit-scrollbar-button { display: none; }
 .ted-content pre > code::-webkit-scrollbar-track { border-radius: 9999px; background: rgba(237, 243, 250, 0.2); }
+/* дорожка начинается после скругления кода (r12), а не на нём (1.0.4) */
+.ted-content pre > code::-webkit-scrollbar-track { margin-inline: calc(12 * var(--ted-u)); }
 .ted-content pre > code::-webkit-scrollbar-thumb { border-radius: 9999px; background: rgba(99, 161, 247, 0.4); }
 .ted-content pre > code::-webkit-scrollbar-thumb:hover { background: rgba(25, 117, 247, 0.5); }
 
@@ -654,6 +714,8 @@
 /* нажатие как у editor-icon-small: main/color1/lighter (тёмная gray/darker с кольцом gray/dark) */
 .ted-content pre > .ted-code-copy:active { background: var(--color-main-color1-lighter, #d2e2f7); }
 [data-ted-theme='dark'] .ted-content pre > .ted-code-copy:active { background: var(--color-main-gray-darker, #262626); box-shadow: inset 0 0 0 2px var(--color-main-gray-dark, #4d4d4d); }
+/* Код (1.0.4): меняется только фон — тело кода цветом фона; цвет текста и подсветка свои */
+.ted-content pre[class*="ted-bg-"] { padding: 0; border-radius: 0; background: none; --ted-c-code-bg: var(--ted-bg); }
 
 /* ---- blocks/checklist/checklist.site.css ---- */
 /* Блок «Чек-лист» — вид на сайте и в редакторе. Общие переменные плашек и значков (--ted-c-*, --ted-icon-*) — в styles/content.css. */
@@ -773,6 +835,11 @@
 
 /* под последним шагом свой отступ шага равен обычному промежутку (как было: 24 шага + промежуток − 24) */
 .ted-content ol.ted-steps > li:last-child { padding-bottom: calc(var(--ted-gap) * var(--ted-u)); }
+/* Цвет текста: весь блок — заголовки шагов ступенью заголовков, описания цветом; заголовок или описание одного шага —
+   <mark> (курсор в нём, меню «Цвет»): заголовок — ступенью заголовков */
+.ted-content ol.ted-steps[class*="ted-tc-"] > li { color: var(--ted-tc); }
+.ted-content ol.ted-steps[class*="ted-tc-"] > li > strong:first-child,
+.ted-content ol.ted-steps > li > strong:first-child mark[class*="ted-tc-"][class*="ted-tc-"] { color: var(--ted-tc-h); }
 
 /* ---- blocks/facts/facts.site.css ---- */
 /* Блок «Ключевые цифры» — вид на сайте и в редакторе. Общие переменные плашек и значков (--ted-c-*, --ted-icon-*) — в styles/content.css. */
@@ -820,11 +887,12 @@
 
 /* Ключевые цифры перекрашиваются кнопкой «Цветной фон»: фон получает карточка (выноска — blocks/callout) */
 .ted-content ul.ted-facts[class*="ted-bg-"] { padding: 0; background: none; border-radius: 0; }
-.ted-content ul.ted-facts.ted-bg-gray > li { background: var(--ted-bg-gray); }
-.ted-content ul.ted-facts.ted-bg-color1 > li { background: var(--ted-bg-color1); }
-.ted-content ul.ted-facts.ted-bg-color2 > li { background: var(--ted-bg-color2); }
+.ted-content ul.ted-facts[class*="ted-bg-"] > li { background: var(--ted-bg); }
 
 [data-ted-theme='dark'] .ted-content ul.ted-facts { --ted-c-fact-num: var(--color-main-color1-light, #63a1f7); }
+/* Цвет текста (меню «Цвет» → «Текст»): красятся число и текст под ним */
+.ted-content ul.ted-facts[class*="ted-tc-"] > li,
+.ted-content ul.ted-facts[class*="ted-tc-"] > li > strong:first-child { color: var(--ted-tc); }
 
 /* ---- blocks/proscons/proscons.site.css ---- */
 /* Блок «Плюсы и минусы» — вид на сайте и в редакторе. Общие переменные плашек и значков (--ted-c-*, --ted-icon-*) — в styles/content.css. */
@@ -899,6 +967,13 @@
 
 /* карточки в сетке: общий отступ между пунктами списка здесь не нужен */
 .ted-content ul.ted-proscons > li + li { margin-top: 0; }
+/* Цвет текста и фон (1.0.4): у всего блока или у одной карточки (курсор в ней — заказчик 28.11). Пункты и значки — цветом,
+   заголовок карточки — ступенью заголовков. По умолчанию как было: значки зелёный и красный */
+.ted-content :is(ul.ted-proscons[class*="ted-tc-"] > li, ul.ted-proscons > li[class*="ted-tc-"]) { color: var(--ted-tc); }
+.ted-content :is(ul.ted-proscons[class*="ted-tc-"] > li, ul.ted-proscons > li[class*="ted-tc-"]) > strong:first-child { color: var(--ted-tc-h); }
+.ted-content :is(ul.ted-proscons[class*="ted-tc-"] > li, ul.ted-proscons > li[class*="ted-tc-"]) > ul > li::before { background: var(--ted-tc); }
+.ted-content ul.ted-proscons[class*="ted-bg-"] { padding: 0; border-radius: 0; background: none; }
+.ted-content :is(ul.ted-proscons[class*="ted-bg-"] > li, ul.ted-proscons > li[class*="ted-bg-"]) { background: var(--ted-bg); }
 
 /* ---- blocks/button/button.site.css ---- */
 /* Блок «Кнопка» — вид на сайте и в редакторе (макет block-button (Action/button)). */
@@ -934,6 +1009,13 @@
   .ted-content .ted-button:has(> .ted-button__btn + .ted-button__btn), .ted-content .ted-button--banner { flex-direction: column; align-items: stretch; }
   .ted-content .ted-button:has(> .ted-button__btn + .ted-button__btn) > .ted-button__btn, .ted-content .ted-button--banner > .ted-button__btn { width: 100%; }
 }
+/* Цвет (1.0.4): баннер — текст (заголовок ступенью заголовков, описание цветом) и фон; простая кнопка без подложки.
+   На дополнительном фоне кнопка — дополнительного цвета (main/color2), на остальных — синяя: других кнопок в ДС нет */
+.ted-content .ted-button[class*="ted-tc-"] .ted-button__title { color: var(--ted-tc-h); }
+.ted-content .ted-button[class*="ted-tc-"] .ted-button__desc { color: var(--ted-tc); }
+.ted-content .ted-button--banner[class*="ted-bg-"] { padding: calc(24 * var(--ted-u)); border-radius: calc(24 * var(--ted-u)); background: var(--ted-bg); }
+.ted-content .ted-button:not(.ted-button--banner)[class*="ted-bg-"] { padding: 0; border-radius: 0; background: none; }
+.ted-content .ted-button.ted-bg-color2 { --ted-btn-bg: var(--color-main-color2-main, #6161f2); --ted-btn-hover: var(--color-main-color2-dark, #4d4dbf); --ted-btn-press: var(--color-main-color2-darker, #38388c); }
 
 /* ---- blocks/iframe/iframe.site.css ---- */
 /* Блок «iFrame» — вид на сайте и в редакторе (макет block-iframe (Embed/iframe)). */
@@ -1035,6 +1117,14 @@
   .ted-content .ted-product__text { flex-basis: 0; }
   .ted-content .ted-product__btn { width: 100%; }
 }
+/* Цвет (1.0.4): название и цена — цветом текста (название ступенью заголовков), старая цена серая; фон карточки — из
+   «Фона»; на дополнительном фоне кнопка — дополнительного цвета, на остальных — синяя */
+.ted-content .ted-product[class*="ted-tc-"] .ted-product__name { color: var(--ted-tc-h); }
+.ted-content .ted-product[class*="ted-tc-"] .ted-product__now { color: var(--ted-tc); }
+.ted-content .ted-product[class*="ted-bg-"] { background: var(--ted-bg); border-color: var(--ted-bg); }
+.ted-content .ted-product.ted-bg-color2 .ted-product__btn { background: var(--color-main-color2-main, #6161f2); }
+.ted-content .ted-product.ted-bg-color2 .ted-product__btn:hover { background: var(--color-main-color2-dark, #4d4dbf); }
+.ted-content .ted-product.ted-bg-color2 .ted-product__btn:active { background: var(--color-main-color2-darker, #38388c); }
 
 /* ---- blocks/media/media.site.css ---- */
 /* Медиа — вид на сайте и в редакторе (Media/image, gallery, video, audio, file): общие правила фигуры и подписи,
@@ -1116,6 +1206,9 @@
 [data-ted-theme='dark'] .ted-content .ted-media__source:hover { background: var(--color-main-gray-medium, #919599); color: var(--color-text-icon-gray-white, #ffffff); }
 [data-ted-theme='dark'] .ted-content .ted-media__source:active { background: var(--color-main-gray-darker, #262626); }
 @media (width <= 811px) { .ted-content .ted-media__source { margin-top: calc(8 * var(--ted-u, 1px)); } }
+/* Цвет текста (меню «Цвет» → «Текст») медиа не меняет — даже внутри цветного контейнера: плеер, подписи, значки свои */
+.ted-content [class*="ted-tc-"] :is(.ted-media, .ted-audio) { color: var(--ted-c-text); }
+.ted-content [class*="ted-tc-"] .ted-audio { color: var(--ted-audio-text); }
 
 /* ---- blocks/table/table.site.css ---- */
 /* Блок «Таблица» — вид на сайте и в редакторе (макет block-table (Table/table)). */
@@ -1141,7 +1234,8 @@
 .ted-content .ted-table__wrap::-webkit-scrollbar-thumb { border-radius: 9999px; background: rgba(99, 161, 247, 0.4); }   /* как у кода (решение заказчика 17.11) */
 .ted-content .ted-table__wrap::-webkit-scrollbar-thumb:hover { background: rgba(25, 117, 247, 0.5); }
 .ted-content .ted-table__wrap::-webkit-scrollbar-thumb:active { background: rgba(20, 97, 204, 0.5); }
-.ted-content .ted-table__wrap::-webkit-scrollbar-track, .ted-content .ted-table__wrap::-webkit-scrollbar-thumb { border-block: 6px solid transparent; background-clip: padding-box !important; }   /* !important: background у :hover сбрасывает clip */
+.ted-content .ted-table__wrap::-webkit-scrollbar-track, .ted-content .ted-table__wrap::-webkit-scrollbar-thumb { border: 6px solid transparent;   /* со всех сторон: при рамке только сверху и снизу скругление концов вытягивалось в овал (заказчик 28.11) */
+ background-clip: padding-box !important; }   /* !important: background у :hover сбрасывает clip */
 .ted-content .ted-table table { box-sizing: border-box; width: 100%; margin: 0; border: calc(2 * var(--ted-u)) solid var(--ted-table-line); border-collapse: separate; border-spacing: 0; border-radius: calc(8 * var(--ted-u)); table-layout: fixed; overflow: hidden; }
 .ted-content .ted-table table[data-cols="1"] { min-width: calc(124 * var(--ted-u)); }
 .ted-content .ted-table table[data-cols="2"] { min-width: calc(244 * var(--ted-u)); }
@@ -1168,6 +1262,11 @@
 
 /* пустая ячейка — высотой строки текста, пустая строка таблицы на сайте не схлопывается в полоску (проверка 22.11) */
 .ted-content .ted-table :is(td, th):empty::before { content: "\200b"; }
+/* Цвет текста: шапка — ступенью заголовков, ячейки — цветом; подпись остаётся серой */
+.ted-content .ted-table[class*="ted-tc-"] th { color: var(--ted-tc-h); }
+.ted-content .ted-table[class*="ted-tc-"] td { color: var(--ted-tc); }
+/* Цветной фон (1.0.4): шапка, рамка и линии — цветом фона, без подложки блока «Цветной фон» */
+.ted-content figure.ted-table[class*="ted-bg-"] { padding: 0; border-radius: 0; background: none; --ted-table-head-bg: var(--ted-bg); --ted-table-line: var(--ted-bg); }
 
 /* ---- blocks/accordion/accordion.site.css ---- */
 /* Блок «Аккордеон» — вид на сайте и в редакторе (макет block-accordion). */
@@ -1189,9 +1288,16 @@
 .ted-content .ted-accordion__item[open]::details-content { block-size: auto; transition-duration: var(--ted-motion-slow, 240ms); transition-timing-function: var(--ted-ease-out, ease); }
 /* на сайте ответ проявляется сверху вниз (opacity + сдвиг 4, как Accordion в UI-ките); закрытие быстрее. В редакторе своё раскрытие (accordion.editor.css) */
 .ted-content:not(.ted-ui-editable) .ted-accordion__body { opacity: 0; transform: translateY(-4px); transition: opacity var(--ted-motion-fast, 120ms) var(--ted-ease-in, ease), transform var(--ted-motion-fast, 120ms) var(--ted-ease-in, ease); }
-.ted-content:not(.ted-ui-editable) .ted-accordion__item[open] > .ted-accordion__body { opacity: 1; transform: none; transition: opacity var(--ted-motion-slow, 240ms) var(--ted-ease-out, ease), transform var(--ted-motion-slow, 240ms) var(--ted-ease-out, ease); }
-@starting-style { .ted-content:not(.ted-ui-editable) .ted-accordion__item[open] > .ted-accordion__body { opacity: 0; transform: translateY(-4px); } }
+/* ответ — прямо в пункте или в обёртке разметки FAQ (.ted-accordion__a, schema.org): без неё правило не срабатывало,
+   и раскрытый ответ оставался прозрачным (сайт texted 27.11, 1.0.4) */
+.ted-content:not(.ted-ui-editable) .ted-accordion__item[open] > .ted-accordion__body, .ted-content:not(.ted-ui-editable) .ted-accordion__item[open] > .ted-accordion__a > .ted-accordion__body { opacity: 1; transform: none; transition: opacity var(--ted-motion-slow, 240ms) var(--ted-ease-out, ease), transform var(--ted-motion-slow, 240ms) var(--ted-ease-out, ease); }
+@starting-style { .ted-content:not(.ted-ui-editable) .ted-accordion__item[open] > .ted-accordion__body, .ted-content:not(.ted-ui-editable) .ted-accordion__item[open] > .ted-accordion__a > .ted-accordion__body { opacity: 0; transform: translateY(-4px); } }
 @media (prefers-reduced-motion: reduce) { .ted-content .ted-accordion__item::details-content, .ted-content .ted-accordion__q::after, .ted-content .ted-accordion__body { transition: none; } }
+/* Цвет текста: красится вопрос (ступенью заголовков); ответ — свои блоки, красятся отдельно */
+.ted-content .ted-accordion[class*="ted-tc-"] .ted-accordion__q { color: var(--ted-tc-h); }
+.ted-content .ted-accordion[class*="ted-tc-"] .ted-accordion__body { color: var(--ted-acc-text); }
+/* вопрос одного пункта (курсор в нём, меню «Цвет») — <mark> во всю строку: ступенью заголовков */
+.ted-content .ted-accordion__q mark[class*="ted-tc-"][class*="ted-tc-"] { color: var(--ted-tc-h); }
 
 /* ---- blocks/tabs/tabs.site.css ---- */
 /* Блок «Вкладки» — вид на сайте и в редакторе (макет block-tabs (Tabs/main underline m)). */
@@ -1227,6 +1333,10 @@
 .ted-content .ted-tabs__bar[data-ted-glide] > .ted-tabs__ink { transition: transform 560ms var(--ted-ease-spring, var(--ted-ease-out, ease)); }
 .ted-content .ted-tabs__bar:has(> .ted-tabs__ink) > .ted-tabs__tab[aria-selected="true"] { border-bottom-color: transparent; }
 @media (prefers-reduced-motion: reduce) { .ted-content .ted-tabs__panel:not([hidden]) { animation: none; } .ted-content .ted-tabs__bar[data-ted-glide] > .ted-tabs__ink { transition: none; } }
+/* Цвет текста (1.0.4): весь блок — все названия ступенью заголовков; одна вкладка (курсор в её названии) — <mark> */
+.ted-content .ted-tabs[class*="ted-tc-"] :is(.ted-tabs__tab, .ted-tabs__title),
+.ted-content :is(.ted-tabs__tab, .ted-tabs__title) mark[class*="ted-tc-"][class*="ted-tc-"] { color: var(--ted-tc-h); }
+.ted-content .ted-tabs[class*="ted-tc-"] .ted-tabs__body { color: var(--ted-c-text); }
 
 /* ---- blocks/toc/toc.site.css ---- */
 /* Блок «Содержание» — вид на сайте и в редакторе (макет block-navigation). */
@@ -1240,6 +1350,11 @@
 [data-ted-theme='dark'] .ted-content .ted-toc { --ted-toc-bg: var(--color-main-gray-dark, #4d4d4d); --ted-toc-title: var(--color-main-gray-white, #ffffff); --ted-toc-link: var(--color-text-icon-color1-light, #63a1f7); --ted-toc-toggle: var(--color-main-gray-lighter, #edf3fa); --ted-toc-track: rgba(77, 77, 77, 0.2); --ted-toc-thumb: rgba(25, 117, 247, 0.2); }
 .ted-content .ted-toc__progress { height: calc(8 * var(--ted-u)); margin: 0 0 calc(12 * var(--ted-u)); overflow: hidden; border-radius: 9999px; background: var(--ted-toc-track); }
 .ted-content .ted-toc__bar { width: 0; height: 100%; border-radius: inherit; background: var(--ted-toc-thumb); transition: width 0.1s linear; }
+/* Цветной фон (меню «Цвет» → «Фон», 27.11): красится панель, а не весь блок — без подложки и полей блока «Цветной фон».
+   Палитра та же (--ted-bg-*); в тёмной теме на цветной панели ссылки — text-icon/color1/lighter */
+.ted-content .ted-toc[class*="ted-bg-"] { padding: 0; border-radius: 0; background: none; }
+.ted-content .ted-toc[class*="ted-bg-"] { --ted-toc-bg: var(--ted-bg); }
+[data-ted-theme='dark'] .ted-content .ted-toc[class*="ted-bg-"]:not(.ted-bg-gray) { --ted-toc-link: var(--color-text-icon-color1-lighter, #d2e2f7); }
 .ted-content .ted-toc[data-ted-stuck] { padding-top: calc(20 * var(--ted-u)); }
 .ted-content .ted-toc[data-ted-stuck] .ted-toc__progress { position: fixed; z-index: 10; top: 8px; margin: 0; }
 .ted-content .ted-toc__panel { --ted-toc-gap: calc(8 * var(--ted-u)); display: grid; gap: var(--ted-toc-gap); padding: calc(20 * var(--ted-u)) calc(20 * var(--ted-u)) calc(12 * var(--ted-u)); border-radius: calc(24 * var(--ted-u)); background: var(--ted-toc-bg); }
@@ -1279,7 +1394,7 @@
 .ted-content .ted-columns__col { display: flow-root; min-width: 0; }
 /* внутри колонки — те же отступы между блоками, что в статье (styles/content.css; решение заказчика 22.11: в колонке любые блоки) */
 .ted-content .ted-columns__col > :last-child { margin-bottom: 0; }
-.ted-content .ted-columns__col > p { font-size: calc(13 * var(--ted-u)); line-height: 1.5; }
+/* текст в колонке — обычный текст статьи (решение заказчика 27.11: в макете t3 13 — мелко и не как остальной текст) */
 .ted-content .ted-columns__col > .ted-media--image > img,
 .ted-content .ted-columns__col > .ted-ui-media > .ted-media--image > img { height: calc(204 * var(--ted-u)); object-fit: cover; }
 @media (width <= 811px) { .ted-content .ted-columns { gap: calc(12 * var(--ted-u)); --ted-cols: 2; } }
@@ -1420,7 +1535,7 @@
    Ted — интерфейс редактора. Источник: макет TextEd (editor-ui) на компонентах
    библиотеки «Симфлекс АИ»: Tabs/main soft (кнопки), Tooltip/main,
    Dropdown/main (меню), Inputs/main, Buttons/main, Buttons/icon-small.
-   Классы интерфейса: ted-ui-*. Размеры и цвета — см. LAYOUT.md.
+   Классы интерфейса: ted-ui-*. Размеры и цвета — токены дизайн-системы (ui/tokens.css).
    ========================================================================== */
 .ted-ui {
   /* light */
@@ -1690,6 +1805,18 @@ textarea.ted-editor[data-ted-theme="dark"],
 
 .ted-ui-toolbar[data-variant="viewRo"] { justify-content: flex-start; }
 
+/* сводка и «Редактировать» — по ширине колонки текста (700 / 628 / 480, поля 64 / 16, как .ted-ui-column), а не по краям
+   окна: на широком экране кнопка уезжала далеко от текста (сайт texted 27.11, 1.0.4) */
+.ted-ui-toolbar:is([data-variant="view"], [data-variant="viewRo"]) {
+  --col: 700px;
+  --edge: 64px;
+  padding-inline: max(8px, calc((100cqw - min(var(--col), 100cqw - 2 * var(--edge))) / 2));
+}
+.ted-ui-toolbar:is([data-variant="view"], [data-variant="viewRo"]) .ted-ui-stats { padding-left: 0; }
+@container ted (width < 980px) { .ted-ui-toolbar:is([data-variant="view"], [data-variant="viewRo"]) { --col: 628px; } }
+@container ted (width < 840px) { .ted-ui-toolbar:is([data-variant="view"], [data-variant="viewRo"]) { --col: 480px; } }
+@container ted (width < 480px) { .ted-ui-toolbar:is([data-variant="view"], [data-variant="viewRo"]) { --edge: 16px; } }
+
 .ted-ui-stats {
   min-width: 0;
   padding: 0 12px;
@@ -1908,6 +2035,50 @@ textarea.ted-editor[data-ted-theme="dark"],
   height: 1px;
   background: var(--ui-line);
 }
+
+/* Меню «Цвет» (editor-dropdown style=color, точки — решение 28.11): подпись раздела «Текст» / «Фон» — text/t4 gray/medium;
+   точки — Switches/radio-color m (заказчик 28.11: s мелкие): 32, кружок 24 с обводкой 1 main/gray/medium (тёмная main/gray/dark), кольцо 2:
+   выбранная — text-icon/color1/main (тёмная color1/light), наведение — color1/light, нажатие — color1/dark; между точками 4 (6 × 32 + 5 × 4 = 212 в меню 240).
+   Заливка кружка — цвет палитры: текст — dark-ступени (тёмная — light), фон — lighter / states light (тёмная — gray/dark,
+   darker, states dark). Название — подсказкой (data-tip) и aria-label */
+.ted-ui .ted-ui-pop__label { flex: none; margin: 0; color: var(--ui-muted); font: 400 11px/16px var(--ui-font); }   /* 11 × 1.45 = 15.95 — точки под подписью вставали на дробный пиксель и рисовались кривыми (заказчик 28.11) */
+.ted-ui-swatches { display: flex; flex: none; gap: 4px; }
+.ted-ui .ted-ui-swatch { position: relative; display: grid; flex: none; place-items: center; width: 32px; height: 32px; margin: 0; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
+.ted-ui .ted-ui-swatch::after { content: ''; position: absolute; inset: 0; border: 2px solid transparent; border-radius: 50%; transition: border-color 0.12s ease; }
+.ted-ui-swatch:hover::after { border-color: var(--ui-color-text-icon-color1-light); }
+.ted-ui-swatch:active::after { border-color: var(--ui-color-text-icon-color1-dark); }
+.ted-ui .ted-ui-swatch.is-active::after { border-color: var(--ui-color-text-icon-color1-main); }   /* выбранная — и при наведении (заказчик 28.11) */
+/* фокус с клавиатуры (Tab, стрелки) — как Switches/focus дизайн-системы: кольцо 2 main/color1/main снаружи, через 2 */
+.ted-ui .ted-ui-swatch:focus { outline: none; }
+.ted-ui .ted-ui-swatch:focus-visible, .ted-ui .ted-ui-swatch.is-focus { outline: 2px solid var(--ui-accent); outline-offset: 2px; }
+.ted-ui-swatch__dot { box-sizing: border-box; width: 24px; height: 24px; border: 1px solid var(--ui-color-main-gray-medium); border-radius: 50%; background: var(--sw); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch__dot { border-color: var(--ui-color-main-gray-dark); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch:hover::after { border-color: var(--ui-color-text-icon-color1-main); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch.is-active::after { border-color: var(--ui-color-text-icon-color1-light); }
+.ted-ui-swatch--tc-gray { --sw: var(--ui-color-text-icon-gray-dark); }
+.ted-ui-swatch--tc-color1 { --sw: var(--ui-color-text-icon-color1-dark); }
+.ted-ui-swatch--tc-color2 { --sw: var(--ui-color-text-icon-color2-dark); }
+.ted-ui-swatch--tc-error { --sw: var(--ui-color-states-error-dark); }
+.ted-ui-swatch--tc-alert { --sw: var(--ui-color-states-alert-dark); }
+.ted-ui-swatch--tc-success { --sw: var(--ui-color-states-success-dark); }
+.ted-ui-swatch--bg-gray { --sw: var(--ui-color-main-gray-lighter); }
+.ted-ui-swatch--bg-color1 { --sw: var(--ui-color-main-color1-lighter); }
+.ted-ui-swatch--bg-color2 { --sw: var(--ui-color-main-color2-lighter); }
+.ted-ui-swatch--bg-error { --sw: var(--ui-color-states-error-light); }
+.ted-ui-swatch--bg-alert { --sw: var(--ui-color-states-alert-light); }
+.ted-ui-swatch--bg-success { --sw: var(--ui-color-states-success-light); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--tc-gray { --sw: var(--ui-color-text-icon-gray-light); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--tc-color1 { --sw: var(--ui-color-text-icon-color1-light); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--tc-color2 { --sw: var(--ui-color-text-icon-color2-light); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--tc-error { --sw: var(--ui-color-states-error-light); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--tc-alert { --sw: var(--ui-color-states-alert-light); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--tc-success { --sw: var(--ui-color-states-success-light); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--bg-gray { --sw: var(--ui-color-main-gray-dark); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--bg-color1 { --sw: var(--ui-color-main-color1-darker); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--bg-color2 { --sw: var(--ui-color-main-color2-darker); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--bg-error { --sw: var(--ui-color-states-error-dark); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--bg-alert { --sw: var(--ui-color-states-alert-dark); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-swatch--bg-success { --sw: var(--ui-color-states-success-dark); }
 
 /* подменю открылось слева (не хватило места справа) — стрелка пункта смотрит влево (22.11) */
 .ted-ui-item.is-sub-left > svg:last-child { transform: scaleX(-1); }
@@ -2186,6 +2357,9 @@ textarea.ted-editor[data-ted-theme="dark"],
 .ted-ui .ted-ui-action--icon.ted-ui-action--s { width: 40px; padding: 0; }
 
 .ted-ui .ted-ui-action--icon.ted-ui-action--s svg { width: 24px; height: 24px; }
+
+/* фокус с клавиатуры у кнопок окон — как у кнопок панели (ui-accent), а не чёрная рамка браузера (1.0.4) */
+.ted-ui .ted-ui-action:focus-visible { outline: 2px solid var(--ui-accent); outline-offset: 2px; }
 
 /* ---- resources/css/ui/toggle.css ---- */
 /* ==========================================================================
@@ -2598,7 +2772,9 @@ textarea.ted-editor[data-ted-theme="dark"],
   transition: max-height 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), padding 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.18s ease;
 }
 
-.ted-ui-addblock.is-hidden { max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; pointer-events: none; }
+/* скрыта только кнопка, место под ней остаётся: при наборе в пустом последнем абзаце она складывалась и раскрывалась
+   с каждой буквой и Enter — страница меняла высоту, редактор внизу трясся (заказчик 27.11) */
+.ted-ui-addblock.is-hidden { opacity: 0; pointer-events: none; }
 
 .ted-ui-addblock::before,
 .ted-ui-addblock::after {
@@ -3020,6 +3196,43 @@ textarea.ted-editor[data-ted-theme="dark"],
 
 .ted-ui[lang="en"] .ted-ui-editable .ted-ui-raw::after { content: "HTML block from old content"; }
 
+/* выбранный пустой блок (меню блока, перетаскивание): подсказка на подсветке темнее — светлая на ней не читалась
+   (text-icon/gray/medium; в тёмной теме — gray/light; сайт texted 27.11, 1.0.4) */
+.ted-ui-editable [data-tedui-selected][data-tedui-ph]::before,
+.ted-ui-editable [data-tedui-selected] [data-tedui-ph]::before { color: var(--ui-color-text-icon-gray-medium); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-editable [data-tedui-selected][data-tedui-ph]::before,
+.ted-ui[data-ted-theme="dark"] .ted-ui-editable [data-tedui-selected] [data-tedui-ph]::before { color: var(--ui-color-text-icon-gray-light); }
+/* заглушки на цветном фоне (таблица, абзац, выноска…): светлая серая пропадала — темнее, text-icon/gray/medium (заказчик 28.11) */
+.ted-ui-editable [class*="ted-bg-"][data-tedui-ph]::before,
+.ted-ui-editable [class*="ted-bg-"] [data-tedui-ph]::before { color: var(--ui-color-text-icon-gray-medium); }
+.ted-ui[data-ted-theme="dark"] .ted-ui-editable [class*="ted-bg-"][data-tedui-ph]::before,
+.ted-ui[data-ted-theme="dark"] .ted-ui-editable [class*="ted-bg-"] [data-tedui-ph]::before { color: var(--ui-color-text-icon-gray-light); }
+
+/* предпросмотр цвета куска текста (наведение на точку меню «Цвет», 1.0.4): CSS Highlight, в разметку не попадает */
+.ted-ui-editable ::highlight(ted-pv-tc-gray) { color: var(--ted-c-text); }
+.ted-ui-editable ::highlight(ted-pv-tc-color1) { color: var(--ted-tc-color1); }
+.ted-ui-editable ::highlight(ted-pv-tc-color2) { color: var(--ted-tc-color2); }
+.ted-ui-editable ::highlight(ted-pv-tc-error) { color: var(--ted-tc-error); }
+.ted-ui-editable ::highlight(ted-pv-tc-alert) { color: var(--ted-tc-alert); }
+.ted-ui-editable ::highlight(ted-pv-tc-success) { color: var(--ted-tc-success); }
+.ted-ui-editable ::highlight(ted-pv-bg-gray) { background-color: var(--ted-bg-gray); }
+.ted-ui-editable ::highlight(ted-pv-bg-color1) { background-color: var(--ted-bg-color1); }
+.ted-ui-editable ::highlight(ted-pv-bg-color2) { background-color: var(--ted-bg-color2); }
+.ted-ui-editable ::highlight(ted-pv-bg-error) { background-color: var(--ted-bg-error); }
+.ted-ui-editable ::highlight(ted-pv-bg-alert) { background-color: var(--ted-bg-alert); }
+.ted-ui-editable ::highlight(ted-pv-bg-success) { background-color: var(--ted-bg-success); }
+.ted-ui-editable ::highlight(ted-pv-bg-none) { background-color: transparent; }
+
+/* Плавная смена цвета текста и фона (меню «Цвет», предпросмотр наведением — заказчик 28.11): только на время смены
+   (класс is-recoloring ставит редактор на 400 мс), чтобы не задевать другие эффекты (наведение на чек-бокс и т. п.) */
+@media (prefers-reduced-motion: no-preference) {
+  .ted-ui-editable.is-recoloring :where(*), .ted-ui-editable.is-recoloring :where(*)::before {
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  }
+}
+/* примерка «Сбросить цвет»: покрашенные слова — как обычный текст */
+.ted-ui-editable mark[data-tedui-pv][data-tedui-pv][data-tedui-pv] { color: inherit; background: none; }
+
 /* ---- resources/css/ui/blocks.css ---- */
 /* ==========================================================================
    Блоки этапа 4 и код в правке
@@ -3275,7 +3488,7 @@ textarea.ted-editor[data-ted-theme="dark"],
 .ted-ui.is-carrying :is(.ted-ui-addauthor, .ted-ui-tableadd, .ted-ui-tablectl, .ted-ui-codehead) { pointer-events: none; transition: none; }
 
 /* Аккордеон в правке: пункт с курсором раскрыт, остальные свёрнуты; шеврон (правые 32 px строки вопроса) раскрывает и сворачивает — плавно.
-   Рамок при наведении нет (PRINCIPLES.md); перетаскивание вопроса — как у шагов. Под блоком — «Добавить вопрос» (как «Добавить автора»). */
+   Рамок при наведении нет; перетаскивание вопроса — как у шагов. Под блоком — «Добавить вопрос» (как «Добавить автора»). */
 
 /* Группа полей окна (ручной ввод товара): тот же шаг 8, что между полями окна */
 .ted-ui-pop__group { display: grid; gap: 8px; }
@@ -3428,6 +3641,11 @@ textarea.ted-editor[data-ted-theme="dark"],
 
 /* английский интерфейс (1.0.2) */
 .ted-ui[lang="en"] .ted-ui-editable div.ted-product[data-tedui-empty] .ted-product__name::before { content: "Choose a product"; }
+/* цвет текста товара (меню «Цвет», 1.0.4) в полях правки: название — ступенью заголовков, цена — цветом; старая цена
+   и её линия остаются серыми (заказчик 28.11: красилась линия, а не цена) */
+.ted-ui-editable div.ted-product[class*="ted-tc-"] .ted-ui-prodfield--name { color: var(--ted-tc-h); }
+.ted-ui-editable div.ted-product[class*="ted-tc-"] .ted-ui-prodfield--now { color: var(--ted-tc); }
+.ted-ui-editable div.ted-product[class*="ted-tc-"] .ted-ui-prodfield--old { color: var(--ui-color-text-icon-gray-medium); text-decoration-color: currentColor; }
 
 /* ---- blocks/media/media.editor.css ---- */
 /* Медиа — правка в редакторе (бывш. styles/ui/media.css). */
@@ -3775,6 +3993,8 @@ textarea.ted-editor[data-ted-theme="dark"],
 .ted-ui-editable .ted-toc__title[data-tedui-ph]::before { top: 0; }
 .ted-ui-editable .ted-toc__title { position: relative; }
 .ted-ui-editable .ted-toc[data-tedui-addbtn] { margin-bottom: calc(var(--ted-gap) * var(--ted-u) + 60px); }
+/* колонка телефона: «Собрать из заголовков» — под «Добавить главу», место под второй строкой кнопок */
+@container ted (width < 480px) { .ted-ui-editable .ted-toc[data-tedui-addbtn] { margin-bottom: calc(var(--ted-gap) * var(--ted-u) + 104px); } }
 
 /* глава при перетаскивании — рамка, как у шагов и пунктов (общие правила — styles/ui/blocks.css) */
 .ted-ui-editable .ted-toc__list > li[data-tedui-drag] {
@@ -3787,6 +4007,9 @@ textarea.ted-editor[data-ted-theme="dark"],
 .ted-ui.is-dragging .ted-ui-editable .ted-toc__list > li { transition: transform 0.22s var(--ui-ease); }
 .ted-ui.is-dragging .ted-ui-editable .ted-toc__list > li[data-tedui-drag] { transition: none; }
 .ted-ui.is-dropping .ted-ui-editable .ted-toc__list > li { transition: none !important; }
+
+/* полоса прилипла (position: fixed) — её место в тексте держит отступ, как data-ted-stuck на сайте */
+.ted-ui-editable .ted-toc[data-tedui-stuck] { padding-top: calc(20 * var(--ted-u)); }
 
 /* ---- blocks/columns/columns.editor.css ---- */
 /* Блок «Колонки» — только отличия в редакторе. */
@@ -3960,3 +4183,8 @@ textarea.ted-editor[data-ted-theme="dark"],
 .ted-ui.is-appearing .ted-ui-editable > :nth-child(15) { animation-delay: 480ms; }
 .ted-ui.is-appearing .ted-ui-editable > :nth-child(16) { animation-delay: 510ms; }
 @media (prefers-reduced-motion: reduce) { .ted-ui.is-appearing .ted-ui-editable > *, .ted-ui.is-appearing .ted-ui-toolbar { animation: none; } }
+
+/* полоса не залезает на скругление окна или блока: дорожка начинается после радиуса (сайт texted 27.11, 1.0.4) —
+   у окон и меню сверху и снизу, у кода слева и справа */
+.ted-ui :is(.ted-ui-menu__list, .ted-ui-picker__scroll, .ted-ui-pop__box)::-webkit-scrollbar-track { margin-block: 12px; }
+.ted-ui .ted-ui-editable pre::-webkit-scrollbar-track { margin-inline: 12px; }

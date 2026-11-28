@@ -9,6 +9,7 @@
 import { h, smallButton, menuItem, icon, adminModalOpen } from './widgets.js';
 import { styleTypes, blockAllowed, blockType, kindOf, blockCanConvert, convertBlocks, normalizeRoot, isEmptyBlock, emptyBlock, emptyStepItem } from '../core/blocks.js';
 import { applyCodeMeta } from '../core/sanitize.js';
+import { copyText } from '../core/clipboard.js';
 import { defOf, objectSelector, isWrap, wrapSelector, isObjectBlock, inNarrowHost } from '../core/registry.js';
 import { t } from '../core/i18n.js';
 
@@ -62,7 +63,15 @@ export class BlockHandle {
 
     // правка: ⠿ и 🗑
     this.ctrlGrip = smallButton({ name: 'grip', label: 'Меню блока, перетащить', iconName: 'grip', flat: true });
-    this.ctrlTrash = smallButton({ name: 'trash', label: 'Удалить блок', iconName: 'trash', flat: true, onClick: () => { if (Date.now() < (this.trashLock || 0)) return; this.remove(this.focused); } });   // сразу после удаления корзина следующего блока под курсором не срабатывает (проверка 22.11)
+    this.ctrlTrash = smallButton({ name: 'trash', label: 'Удалить блок', iconName: 'trash', flat: true, onClick: () => {
+      if (Date.now() < (this.trashLock || 0)) return;   // сразу после удаления корзина следующего блока под курсором не срабатывает (проверка 22.11)
+      // блок запомнен при нажатии: открытое окно блока («Настройки товара», «Ссылка»…) закрывается раньше щелчка, и выбранный
+      // блок успевал сброситься — корзина ничего не удаляла (сайт texted 27.11, 1.0.4)
+      const target = this.trashTarget && this.trashTarget.isConnected ? this.trashTarget : this.focused;
+      this.trashTarget = null;
+      this.remove(target);
+    } });
+    this.ctrlTrash.addEventListener('pointerdown', () => { this.trashTarget = this.focused; }, true);
     // якорь: кнопка видна только у блока с id; клик открывает окно «Якорь» (там можно изменить или удалить)
     this.ctrlAnchor = smallButton({ name: 'anchor', label: 'Якорь блока', iconName: 'anchor', flat: true, onClick: () => this.focused && this.editor.openAnchor(this.focused) });
     this.ctrlAnchor.hidden = true;
@@ -746,30 +755,12 @@ export class BlockHandle {
     return `${base}#${id}`;
   }
 
-  /** Копирует текст в буфер обмена с запасным способом для http. */
-  copyText(url, okMsg = 'Ссылка скопирована', failMsg = 'Не удалось скопировать ссылку') {
+  /** Копирует текст в буфер обмена (core/clipboard.js: без https — запасной способ сразу при нажатии) и говорит, вышло ли. */
+  copyText(text, okMsg = 'Ссылка скопирована', failMsg = 'Не удалось скопировать ссылку') {
     const ed = this.editor;
-    const ok = () => ed.toast(okMsg);
-    const fail = () => ed.toast(failMsg);
-    // запасной способ: Clipboard API есть только на https / localhost, а админка бывает на http
-    const legacy = () => {
-      const ta = document.createElement('textarea');
-      ta.value = url;
-      ta.setAttribute('readonly', '');
-      ta.style.cssText = 'position:fixed;top:0;left:-9999px;opacity:0';
-      document.body.appendChild(ta);
-      ta.select();
-      let done = false;
-      try { done = document.execCommand('copy'); } catch (e) { done = false; }
-      ta.remove();
-      ed.editable.focus({ preventScroll: true });
-      return done;
-    };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(ok, () => (legacy() ? ok() : fail()));
-    } else if (legacy()) ok();
-    else fail();
+    copyText(text).then((ok) => { ed.toast(ok ? okMsg : failMsg, ok ? {} : { status: 'error' }); });
   }
+
   remove(block) {
     const ed = this.editor;
     if (!block || !block.isConnected) return;
@@ -782,6 +773,7 @@ export class BlockHandle {
       return;
     }
     this.hideGutter();
+    if (ed.popover.isOpen) ed.popover.close();   // окно удаляемого блока («Настройки товара»…) — вместе с ним
     ed.history.commit();
     let next = block.nextElementSibling || block.previousElementSibling;
     block.remove();
@@ -860,7 +852,8 @@ export class BlockHandle {
       : rects[i].height + (parseFloat(getComputedStyle(b).marginBottom) || 0)));
     const centers = rects.map((r) => r.top + sy + r.height / 2);
     const index = blocks.indexOf(block);
-    this.drag = { block, parent: block.parentNode, blocks, index, tops, slots, centers, startY: (startY ?? rects[index].top) + sy, target: index, shifts: blocks.map(() => 0) };
+    const heights = rects.map((r) => r.height);
+    this.drag = { block, parent: block.parentNode, blocks, index, tops, slots, heights, centers, startY: (startY ?? rects[index].top) + sy, target: index, shifts: blocks.map(() => 0) };
     // окно закрывается, когда перетаскивание уже началось: кнопки выбранного пункта (глава содержания) не пропадают (22.11)
     ed.popover.close();
     ed.tooltip.hide();
@@ -946,7 +939,11 @@ export class BlockHandle {
       const sx = window.scrollX;
       const i0 = d.index;
       const c0 = d.cells[i0];
-      d.block.style.transform = `translate(${e.clientX + sx - d.startX}px, ${e.clientY + sy - d.startY}px)`;
+      // плитка идёт за курсором, но не выходит за края сетки блока (заказчик 27.11: уносилась за края)
+      const box = d.cells.reduce((b, c) => ({ l: Math.min(b.l, c.x), t: Math.min(b.t, c.y), r: Math.max(b.r, c.x + c.w), b: Math.max(b.b, c.y + c.h) }), { l: Infinity, t: Infinity, r: -Infinity, b: -Infinity });
+      const gx = Math.max(box.l - c0.x, Math.min(box.r - c0.x - c0.w, e.clientX + sx - d.startX));
+      const gy = Math.max(box.t - c0.y, Math.min(box.b - c0.y - c0.h, e.clientY + sy - d.startY));
+      d.block.style.transform = `translate(${gx}px, ${gy}px)`;
       // новое место — ячейка под курсором (или ближайшая по центру)
       const px = e.clientX + sx;
       const py = e.clientY + sy;
@@ -966,7 +963,6 @@ export class BlockHandle {
         const dy = d.cells[p].y - d.cells[j].y;
         b.style.transform = dx || dy ? `translate(${dx}px, ${dy}px)` : '';
       });
-      void c0;
       const edge = e.clientY < 60 ? -12 : e.clientY > window.innerHeight - 60 ? 12 : 0;
       if (edge) {
         window.scrollBy(0, edge);
@@ -998,7 +994,8 @@ export class BlockHandle {
     const i = d.index;
     // блок идёт за курсором, но не выходит за пределы списка блоков
     const minDy = d.tops[0] - d.tops[i];
-    const maxDy = (d.tops[n - 1] - d.slots[i] + d.slots[n - 1]) - d.tops[i];
+    // низ — не ниже низа последнего (без его нижнего отступа: пункт содержания уходил под край панели, заказчик 27.11)
+    const maxDy = Math.min((d.tops[n - 1] - d.slots[i] + d.slots[n - 1]) - d.tops[i], d.tops[n - 1] + d.heights[n - 1] - d.heights[i] - d.tops[i]);
     const dy = Math.max(minDy, Math.min(maxDy, e.clientY + sy - d.startY));
     d.block.style.transform = `translateY(${dy}px)`;
     if (!d.itemMode && this.hovered === d.block) this.gutter.style.transform = `translateY(${dy}px)`;   // блок не выбран: ручка «+ ⠿» тоже едет за ним

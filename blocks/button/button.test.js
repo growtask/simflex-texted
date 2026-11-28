@@ -109,7 +109,7 @@ group('Кнопка: правка', () => {
     ok(title.contains(getSelection().anchorNode), 'курсор в заголовке');
     eq(el.querySelectorAll('.ted-button__text > p').length, 2, 'строки не склеились');
     ok(/<p class="ted-button__title">Хотите советов\?<\/p><p class="ted-button__desc">Подпишитесь\.<\/p>/.test(html(ed)), html(ed));
-    ok(ed.toolbar.alignBtn.hidden && ed.toolbar.colorBtn.hidden && ed.toolbar.marks.bold.hidden, 'в баннере — простой текст');
+    ok(ed.toolbar.alignBtn.hidden && ed.toolbar.marks.bold.hidden && !ed.toolbar.colorBtn.hidden, 'в баннере — простой текст; цвет текста и фон — есть (1.0.4)');
   });
 });
 
@@ -151,7 +151,7 @@ group('Кнопка: точки подключения реестра', () => {
     const ed = make(BANNER);
     ed.toolbar.update({ ...ed.state, type: 'button', mode: 'edit', focused: true, marks: {} });
     const tb = ed.toolbar;
-    ok(tb.colorBtn.hidden && tb.alignBtn.hidden && tb.styleBtn.hidden, 'фон, выравнивание, стиль');
+    ok(!tb.colorBtn.hidden && tb.alignBtn.hidden && tb.styleBtn.hidden, 'выравнивания и стиля нет; «Цвет» — есть (1.0.4)');
     ok(Object.values(tb.marks).every((b) => b.hidden), 'форматирование');
     ed.toolbar.update({ ...ed.state, type: 'p', mode: 'edit', focused: true, marks: {} });
     ok(!tb.alignBtn.hidden && !tb.styleBtn.hidden && !tb.marks.bold.hidden, 'в абзаце — снова есть');

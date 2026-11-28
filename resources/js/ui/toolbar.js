@@ -5,12 +5,12 @@
 //   view    — режим просмотра:    только кнопка режима
 // Кнопки будущих этапов показаны как в макете, по клику — подсказка «появится на этапе N».
 
-import { h, button, icon, formatKeys, menuItem } from './widgets.js';
-import { getLang } from '../core/i18n.js';
+import { h, button, icon, formatKeys, menuItem, keepFocus } from './widgets.js';
+import { t, getLang } from '../core/i18n.js';
 import { exchangeItems } from './exchange.js';
-import { styleTypes, blockAllowed } from '../core/blocks.js';
+import { styleTypes, blockAllowed, tcAllowed, bgAllowed, tcOfBlock, bgOfBlock } from '../core/blocks.js';
 import { HOTKEYS, keysFor } from '../core/keys.js';
-import { isObjectType, blockDef, registeredBlocks } from '../core/registry.js';
+import { isObjectType, blockDef, registeredBlocks, defOf } from '../core/registry.js';
 
 /** Инструкция в «Помощи» — тексты шагов из макета (editor-help-text, step-text-1…4). */
 export const HELP_STEPS = [
@@ -50,7 +50,7 @@ export class Toolbar {
     // общие для default и text
     this.styleBtn = b({ name: 'style', label: 'Стиль текста', iconName: 'type', chevron: true, onClick: () => this.openStyleMenu() });
     this.alignBtn = b({ name: 'align', label: 'Выравнивание', iconName: 'align-left', chevron: true, onClick: () => this.openAlignMenu() });
-    this.colorBtn = b({ name: 'color', label: 'Цветной фон', iconName: 'color', chevron: true, onClick: () => this.openColorMenu() });
+    this.colorBtn = b({ name: 'color', label: 'Цвет', iconName: 'color', chevron: true, onClick: () => this.openColorMenu() });
 
     this.common = [this.styleBtn, this.alignBtn, this.colorBtn];
 
@@ -90,9 +90,11 @@ export class Toolbar {
     this.sets = {
       // стиль ▾ выравнивание ▾ цвет ▾ | медиа ▾, все блоки | ✨, ещё | помощь, сохранить
       default: [...this.common, div(), this.mediaBtn, this.allBlocksBtn, div(), this.magicBtn, this.moreBtn, div(), ...tail],
-      // + | B I U S код ссылка якорь | все блоки, ✨, ещё | помощь, сохранить
-      text: [...this.common, div(), ...Object.values(this.marks), this.anchorBtn, div(), this.allBlocksBtn, this.magicBtn, this.moreBtn, div(), ...tail],
-      line: [this.moreBtn, div(), ...tail],   // editor-toolbar style=line
+      // + | B I U S код ссылка якорь | медиа ▾, все блоки, ✨, ещё | помощь, сохранить
+      // «Медиа ▾» остаётся и при наборе текста (28.11): вставка как из меню «/» — на место пустого абзаца или под блоком
+      text: [...this.common, div(), ...Object.values(this.marks), this.anchorBtn, div(), this.mediaBtn, this.allBlocksBtn, this.magicBtn, this.moreBtn, div(), ...tail],
+      // editor-toolbar style=line; «Цвет» — у разделителя, кнопки, товара (фон и текст, 1.0.4), у остальных скрыт
+      line: [this.colorBtn, this.lineDiv = div(), this.moreBtn, div(), ...tail],
       view: [this.stats, this.modeBtn],
       viewRo: [this.stats],   // только просмотр: сводка без кнопки «Редактировать»
     };
@@ -194,12 +196,15 @@ export class Toolbar {
     }
     // кнопки, которые в этом месте не работают, убираем из панели
     const tb = (blockDef(type) || {}).toolbar || {};   // block.json → toolbar: что убрать из панели в этом блоке
-    const noBg = tb.bg === false || !!state.inHost;   // block.json → toolbar.bg; в ответе аккордеона фона тоже нет
-    this.colorBtn.hidden = noBg || !blockAllowed(this.editor.allowedBlocks, 'background');   // фон отключён опцией blocks
+    // «Цвет»: есть цвет текста или фон (block.json → toolbar.bg; в ответе аккордеона фона нет; фон отключён опцией blocks)
+    const parts = this.colorParts();
+    this.colorBtn.hidden = !parts.canTc && !parts.canBgMenu;
+    if (this.lineDiv) this.lineDiv.hidden = this.colorBtn.hidden;
     this.mediaBtn.hidden = !this.mediaItems().length;
     this.alignBtn.hidden = tb.align === false;   // block.json → toolbar.align: код, чек-лист, шаги, цифры, плюсы и минусы, таблица, кнопка
     this.styleBtn.hidden = tb.style === false;
-    this.marks.bold.hidden = !!state.stepTitle;   // заголовок шага уже жирный
+    // заголовок шага и заголовки h2–h6 и так жирные — «Жирный» в них ничего не меняет, кнопку убираем (сайт texted 27.11, 1.0.4)
+    this.marks.bold.hidden = !!state.stepTitle || /^h[2-6]$/.test(type);
     for (const k of ['italic', 'underline', 'strike']) this.marks[k].hidden = false;
     if (Array.isArray(tb.marks)) for (const [k, b] of Object.entries(this.marks)) if (!tb.marks.includes(k)) b.hidden = true;
     this.anchorBtn.classList.toggle('is-active', !!state.anchor);
@@ -216,10 +221,12 @@ export class Toolbar {
     if (this.pop.isOpen && this.pop.anchor === this.styleBtn) return this.pop.close();
     const ed = this.editor;
     ed.rememberSelection();
+    const noCaret = !ed.saved;
     this.pop.menu(styleTypes().filter((t) => blockAllowed(ed.allowedBlocks, t.type)).map((t) => ({ value: t.type, label: t.label, icon: t.icon })), this.styleBtn, {
       cls: 'ted-ui-pop--text',
       active: ed.state.type,
-      onSelect: (type) => ed.exec(`block:${type}`),
+      // курсора в тексте не было (меню открыли, не ставя курсор) — стиль получает новый блок в конце, а не первый блок статьи (1.0.4)
+      onSelect: (type) => { if (!noCaret) return ed.exec(`block:${type}`); ed.caretToNewBlock(); ed.exec(`block:${type}`); ed.rememberSelection(); },
       onClose: () => ed.restoreRemembered(),
     });
   }
@@ -236,23 +243,117 @@ export class Toolbar {
     });
   }
 
-  /** Цветной фон (макет editor-dropdown style=color): палитры сайта, «Удалить фон». */
+  /**
+   * «Цвет» (макет editor-dropdown style=color, точки — решение 28.11): «Текст» и «Фон» — по строке точек Switches/radio-color
+   * (Стандартный, Акцентный, Дополнительный, Ошибка, Предупреждение, Успех), название — подсказкой; ниже «Удалить фон».
+   * Разделы, которые в этом месте не работают, не показываются.
+   */
   openColorMenu() {
     if (this.pop.isOpen && this.pop.anchor === this.colorBtn) return this.pop.close();
     const ed = this.editor;
     ed.rememberSelection();
-    this.pop.menu([
-      { value: 'gray', label: 'Стандартный', icon: 'color' },
-      { value: 'color1', label: 'Акцентный', icon: 'color', iconColor: '#1975f7' },
-      { value: 'color2', label: 'Дополнительный', icon: 'color', iconColor: '#6161f2' },
-      '-',
-      { value: 'none', label: 'Удалить фон', icon: 'no-color' },
-    ], this.colorBtn, {
-      cls: 'ted-ui-pop--align',
-      active: ed.state.bg || null,
-      onSelect: (v) => ed.exec(`bg:${v === 'none' ? '' : v}`),
-      onClose: () => ed.restoreRemembered(),
-    });
+    // открыли с клавиатуры (Esc → Tab, фокус на панели, курсора в тексте нет): курсор — на последнее место, чтобы меню знало
+    // секцию (только для «Цвета»: «Стиль текста» без курсора по-прежнему ставит новый блок)
+    if (!ed.saved && !ed.pickedObject() && ed.lastRange && ed.editable.contains(ed.lastRange.startContainer)) {
+      ed.saved = ed.lastRange.cloneRange();
+      ed.restoreRemembered();
+      ed.updateState();
+    }
+    const { canTc, canBgMenu, obj } = this.colorParts();
+    if (!canTc && !canBgMenu) return;
+    const curTc = obj ? (tcOfBlock(obj) || 'gray') : (ed.state.tc || 'gray');
+    // блок со своей серой плашкой (цифры, выноска, код…) — «Стандартный» отмечен и без класса фона (block → defaultBg)
+    const dflt = (el) => { const d = el && defOf(el); const v = d && d.defaultBg; return (typeof v === 'function' ? v(el) : v) || null; };
+    const curBg = obj ? (bgOfBlock(obj) || dflt(obj)) : (ed.state.bg || null);
+    const COLORS = [['gray', 'Стандартный'], ['color1', 'Акцентный'], ['color2', 'Дополнительный'], ['error', 'Ошибка'], ['alert', 'Предупреждение'], ['success', 'Успех']];
+    // наведение (и фокус с клавиатуры) — предпросмотр: цвет сразу примеряется на то, что поменяется (заказчик 28.11)
+    const pick = (cmd) => { ed.clearPreview(); this.pop.close(); ed.exec(cmd); };
+    const row = (kind, active) => {
+      const r = h('div', { class: 'ted-ui-swatches', role: 'radiogroup', 'aria-label': t(kind === 'tc' ? 'Текст' : 'Фон') });
+      for (const [name, label] of COLORS) {
+        const on = name === active;
+        // Tab попадает в ряд на выбранную точку (или первую), дальше — стрелки (радиогруппа, заказчик 28.11)
+        const first = active ? on : name === COLORS[0][0];
+        const b = h('button', { type: 'button', class: `ted-ui-swatch${on ? ' is-active' : ''}`, role: 'radio', 'aria-checked': String(on), tabindex: first ? '0' : '-1', 'aria-label': t(label), 'data-tip': label, 'data-value': `${kind}:${name}` }, [
+          h('span', { class: `ted-ui-swatch__dot ted-ui-swatch--${kind}-${name}` }),
+        ]);
+        keepFocus(b);
+        b.addEventListener('click', () => pick(`${kind}:${name}`));
+        b.addEventListener('pointerenter', () => ed.previewColor(`${kind}:${name}`));
+        b.addEventListener('focus', () => ed.previewColor(`${kind}:${name}`));
+        r.appendChild(b);
+      }
+      // примерка снимается, когда мышь или фокус ушли с ряда, а не с точки: между точками 4 px, и цвет мигал (заказчик 28.11)
+      r.addEventListener('pointerleave', () => ed.clearPreview());
+      r.addEventListener('focusout', (e) => { if (!r.contains(e.relatedTarget)) ed.clearPreview(); });
+      return r;
+    };
+    const nodes = [];
+    if (canTc) nodes.push(h('div', { class: 'ted-ui-pop__label', text: t('Текст') }), row('tc', curTc));
+    if (canTc && canBgMenu) nodes.push(h('div', { class: 'ted-ui-pop__line' }));
+    if (canBgMenu) nodes.push(h('div', { class: 'ted-ui-pop__label', text: t('Фон') }), row('bg', curBg));
+    // «Сбросить цвет» (заказчик 28.11, вместо «Удалить фон»): секция — к виду по умолчанию: цвет текста, фон, покрашенные слова
+    const reset = menuItem({ value: 'color:reset', label: 'Сбросить цвет', iconName: 'no-color', onSelect: () => pick('color:reset') });
+    reset.addEventListener('pointerenter', () => ed.previewColor('color:reset'));
+    reset.addEventListener('pointerleave', () => ed.clearPreview());
+    nodes.push(h('div', { class: 'ted-ui-pop__line' }), reset);
+    // Клавиатура (заказчик 28.11): стрелки — по точкам (← →) и между рядами (↑ ↓), точка под рамкой сразу примеряется;
+    // Enter или пробел — выбрать; Esc — закрыть (окно). Работает и без фокуса в меню (курсор остаётся в тексте), и с фокусом на точке
+    let el = null;
+    let pos = null;
+    const grid = () => [...el.querySelectorAll('.ted-ui-swatches')].map((r) => [...r.children]).concat([[reset]]);
+    const show = (r, c) => {
+      const g = grid();
+      r = (r + g.length) % g.length;
+      c = Math.max(0, Math.min(c, g[r].length - 1));
+      pos = [r, c];
+      el.querySelectorAll('.is-focus').forEach((x) => x.classList.remove('is-focus'));
+      const it = g[r][c];
+      it.classList.add('is-focus');
+      if (el.contains(document.activeElement) && document.activeElement !== it) it.focus({ preventScroll: true });
+      ed.previewColor(it.dataset.value);
+    };
+    const startPos = () => {
+      const g = grid();
+      const fromFocus = g.findIndex((row) => row.includes(document.activeElement));
+      if (fromFocus >= 0) return [fromFocus, g[fromFocus].indexOf(document.activeElement)];
+      const c = g[0].findIndex((x) => x.classList.contains('is-active'));
+      return [0, Math.max(0, c)];
+    };
+    const keyHandler = (e) => {
+      const dir = { ArrowRight: [0, 1], ArrowLeft: [0, -1], ArrowDown: [1, 0], ArrowUp: [-1, 0] }[e.key];
+      if (dir) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!pos) pos = startPos();   // первое нажатие — сразу от выбранной точки (или первой) на соседнюю
+        const row = grid()[pos[0]];
+        if (dir[1]) return show(pos[0], (pos[1] + dir[1] + row.length) % row.length);
+        return show(pos[0] + dir[0], pos[1]);
+      }
+      if ((e.key === 'Enter' || e.key === ' ') && pos) {
+        e.preventDefault();
+        e.stopPropagation();
+        grid()[pos[0]][pos[1]].click();
+      }
+    };
+    el = this.pop.open(nodes, this.colorBtn, { cls: 'ted-ui-pop--align ted-ui-pop--color', keyHandler, onClose: () => { ed.clearPreview(); ed.restoreRemembered(); } });
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-label', t('Цвет'));
+    // фокус Tab-ом на точке: рамка и примерка идут за фокусом (стрелки дальше двигают от неё)
+    el.addEventListener('focusin', (e) => { const g = grid(); const r = g.findIndex((row) => row.includes(e.target)); if (r >= 0) { pos = [r, g[r].indexOf(e.target)]; el.querySelectorAll('.is-focus').forEach((x) => x.classList.remove('is-focus')); e.target.classList.add('is-focus'); } });
+  }
+
+  /** Что умеет меню «Цвет» в этом месте: цвет текста — блок с текстом; фон — блок с фоном, набор с «Цветным фоном». */
+  colorParts() {
+    const ed = this.editor;
+    const state = ed.state;
+    const obj = ed.pickedObject && ed.pickedObject();   // выбран разделитель, кнопка, товар — меню для него
+    // у блока без курсора (медиа, файл, карточка…) «Цвет» есть, только если блок сам его разрешил (canBg / canTc)
+    if (obj) { const od = defOf(obj) || {}; return { canTc: !!(od.canTc && od.canTc(obj)), canBgMenu: !!(od.canBg && od.canBg(obj)) && blockAllowed(ed.allowedBlocks, 'background'), obj }; }
+    const tb = (blockDef(state.type) || {}).toolbar || {};
+    const canTc = !!state.canTc;
+    const canBgMenu = !(tb.bg === false || !!state.inHost) && blockAllowed(ed.allowedBlocks, 'background');
+    return { canTc, canBgMenu };
   }
 
   /** «Медиа ▾» (editor-dropdown style=media). */

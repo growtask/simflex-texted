@@ -75,6 +75,18 @@ function joinModules(array $list, string $root, string $banner): string
             $json = trim(preg_replace('/^\x{FEFF}/u', '', (string) file_get_contents("$root/$dir/" . $m[2])));
             return "const {$m[1]} = $json;";
         }, $code);
+        // каждый импорт — из модуля, который есть в сборке (28.11: core/clipboard.js забыли в build.json — копирование падало только в dist)
+        if (preg_match_all("/^\s*import\s[^;]*?from\s+'(\.{1,2}\/[^']+\.js)'/m", $code, $imps)) {
+            foreach ($imps[1] as $imp) {
+                $target = ltrim(str_replace('\\', '/', (string) realpath("$root/$dir/$imp")), '/');
+                $rootN = ltrim(str_replace('\\', '/', (string) realpath($root)), '/');
+                $relT = $target !== '' ? substr($target, strlen($rootN) + 1) : "$dir/$imp";
+                if (!in_array($relT, $list, true)) {
+                    fwrite(STDERR, "$rel импортирует $imp, а модуля $relT нет в сборке (bin/build.json → modules)\n");
+                    exit(1);
+                }
+            }
+        }
         // убираем импорты
         $code = preg_replace('/^\s*import\s[^;]*;\s*(?:\/\/[^\n]*)?$/m', '', $code);
         if (preg_match('/^\s*import[\s{\'"]/m', $code)) {

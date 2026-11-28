@@ -77,6 +77,8 @@
 .ted-content pre > code::-webkit-scrollbar { height: 8px; }
 .ted-content pre > code::-webkit-scrollbar-button { display: none; }
 .ted-content pre > code::-webkit-scrollbar-track { border-radius: 9999px; background: rgba(237, 243, 250, 0.2); }
+/* дорожка начинается после скругления кода (r12), а не на нём (1.0.4) */
+.ted-content pre > code::-webkit-scrollbar-track { margin-inline: calc(12 * var(--ted-u)); }
 .ted-content pre > code::-webkit-scrollbar-thumb { border-radius: 9999px; background: rgba(99, 161, 247, 0.4); }
 .ted-content pre > code::-webkit-scrollbar-thumb:hover { background: rgba(25, 117, 247, 0.5); }
 
@@ -132,3 +134,5 @@
 /* нажатие как у editor-icon-small: main/color1/lighter (тёмная gray/darker с кольцом gray/dark) */
 .ted-content pre > .ted-code-copy:active { background: var(--color-main-color1-lighter, #d2e2f7); }
 [data-ted-theme='dark'] .ted-content pre > .ted-code-copy:active { background: var(--color-main-gray-darker, #262626); box-shadow: inset 0 0 0 2px var(--color-main-gray-dark, #4d4d4d); }
+/* Код (1.0.4): меняется только фон — тело кода цветом фона; цвет текста и подсветка свои */
+.ted-content pre[class*="ted-bg-"] { padding: 0; border-radius: 0; background: none; --ted-c-code-bg: var(--ted-bg); }

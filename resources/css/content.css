@@ -182,3 +182,43 @@
   --ted-c-code-head: var(--color-main-gray-darker, #262626);
   --ted-c-code-text: var(--color-text-icon-gray-lighter, #edf3fa);
 }
+
+/* ---------- Цвет текста (меню «Цвет» → «Текст», 1.0.4) ----------
+   Класс ted-tc-<имя> у блока или <mark class="ted-tc-<имя>"> у части текста. Текст — dark (тёмная тема — light),
+   заголовки того же цвета — на ступень сильнее: darker (тёмная — lighter); у ошибки и успеха в дизайн-системе такой
+   ступени нет — dark / light. Цветные части блока (цифры, заголовки карточек и т. п.) красятся тоже; ссылки — нет. */
+.ted-content {
+  --ted-tc-color1: var(--color-text-icon-color1-dark, #1461cc);
+  --ted-tc-color1-h: var(--color-text-icon-color1-darker, #104fa6);
+  --ted-tc-color2: var(--color-text-icon-color2-dark, #4d4dbf);
+  --ted-tc-color2-h: var(--color-text-icon-color2-darker, #38388c);
+  --ted-tc-error: var(--color-states-error-dark, #cc2929);
+  --ted-tc-alert: var(--color-states-alert-dark, #737300);
+  --ted-tc-success: var(--color-states-success-dark, #0e8c0e);
+}
+[data-ted-theme="dark"] .ted-content,
+.ted-content[data-ted-theme="dark"] {
+  --ted-tc-color1: var(--color-text-icon-color1-light, #63a1f7);
+  --ted-tc-color1-h: var(--color-text-icon-color1-lighter, #d2e2f7);
+  --ted-tc-color2: var(--color-text-icon-color2-light, #9191f2);
+  --ted-tc-color2-h: var(--color-text-icon-color2-lighter, #e5e5ff);
+  --ted-tc-error: var(--color-states-error-light, #ffcccc);
+  --ted-tc-alert: var(--color-states-alert-light, #f2f2aa);
+  --ted-tc-success: var(--color-states-success-light, #c3e5c3);
+}
+.ted-content .ted-tc-gray { --ted-tc: var(--ted-c-text); --ted-tc-h: var(--ted-c-heading); }
+.ted-content .ted-tc-color1 { --ted-tc: var(--ted-tc-color1); --ted-tc-h: var(--ted-tc-color1-h); }
+.ted-content .ted-tc-color2 { --ted-tc: var(--ted-tc-color2); --ted-tc-h: var(--ted-tc-color2-h); }
+.ted-content .ted-tc-error { --ted-tc: var(--ted-tc-error); --ted-tc-h: var(--ted-tc-error); }
+.ted-content .ted-tc-alert { --ted-tc: var(--ted-tc-alert); --ted-tc-h: var(--ted-tc-alert); }
+.ted-content .ted-tc-success { --ted-tc: var(--ted-tc-success); --ted-tc-h: var(--ted-tc-success); }
+/* часть текста: только цвет букв, без подложки <mark> */
+.ted-content mark[class*="ted-tc-"] { background: none; }
+/* Правила сильнее правил блоков (стили блоков идут после content.css): двойной [class*] поднимает вес.
+   Цветной блок красит свой основной текст и заголовки (своей ступенью); описания и подписи (подпись под цифрой,
+   описание шага, автор цитаты, подписи медиа и таблиц) остаются серыми, ссылки, код и «Содержание» — своего цвета.
+   Акцентные части блоков (число, заголовок шага, вопрос…) красит сам блок в своём .site.css */
+.ted-content [class*="ted-tc-"][class*="ted-tc-"] { color: var(--ted-tc); }
+.ted-content :is(h2, h3, h4, h5, h6)[class*="ted-tc-"][class*="ted-tc-"],
+.ted-content [class*="ted-tc-"][class*="ted-tc-"] :is(h2, h3, h4, h5, h6),
+.ted-content :is(h2, h3, h4, h5, h6) mark[class*="ted-tc-"][class*="ted-tc-"] { color: var(--ted-tc-h); }

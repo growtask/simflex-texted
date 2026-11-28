@@ -9,6 +9,11 @@
 [data-ted-theme='dark'] .ted-content .ted-toc { --ted-toc-bg: var(--color-main-gray-dark, #4d4d4d); --ted-toc-title: var(--color-main-gray-white, #ffffff); --ted-toc-link: var(--color-text-icon-color1-light, #63a1f7); --ted-toc-toggle: var(--color-main-gray-lighter, #edf3fa); --ted-toc-track: rgba(77, 77, 77, 0.2); --ted-toc-thumb: rgba(25, 117, 247, 0.2); }
 .ted-content .ted-toc__progress { height: calc(8 * var(--ted-u)); margin: 0 0 calc(12 * var(--ted-u)); overflow: hidden; border-radius: 9999px; background: var(--ted-toc-track); }
 .ted-content .ted-toc__bar { width: 0; height: 100%; border-radius: inherit; background: var(--ted-toc-thumb); transition: width 0.1s linear; }
+/* Цветной фон (меню «Цвет» → «Фон», 27.11): красится панель, а не весь блок — без подложки и полей блока «Цветной фон».
+   Палитра та же (--ted-bg-*); в тёмной теме на цветной панели ссылки — text-icon/color1/lighter */
+.ted-content .ted-toc[class*="ted-bg-"] { padding: 0; border-radius: 0; background: none; }
+.ted-content .ted-toc[class*="ted-bg-"] { --ted-toc-bg: var(--ted-bg); }
+[data-ted-theme='dark'] .ted-content .ted-toc[class*="ted-bg-"]:not(.ted-bg-gray) { --ted-toc-link: var(--color-text-icon-color1-lighter, #d2e2f7); }
 .ted-content .ted-toc[data-ted-stuck] { padding-top: calc(20 * var(--ted-u)); }
 .ted-content .ted-toc[data-ted-stuck] .ted-toc__progress { position: fixed; z-index: 10; top: 8px; margin: 0; }
 .ted-content .ted-toc__panel { --ted-toc-gap: calc(8 * var(--ted-u)); display: grid; gap: var(--ted-toc-gap); padding: calc(20 * var(--ted-u)) calc(20 * var(--ted-u)) calc(12 * var(--ted-u)); border-radius: calc(24 * var(--ted-u)); background: var(--ted-toc-bg); }

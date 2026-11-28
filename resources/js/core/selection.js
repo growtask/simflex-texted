@@ -15,12 +15,16 @@ export function getRange(root) {
 
 // Каждый блок верхнего уровня добавляет 1 «символ»-разделитель, иначе позиция
 // в конце одного блока и в начале следующего совпадала бы.
+// служебные элементы интерфейса в поле правки (панели медиа, data-tedui-m: «Скрыть» у содержания, поля карточек) — их нет
+// в снимках истории, поэтому и в позиции курсора они не считаются: иначе после Ctrl+Z выделение съезжало на их длину (28.11)
+const isUi = (node) => node.nodeType === 1 && (node.hasAttribute('data-tedui-media-panel') || node.hasAttribute('data-tedui-m'));
+
 function walkOffset(root, container, offset) {
   let count = 0;
   let found = -1;
   const visit = (node, isBlockStart) => {
     if (found >= 0) return;
-    if (node.nodeType === 1 && node.hasAttribute('data-tedui-media-panel')) return;
+    if (isUi(node)) return;
     if (node === container && node.nodeType !== 3) {
       // смещение указывает на дочерний узел
       for (let i = 0; i < offset && i < node.childNodes.length; i++) count += textLen(node.childNodes[i], node === root);
@@ -47,9 +51,12 @@ function walkOffset(root, container, offset) {
 }
 
 function textLen(node, isTopLevel) {
+  if (isUi(node)) return isTopLevel ? 1 : 0;
   let len = node.nodeType === 3 ? node.data.length : node.textContent.length;
-  if (node.nodeType === 1 && isWrap(node)) {   // обёртка правки (медиа): текст её панели не считается
-    for (const ui of node.querySelectorAll('[data-tedui-media-panel]')) len -= ui.textContent.length;
+  if (node.nodeType === 1) {   // панели медиа и служебные элементы (data-tedui-m) не считаются
+    for (const ui of node.querySelectorAll('[data-tedui-media-panel], [data-tedui-m]')) {
+      if (!ui.parentElement.closest('[data-tedui-media-panel], [data-tedui-m]') || !node.contains(ui.parentElement.closest('[data-tedui-media-panel], [data-tedui-m]'))) len -= ui.textContent.length;
+    }
   }
   return len + (isTopLevel ? 1 : 0);
 }
@@ -73,7 +80,7 @@ function findPoint(root, target) {
       const walker = root.ownerDocument.createTreeWalker(block, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
         acceptNode(node) {
           if (node.nodeType === 3) return NodeFilter.FILTER_ACCEPT;
-          return node.hasAttribute('data-tedui-media-panel') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP;
+          return isUi(node) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP;
         },
       });
       let local = target - count;

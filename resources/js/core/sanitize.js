@@ -52,7 +52,9 @@ const UNWRAP_BLOCK_TAGS = new Set([
 ]);
 
 const ALIGN_CLASS = /^ted-align-(center|right)$/;
-const BG_CLASS = /^ted-bg-(gray|color1|color2)$/;
+const BG_CLASS = /^ted-bg-(gray|color1|color2|error|alert|success)$/;
+// цвет текста блока или части текста (меню «Цвет» → «Текст», 1.0.4); gray — «Стандартный» внутри цветного блока
+const TC_CLASS = /^ted-tc-(gray|color1|color2|error|alert|success)$/;
 const ID_RE = ID_PATTERN;   // id — как на сервере: с буквы, до 64 знаков (core/allowlist.js)
 
 const isWhitespace = (s) => !/[^\t\n\r ]/.test(s);
@@ -174,6 +176,8 @@ function cleanBlockLevel(node, ctx) {
   const made = regDef ? regDef.clean(inner || node, doc, (id) => ID_RE.test(id || ''), inner ? node : null) : false;
   if (made !== false) {   // false — «не мой»: элемент очищается дальше как обычно (сложная таблица — «сырой» HTML)
     closePara(ctx);
+    // цвет текста и фон блока (меню «Цвет», 1.0.4) переносит ядро — блоку не нужно знать о них
+    if (made && made.nodeType === 1) for (const c of colorClasses(inner || node)) made.classList.add(c);
     if (made) ctx.out.appendChild(made);
     return;
   }
@@ -306,6 +310,9 @@ function cleanBlockLevel(node, ctx) {
       if (emitTokens) code.appendChild(highlightFragment(text, lang, doc)); else code.appendChild(doc.createTextNode(text));
       pre.appendChild(code);
       applyCodeMeta(pre, lang, nums);
+      // цветной фон кода (меню «Цвет» → «Фон», 1.0.4)
+      const bg = node.classList && Array.from(node.classList).find((c) => BG_CLASS.test(c));
+      if (bg) pre.className = bg;
       ctx.out.appendChild(pre);
     }
     return;
@@ -398,6 +405,8 @@ function cleanListItem(node, doc) {
   for (const cls of ['ted-checked', 'ted-pros', 'ted-cons']) {
     if (node.classList && node.classList.contains(cls)) li.classList.add(cls);
   }
+  // карточка плюсов или минусов красится отдельно (меню «Цвет», 1.0.4)
+  if (li.classList.contains('ted-pros') || li.classList.contains('ted-cons')) for (const c of colorClasses(node)) li.classList.add(c);
   const nested = [];
   for (const child of Array.from(node.childNodes)) {
     if (child.nodeType === 1 && (child.tagName === 'UL' || child.tagName === 'OL')) {
@@ -457,8 +466,8 @@ function cleanInlineNode(node, dest, doc, opts) {
       target = a;
     }
   } else if (mapped === 'mark') {
-    // подложка под фрагментом текста: только с классом палитры, иначе <mark> без смысла — просто текст
-    const bg = node.classList && Array.from(node.classList).find((c) => BG_CLASS.test(c));
+    // подложка или цвет фрагмента текста: только с классом палитры, иначе <mark> без смысла — просто текст
+    const bg = node.classList && Array.from(node.classList).find((c) => BG_CLASS.test(c) || TC_CLASS.test(c));
     if (bg) {
       const el = doc.createElement('mark');
       el.className = bg;
@@ -589,16 +598,17 @@ function withAlign(el, src) {
   const align = (src.style && src.style.textAlign) || src.getAttribute('align') || '';
   let cls = '';
   let bg = '';
+  let tc = '';
   if (src.classList) {
-    for (const c of src.classList) { if (ALIGN_CLASS.test(c)) cls = c; if (BG_CLASS.test(c)) bg = c; }
+    for (const c of src.classList) { if (ALIGN_CLASS.test(c)) cls = c; if (BG_CLASS.test(c)) bg = c; if (TC_CLASS.test(c) && c !== 'ted-tc-gray') tc = c; }
   }
   if (!cls && /center/i.test(align)) cls = 'ted-align-center';
   if (!cls && /right|end/i.test(align)) cls = 'ted-align-right';
   // у чек-листа и шагов выравнивания нет
   if (src.classList && Array.from(src.classList).some((c) => /^ted-(checklist|steps)$/.test(c))) cls = '';
-  // у чек-листа, шагов, цифр, плюсов и минусов, выноски фона нет
-  if (src.classList && Array.from(src.classList).some((c) => /^ted-(checklist|steps|proscons)$/.test(c))) bg = '';
-  const all = [cls, bg].filter(Boolean).join(' ');
+  // у чек-листа и шагов фона нет (плюсы и минусы красятся с 1.0.4)
+  if (src.classList && Array.from(src.classList).some((c) => /^ted-(checklist|steps)$/.test(c))) bg = '';
+  const all = [cls, bg, tc].filter(Boolean).join(' ');
   if (all) el.className = all;
   // якоря: id блока (латиница, цифры, дефис) сохраняется
   const id = src.getAttribute && src.getAttribute('id');
@@ -700,6 +710,24 @@ function stripDangerous(root) {
   }
 }
 
+/** Классы цвета текста и фона блока (ted-tc-*, ted-bg-*): ted-tc-gray — только у части текста, у блока не нужен. */
+function colorClasses(el) {
+  return el && el.classList ? Array.from(el.classList).filter((c) => BG_CLASS.test(c) || (TC_CLASS.test(c) && c !== 'ted-tc-gray')) : [];
+}
+
+/** Классы цвета в первом теге HTML блока, если его serialize их не вывел. */
+function withColorClasses(html, el) {
+  const cls = colorClasses(el);
+  if (!cls.length) return html;
+  return html.replace(/^(\s*<[a-z0-9]+)([^>]*)>/i, (m, tag, attrs) => {
+    const have = ((attrs.match(/\sclass="([^"]*)"/) || [])[1] || '').split(/\s+/);
+    const add = cls.filter((c) => !have.includes(c));
+    if (!add.length) return m;
+    if (/\sclass="/.test(attrs)) return tag + attrs.replace(/\sclass="([^"]*)"/, (x, v) => ` class="${v} ${add.join(' ')}"`) + '>';
+    return `${tag} class="${add.join(' ')}"${attrs}>`;
+  });
+}
+
 /** Чистый фрагмент → аккуратная HTML-строка: один блок на строку. */
 export function serializeBlocks(frag) {
   const parts = [];
@@ -707,7 +735,7 @@ export function serializeBlocks(frag) {
     if (node.nodeType !== 1) continue;
     const wrapped = isWrap(node) ? node.firstElementChild : null;   // обёртка правки (медиа): сохраняется блок внутри
     const sd = defOf(wrapped || node);   // блок из реестра сохраняет себя сам (blocks/<тип>/<тип>.js → serialize)
-    if (sd && sd.serialize) { const out = sd.serialize(wrapped || node, wrapped ? node : null); if (out) parts.push(out); continue; }
+    if (sd && sd.serialize) { const out = sd.serialize(wrapped || node, wrapped ? node : null); if (out) parts.push(withColorClasses(out, wrapped || node)); continue; }
     if (isWrap(node)) continue;   // обёртка без блока внутри (всё вычищено) — не сохраняем
     if (node.classList.contains('ted-ui-raw')) {
       parts.push(node.getAttribute('data-ted-raw') || node.innerHTML);

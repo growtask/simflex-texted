@@ -100,12 +100,12 @@ group('Аккордеон: правка', () => {
     const p = ed.editable.querySelector('.ted-accordion__body > p');
     caret(ed, p);
     eq(ed.state.type, 'p', 'текущий блок — абзац ответа');
-    ok(ed.toolbar.colorBtn.hidden, 'фона нет');
+    ok(!ed.toolbar.colorParts().canBgMenu, 'фона нет (цвет текста — есть)');
     ok(!ed.toolbar.styleBtn.hidden, 'стиль текста есть');
     ed.exec('block:h3');
     ok(ed.editable.querySelector('.ted-accordion__body > h3'), 'абзац ответа стал заголовком');
     caret(ed, ed.editable.querySelector('.ted-accordion__q'));
-    ok(ed.toolbar.styleBtn.hidden && ed.toolbar.alignBtn.hidden && ed.toolbar.colorBtn.hidden, 'в вопросе нет стиля, выравнивания и фона');
+    ok(ed.toolbar.styleBtn.hidden && ed.toolbar.alignBtn.hidden && !ed.toolbar.colorParts().canBgMenu && ed.toolbar.colorParts().canTc, 'в вопросе нет стиля, выравнивания и фона; цвет текста вопроса — есть (1.0.4)');
     ok(!ed.toolbar.marks.bold.hidden && !ed.toolbar.marks.link.hidden);
   });
 
@@ -233,5 +233,25 @@ group('Аккордеон: точки подключения реестра', ()
     const s = getSelection().getRangeAt(0).startContainer;
     ok((s.nodeType === 1 ? s : s.parentNode).closest('.ted-accordion__q'), 'курсор в вопросе');
     ed.destroy();
+  });
+});
+
+group('Аккордеон на сайте (сайт texted 27.11, 1.0.4)', () => {
+  test('раскрытый ответ виден: сохранённая разметка с обёрткой FAQ (.ted-accordion__a) — ответ непрозрачный', async () => {
+    const box = document.createElement('div');
+    box.className = 'ted-content';
+    box.innerHTML = Ted.clean('<div class="ted-accordion"><details class="ted-accordion__item"><summary class="ted-accordion__q">Вопрос</summary><div class="ted-accordion__body"><p>Ответ</p></div></details></div>');
+    document.body.appendChild(box);
+    try {
+      const item = box.querySelector('details');
+      ok(item.querySelector('.ted-accordion__a > .ted-accordion__body'), 'ответ в обёртке FAQ');
+      item.open = true;
+      await wait(30);
+      for (const a of box.getAnimations({ subtree: true })) a.finish();
+      await wait(0);
+      eq(getComputedStyle(item.querySelector('.ted-accordion__body')).opacity, '1', 'ответ виден');
+    } finally {
+      box.remove();
+    }
   });
 });

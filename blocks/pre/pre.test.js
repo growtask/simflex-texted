@@ -370,3 +370,33 @@ group('Шапка кода: настоящие кнопки и горячие к
     ed.popover.close();
   });
 });
+
+group('Сайт: «Копировать код» (1.0.4)', () => {
+  // на сайте texted по http галочка была, а в буфер не попадало, и тоста не было — проверка вручную 27.11
+  test('кнопка копирует весь код (запасной способ, если Clipboard API нет или отказал) и показывает тост, как в редакторе', async () => {
+    if (!window.TedContent) return;
+    const box = document.createElement('div');
+    box.className = 'ted-content';
+    box.innerHTML = Ted.clean('<pre data-lang="js"><code>let a = 1;\nlet b = 2;</code></pre>');
+    document.body.appendChild(box);
+    const exec = document.execCommand;
+    let copied = null;
+    try {
+      // Clipboard API отказывает (как без https или без разрешения) — копирует запасной способ
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, get: () => ({ writeText: () => Promise.reject(new Error('нет доступа')) }) });
+      document.execCommand = (cmd) => { if (cmd === 'copy') { copied = document.activeElement && document.activeElement.value; return true; } return false; };
+      window.TedContent.mount(box);
+      box.querySelector('.ted-code-copy').click();
+      await wait(50);
+      eq(copied, 'let a = 1;\nlet b = 2;', 'в буфер — весь код');
+      ok(box.querySelector('.ted-code-copy').classList.contains('is-copied'), 'галочка');
+      const toast = document.querySelector('body > .ted-ui-toasts[data-ted-site] .ted-ui-toast');
+      ok(toast && /Код скопирован|Code copied/.test(toast.textContent), 'тост «Код скопирован»');
+    } finally {
+      document.execCommand = exec;
+      delete navigator.clipboard;
+      document.querySelectorAll('body > .ted-ui-toasts[data-ted-site]').forEach((n) => n.remove());
+      box.remove();
+    }
+  });
+});

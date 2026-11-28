@@ -6,7 +6,7 @@
   "selector": "figure.ted-table",
   "html": {},
   "inNarrow": false,
-  "toolbar": { "bg": false, "align": false, "style": false },
+  "toolbar": { "align": false, "style": false },
   "compound": true,
   "neverEmpty": true,
   "lineAfter": true

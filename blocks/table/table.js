@@ -18,7 +18,7 @@ import { structureMap, remapFormulas, formulaAllowed } from './formula.js';
 
 export const TABLE_MAX_COLS = 10;
 export const TABLE_MAX_ROWS = 100;
-const CELL_TAGS = new Set(['STRONG', 'EM', 'U', 'S', 'CODE', 'A', 'BR']);   // как в абзаце: жирный, курсив, подчёркнутый, зачёркнутый, код, ссылка
+const CELL_TAGS = new Set(['STRONG', 'EM', 'U', 'S', 'CODE', 'A', 'BR', 'MARK']);   // как в абзаце: жирный, курсив, подчёркнутый, зачёркнутый, код, ссылка, цвет и подложка части текста (mark с классом палитры, 1.0.4)
 
 /** figure.ted-table? */
 export function isTableBlock(el) {
@@ -99,6 +99,13 @@ function keepCellInline(el) {
  * тогда она остаётся «сырым» блоком, как раньше.
  * cleanInline(src, dst) — строчная очистка из sanitize.js (передаётся, чтобы не было круговой зависимости модулей).
  */
+/** <figure> без класса, в которой только таблица и подпись (старые статьи, вставка со страниц). */
+export function isPlainTableFigure(el) {
+  if (!el || el.tagName !== 'FIGURE' || el.className) return false;
+  const kids = [...el.children];
+  return kids.filter((k) => k.tagName === 'TABLE').length === 1 && kids.every((k) => k.tagName === 'TABLE' || k.tagName === 'FIGCAPTION');
+}
+
 export function cleanTableNode(node, doc, cleanInline, idOk) {
   const ours = node.tagName === 'FIGURE' && node.classList.contains('ted-table');
   const table = node.tagName === 'TABLE' ? node : node.querySelector('table');
@@ -113,6 +120,8 @@ export function cleanTableNode(node, doc, cleanInline, idOk) {
   const fig = doc.createElement('figure');
   fig.className = 'ted-table';
   if (ours && node.classList.contains('ted-table--plain')) fig.classList.add('ted-table--plain');
+  // цвет текста и фон (меню «Цвет», 1.0.4)
+  if (ours) for (const c of node.classList) if (/^ted-(tc|bg)-(gray|color1|color2|error|alert|success)$/.test(c) && c !== 'ted-tc-gray') fig.classList.add(c);
   if (idOk && idOk(node.id)) fig.id = node.id;
   const wrap = doc.createElement('div');
   wrap.className = 'ted-table__wrap';
@@ -141,7 +150,7 @@ export function cleanTableNode(node, doc, cleanInline, idOk) {
   out.appendChild(tbody);
   wrap.appendChild(out);
   fig.appendChild(wrap);
-  const capSrc = (ours ? node.querySelector(':scope > figcaption') : null) || table.querySelector(':scope > caption');
+  const capSrc = (node.tagName === 'FIGURE' ? node.querySelector(':scope > figcaption') : null) || table.querySelector(':scope > caption');
   if (capSrc) {
     const cap = doc.createElement('figcaption');
     cleanInline(capSrc, cap);
@@ -376,11 +385,13 @@ export function parseClipboardTable(html, text, doc = document) {
 
 
 registerBlock({
+  defaultBg: 'gray',   // своя серая плашка — в меню «Цвет» → «Фон» по умолчанию отмечен «Стандартный» (заказчик 28.11)
   toMarkdown: (el, md) => { const t = el.querySelector('table'); const cap = el.querySelector('figcaption'); return (t ? md.table(t) : '') + (cap ? `\n\n*${md.inline(cap).trim()}*` : ''); },   // Ted.toMarkdown (22.11)
   ...TABLE_BLOCK,
   match: (el) => isTableBlock(el),
   /** Простая таблица со страницы или из Word (без объединённых ячеек, до 10 столбцов и 100 строк) — тоже блок «Таблица». */
-  adopt: (el) => el.tagName === 'TABLE',
+  // …и таблица в <figure> без класса (со своей подписью figcaption) — из старых статей; иначе в наборе без таблиц пропадала (28.11)
+  adopt: (el) => el.tagName === 'TABLE' || isPlainTableFigure(el),
   /** Макет block-table: новая таблица 3 × 3, шапка включена; курсор — в первой ячейке. */
   create: (doc) => { const fig = createTable(doc, 3, 3, true); normalizeTableBlock(fig, doc); return { el: fig, focus: fig.querySelector('th, td') }; },
   /** Наш блок или простая таблица → блок; сложная — false: остаётся «сырым» HTML (очистка ядра). */
@@ -396,7 +407,6 @@ registerBlock({
     return normalizeTableBlock(fig, doc);
   },
   canAlign: () => false,
-  canBg: () => false,
   editorUi: (editor) => new TableUI(editor),
   editorUiName: 'table',
   /** Меню блока (editor-block-menu-table): шапка и границы; подписи меняются по состоянию, как «Добавить автора» / «Убрать автора». */

@@ -77,3 +77,6 @@
 [data-ted-theme='dark'] .ted-content .ted-media__source:hover { background: var(--color-main-gray-medium, #919599); color: var(--color-text-icon-gray-white, #ffffff); }
 [data-ted-theme='dark'] .ted-content .ted-media__source:active { background: var(--color-main-gray-darker, #262626); }
 @media (width <= 811px) { .ted-content .ted-media__source { margin-top: calc(8 * var(--ted-u, 1px)); } }
+/* Цвет текста (меню «Цвет» → «Текст») медиа не меняет — даже внутри цветного контейнера: плеер, подписи, значки свои */
+.ted-content [class*="ted-tc-"] :is(.ted-media, .ted-audio) { color: var(--ted-c-text); }
+.ted-content [class*="ted-tc-"] .ted-audio { color: var(--ted-audio-text); }

@@ -5,6 +5,7 @@ import HR_BLOCK from './block.json' with { type: 'json' };
 import { registerBlock } from '../../resources/js/core/registry.js';
 
 registerBlock({
+  canBg: () => true,   // цвет линии — из «Фона» (меню «Цвет», 1.0.4)
   toMarkdown: () => '---',   // Ted.toMarkdown (22.11)
   ...HR_BLOCK,
   match: (el) => el.tagName === 'HR',

@@ -9,7 +9,7 @@
   "figma": "block-code",
   "text": true,
   "toolbar": {
-    "bg": false,
+    "tc": false,
     "align": false,
     "marks": []
   },

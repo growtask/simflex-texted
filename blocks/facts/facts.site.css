@@ -43,8 +43,9 @@
 
 /* Ключевые цифры перекрашиваются кнопкой «Цветной фон»: фон получает карточка (выноска — blocks/callout) */
 .ted-content ul.ted-facts[class*="ted-bg-"] { padding: 0; background: none; border-radius: 0; }
-.ted-content ul.ted-facts.ted-bg-gray > li { background: var(--ted-bg-gray); }
-.ted-content ul.ted-facts.ted-bg-color1 > li { background: var(--ted-bg-color1); }
-.ted-content ul.ted-facts.ted-bg-color2 > li { background: var(--ted-bg-color2); }
+.ted-content ul.ted-facts[class*="ted-bg-"] > li { background: var(--ted-bg); }
 
 [data-ted-theme='dark'] .ted-content ul.ted-facts { --ted-c-fact-num: var(--color-main-color1-light, #63a1f7); }
+/* Цвет текста (меню «Цвет» → «Текст»): красятся число и текст под ним */
+.ted-content ul.ted-facts[class*="ted-tc-"] > li,
+.ted-content ul.ted-facts[class*="ted-tc-"] > li > strong:first-child { color: var(--ted-tc); }

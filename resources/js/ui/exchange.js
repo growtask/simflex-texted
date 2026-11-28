@@ -4,6 +4,7 @@
 
 import { h, menuItem } from './widgets.js';
 import { tf } from '../core/i18n.js';
+import { copyText } from '../core/clipboard.js';
 import { sanitizeHTML } from '../core/sanitize.js';
 import { normalizeRoot } from '../core/blocks.js';
 import { blocksToHtml, htmlToBlocks } from '../core/blocks-json.js';
@@ -122,8 +123,8 @@ ${json.map((j) => '  ' + j).join('\n')}
 export function copyPrompt(ed) {
   const text = aiPrompt();
   const done = () => ed.toast('Промт скопирован — вставьте его в нейросеть вместе с текстом статьи');
-  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, () => ed.toast('Не удалось скопировать промт', { status: 'error' }));
-  else ed.toast('Буфер обмена недоступен в этом браузере', { status: 'error' });
+  // и без https: запасной способ сразу при нажатии (core/clipboard.js, 1.0.4) — раньше на http была только ошибка
+  copyText(text).then((ok) => (ok ? done() : ed.toast('Не удалось скопировать промт', { status: 'error' })));
 }
 
 /** Смена языка интерфейса: название языка, на который переключит, — на нём самом (English / Русский). */

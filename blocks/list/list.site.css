@@ -21,3 +21,5 @@
 .ted-content :is(li + li, li > ul, li > ol) {
   margin-top: calc(var(--ted-gap-li) * var(--ted-u));
 }
+/* Цвет текста (1.0.4): точки и номера списка — цветом текста */
+.ted-content :is(ul, ol)[class*="ted-tc-"] { --ted-c-marker: var(--ted-tc); }

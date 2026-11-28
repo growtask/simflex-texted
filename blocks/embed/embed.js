@@ -161,6 +161,7 @@ registerBlock({
   normalize: normalizeEmbed,
   canAlign: () => false,
   canBg: () => false,
+  canTc: () => false,   // карточка: цвет текста не меняется (меню «Цвет», 27.11)
   editorUi: (editor) => new EmbedUI(editor),
   editorUiName: 'embeds',
   /** Вставили ссылку отдельным абзацем: «Встроить карточкой» — если CMS подключила opengraph. */

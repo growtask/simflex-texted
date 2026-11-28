@@ -69,3 +69,8 @@
 
 /* под последним шагом свой отступ шага равен обычному промежутку (как было: 24 шага + промежуток − 24) */
 .ted-content ol.ted-steps > li:last-child { padding-bottom: calc(var(--ted-gap) * var(--ted-u)); }
+/* Цвет текста: весь блок — заголовки шагов ступенью заголовков, описания цветом; заголовок или описание одного шага —
+   <mark> (курсор в нём, меню «Цвет»): заголовок — ступенью заголовков */
+.ted-content ol.ted-steps[class*="ted-tc-"] > li { color: var(--ted-tc); }
+.ted-content ol.ted-steps[class*="ted-tc-"] > li > strong:first-child,
+.ted-content ol.ted-steps > li > strong:first-child mark[class*="ted-tc-"][class*="ted-tc-"] { color: var(--ted-tc-h); }

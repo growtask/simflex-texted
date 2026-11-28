@@ -130,6 +130,8 @@ export function serializeButton(el) {
 
 
 registerBlock({
+  // подложка баннера по умолчанию: светлая тема — main/color1/lighter («Акцентный»), тёмная — main/gray/dark («Стандартный»)
+  defaultBg: (el) => (!el.classList.contains('ted-button--banner') ? '' : el.closest('[data-ted-theme="dark"]') ? 'gray' : 'color1'),
   ...BUTTON_BLOCK,
   match: (el) => el.tagName === 'DIV' && el.classList.contains('ted-button'),
   /** Макет block-button, state=empty: одна кнопка «Текст кнопки»; после вставки сразу открывается окно «Настройки кнопки». */
@@ -139,6 +141,8 @@ registerBlock({
   serialize: serializeButton,
   normalize: normalizeButton,
   canAlign: (el) => !el.classList.contains('ted-button--banner'),   // баннер — на всю ширину колонки
+  canBg: () => true,   // фон баннера; на дополнительном фоне кнопка — дополнительного цвета (меню «Цвет», 1.0.4)
+  canTc: (el) => el.classList.contains('ted-button--banner'),   // текст есть только у баннера
   editorUi: (editor) => new ButtonUI(editor),
   editorUiName: 'buttons',
   /** В наборе без кнопки: заголовок баннера жирным, текст, кнопки — ссылками (так же на сервере — button.php). */

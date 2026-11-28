@@ -996,6 +996,30 @@ group('Медиа: точки подключения реестра', () => {
   const fig = (kind, inner) => '<figure class="ted-media ted-media--' + kind + '">' + inner + '</figure>';
   const mgr = { mediaSource: 'manager', pickFile: () => [] };
 
+  test('«Медиа» остаётся в шапке при наборе текста: блок встаёт под абзацем, пустой абзац заменяет (28.11)', () => {
+    const ed = make('<p>текст</p><p>дальше</p>', mgr);
+    select(ed, 0, 2);
+    ed.toolbar.update({ ...ed.state, focused: true });
+    eq(ed.toolbar.variant, 'text');
+    ok(ed.toolbar.mediaBtn.isConnected && !ed.toolbar.mediaBtn.hidden, 'кнопка «Медиа» в шапке при наборе текста');
+    ed.toolbar.mediaBtn.click();
+    ed.popover.el.querySelector('.ted-ui-item[data-value="image"]').click();
+    const kids = Array.from(ed.editable.children);
+    eq(kids[0].textContent, 'текст', 'абзац с текстом на месте');
+    ok(kids[1].classList.contains('ted-ui-media'), 'медиа — сразу под абзацем');
+    eq(kids[2].textContent, 'дальше');
+    ed.destroy();
+    const ed2 = make('<p>текст</p><p>ещё</p>', mgr);
+    const empty = document.createElement('p'); empty.innerHTML = '<br>'; ed2.editable.firstElementChild.after(empty);   // новый пустой абзац, как после Enter
+    select(ed2, 1, 0);
+    ed2.toolbar.update({ ...ed2.state, focused: true });
+    ed2.toolbar.mediaBtn.click();
+    ed2.popover.el.querySelector('.ted-ui-item[data-value="image"]').click();
+    eq(ed2.editable.children.length, 3, 'пустой абзац заменён, как из меню «/»');
+    ok(ed2.editable.children[1].classList.contains('ted-ui-media'), ed2.editable.innerHTML.slice(0, 300));
+    ed2.destroy();
+  });
+
   test('wrap (block.json): обёртка правки — ted-ui-media; editor.media в blockUis; сохраняется блок внутри, с якорем обёртки', () => {
     const ed = make('<p>Текст</p>' + fig('image', '<img src="/uf/images/a.webp" alt="">').replace('<figure ', '<figure id="photo" '), mgr);
     const w = ed.editable.querySelector(':scope > .ted-ui-media');

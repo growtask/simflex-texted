@@ -148,7 +148,8 @@ registerBlock({
   normalize: normalizeProduct,
   filesOf: productFilesOf,
   canAlign: () => false,
-  canBg: () => false,
+  canBg: () => true,   // цвет карточки и кнопки (меню «Цвет», 1.0.4)
+  canTc: () => true,
   editorUi: (editor) => new ProductUI(editor),
   editorUiName: 'products',
   /** В наборе без товара — «Название — цена» ссылкой на товар; так же на сервере — product.php. */

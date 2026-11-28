@@ -9,7 +9,7 @@ import { getRange, topBlockOf, selectedBlocks, isAtStart, isAtEnd, placeCaret } 
 import { History } from './history.js';
 import { chooseMedia, mediaPagePath } from './upload.js';
 import {
-  bgAllowed, alignAllowed, blockCanConvert, resolveBlocks, blockAllowed, restrictBlocks, ZWSP, emptyStepItem, convertBlocks, setAlign, alignOfBlock, setBg, bgOfBlock, blockType, kindOf, normalizeRoot, emptyBlock, isEmptyBlock,
+  bgAllowed, alignAllowed, blockCanConvert, resolveBlocks, blockAllowed, restrictBlocks, ZWSP, emptyStepItem, convertBlocks, setAlign, alignOfBlock, setBg, bgOfBlock, setTc, tcOfBlock, tcAllowed, TC_NAMES, BG_NAMES, blockType, kindOf, normalizeRoot, emptyBlock, isEmptyBlock,
   withMarkers, placeholderOf,
 } from './blocks.js';
 import { serverOptions } from './server.js';
@@ -317,7 +317,9 @@ export class Editor {
     }), 0);
   }
 
-  setHTML(html, { silent = false } = {}) {
+  setHTML(html, { silent = false, undoable = false } = {}) {
+    // undoable: замена записывается в историю — Ctrl+Z и «Отменить» в уведомлении вернут прежний текст (сброс демо, 1.0.4)
+    if (undoable) this.history.commit();
     const frag = this.restrict(withoutTokens(() => sanitizeHTML(html || '')));
     this.editable.replaceChildren(frag);
     if (!this.editable.firstChild) {
@@ -325,7 +327,8 @@ export class Editor {
       this.editable.appendChild(emptyBlock(document, 'p'));
     }
     normalizeRoot(this.editable);
-    this.history.reset();
+    this.seenBlocks = new WeakSet(this.editable.children);   // загруженные блоки — не «новые» для revealCaret
+    if (!undoable) this.history.reset();
     this.refreshBlockUis();
     this.updatePlaceholders();
     if (silent) {
@@ -436,6 +439,87 @@ export class Editor {
     }
     clearTimeout(this.changeTimer);
     this.changeTimer = setTimeout(() => this.emitChange(), immediate ? 0 : 250);
+    // правка или новый блок за краем окна — экран идёт за ним (сайт texted 27.11, 1.0.4)
+    if (!this.destroyed) requestAnimationFrame(() => this.revealCaret());
+  }
+
+  /**
+   * Место правки (курсор или выделенный блок) ушло за край окна — плавно подводим к нему с запасом: снизу 72 (над нижними
+   * панелями сайта), сверху — под панелью редактора. Высокий блок (больше окна) — показываем его начало.
+   */
+  revealCaret() {
+    // новые блоки верхнего уровня (вставка из меню, дублирование, медиа) — показываем блок целиком, а не только строку
+    // курсора: у вставленной таблицы, выноски, фото курсор в первой строке, а сам блок оставался за нижним краем
+    // (заказчик 27.11). Первый вызов только запоминает блоки.
+    const kids = Array.from(this.editable.children);
+    const seen = this.seenBlocks;
+    this.seenBlocks = new WeakSet(kids);
+    let fresh = seen ? kids.filter((c) => !seen.has(c)) : [];
+    if (fresh.length === kids.length) fresh = [];   // заменено всё (отмена, повтор, загрузка) — ведём только за курсором
+    if (this.destroyed || this.mode !== 'edit' || !this.isFocused()) return;
+    const top = this.toolbar.el.getBoundingClientRect().bottom + 16;
+    const bottom = window.innerHeight - 72;
+    let rect = null;
+    if (fresh.length) {
+      const a = fresh[0].getBoundingClientRect();
+      const b = fresh[fresh.length - 1].getBoundingClientRect();
+      if (b.bottom - a.top <= bottom - top) rect = { top: a.top, bottom: b.bottom, height: b.bottom - a.top };
+    }
+    const r = getRange(this.editable);
+    if (!rect && !r) return;
+    if (!rect) rect = r.getBoundingClientRect();
+    if (!rect.height) {
+      // пустая строка: у свёрнутого курсора нет размеров — берём элемент, где он стоит (абзац, ячейку), а не весь блок
+      const el = r.startContainer.nodeType === 1 ? r.startContainer : r.startContainer.parentElement;
+      if (!el || el === this.editable) return;
+      rect = el.getBoundingClientRect();
+    }
+    let dy = 0;
+    if (rect.height > bottom - top) {
+      if (rect.bottom < top || rect.top > bottom) dy = rect.top - top;   // высокий — только если целиком за краем, к его началу
+    } else if (rect.top < top) dy = rect.top - top;
+    else if (rect.bottom > bottom) dy = rect.bottom - bottom;
+    if (Math.abs(dy) < 1) return;
+    this.scrollFollow(dy);
+  }
+
+  /**
+   * Плавно сдвигает страницу на dy. Одна анимация с общей целью: при наборе каждая клавиша лишь сдвигает цель, а не
+   * запускает новую плавную прокрутку (браузерная smooth на каждое нажатие сбивала предыдущую — экран дёргался, строка
+   * оставалась у края; заказчик 27.11). Колесо или касание пользователя останавливают анимацию. «Уменьшить движение» —
+   * сразу, без анимации.
+   */
+  scrollFollow(dy) {
+    const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const target = Math.min(max, Math.max(0, window.scrollY + dy));   // dy посчитан от текущего положения
+    if (calm) { this.stopFollow(); window.scrollTo(0, target); return; }
+    if (this.follow) { this.follow.target = target; return; }
+    const stop = () => this.stopFollow();
+    const f = this.follow = { target, raf: 0, stop };
+    window.addEventListener('wheel', stop, { passive: true, once: true });
+    window.addEventListener('touchstart', stop, { passive: true, once: true });
+    const step = () => {
+      if (this.follow !== f || this.destroyed) return;
+      const left = f.target - window.scrollY;
+      if (Math.abs(left) < 1) { window.scrollTo(0, f.target); this.stopFollow(); return; }
+      // мягкое замедление к цели: за кадр — пятая часть остатка (≈ 250 мс), не меньше 1 px
+      const move = Math.sign(left) * Math.max(1, Math.abs(left) * 0.2);
+      const before = window.scrollY;
+      window.scrollTo(0, before + move);
+      if (window.scrollY === before) { this.stopFollow(); return; }   // дальше некуда (край страницы)
+      f.raf = requestAnimationFrame(step);
+    };
+    f.raf = requestAnimationFrame(step);
+  }
+
+  stopFollow() {
+    const f = this.follow;
+    if (!f) return;
+    this.follow = null;
+    cancelAnimationFrame(f.raf);
+    window.removeEventListener('wheel', f.stop);
+    window.removeEventListener('touchstart', f.stop);
   }
 
   // -------------------------------------------------------------------------
@@ -689,6 +773,7 @@ export class Editor {
   destroy() {
     if (this.destroyed) return;
     this.destroyed = true;
+    this.stopFollow();
     this.presence?.destroy();
     this.flush();
     this.popover.close();
@@ -774,6 +859,23 @@ export class Editor {
     return this.blockFromRange(getRange(this.editable));
   }
 
+  /**
+   * Курсор в новый пустой абзац в конце статьи (сайт texted 27.11, 1.0.4): выбор в панели без курсора создаёт блок, а не меняет
+   * первый. Пустой последний абзац (и единственный пустой в пустой статье) берётся сам — второй пустой не добавляем.
+   */
+  caretToNewBlock() {
+    const last = this.editable.lastElementChild;
+    let p = last && last.tagName === 'P' && !last.className && isEmptyBlock(last) ? last : null;
+    if (!p) {
+      p = emptyBlock(document);
+      this.editable.appendChild(p);
+    }
+    this.editable.focus({ preventScroll: true });
+    placeCaret(p);
+    p.scrollIntoView({ block: 'nearest' });
+    return p;
+  }
+
   scheduleState() {
     if (this._stateFrame) return;
     this._stateFrame = requestAnimationFrame(() => {
@@ -785,6 +887,7 @@ export class Editor {
 
   updateState() {
     const r = getRange(this.editable);
+    if (r) this.lastRange = r.cloneRange();   // последнее место курсора: меню, открытое с клавиатуры (Esc → Tab), знает, что красить
     const block = this.blockFromRange(r);
     const type = blockType(block) || 'p';
     const inNode = (sel) => {
@@ -812,7 +915,18 @@ export class Editor {
     Object.assign(this.state, {
       type: kindOf(block) || type,
       align: alignOfBlock(block),
-      bg: bgOfBlock(block),
+      // фон и цвет части (карточка плюсов или минусов), если блок их так разделяет (bgPart / tcPart → элемент)
+      bg: (() => {
+        const d = block && defOf(block);
+        const part = r && d && d.bgPart ? d.bgPart(block, r.startContainer) : null;
+        const own = bgOfBlock(part) || bgOfBlock(block);   // фон части, иначе всего блока
+        if (own || !d) return own;
+        const v = d.defaultBg;   // своя плашка блока или части (цифры, выноска, карточка плюсов…) — отмечена в меню (28.11)
+        return (typeof v === 'function' ? v(part || block) : v) || '';
+      })(),
+      // цвет текста под курсором: выделение в mark ted-tc-* или класс блока (меню «Цвет» → «Текст»)
+      tc: (() => { const el = r && (r.startContainer.nodeType === 1 ? r.startContainer : r.startContainer.parentNode); const m = el && el.closest && el.closest('mark[class*="ted-tc-"]'); const c = m && this.editable.contains(m) && (m.className.match(/ted-tc-([a-z0-9]+)/) || [])[1]; if (c) return c; const d = block && defOf(block); const part = r && r.collapsed && d && d.tcPart ? d.tcPart(block, r.startContainer) : null; return (part && part.nodeType === 1 ? tcOfBlock(part) : '') || tcOfBlock(block) || 'gray'; })(),
+      canTc: tcAllowed(block),
       anchor: !!(block && block.id),
       marks,
       hasSelection: !!(r && !r.collapsed && r.toString().trim()),
@@ -976,7 +1090,9 @@ export class Editor {
     // «Добавить блок» — только если последний блок уже заполнен
     const last = ed.lastElementChild;
     // строка скрывается плавно (высота и прозрачность), а не пропадает рывком
-    const hideAdd = !last || isEmptyBlock(last);
+    // под пустой строкой (абзац, заголовок) «+» не нужен — в ней и так пишут; под пустыми вкладками, аккордеоном, колонками,
+    // медиа — нужен: иначе после них блок не добавить (сайт texted 27.11, 1.0.4)
+    const hideAdd = !last || (isEmptyBlock(last) && /^(P|H[2-6])$/.test(last.tagName));
     this.addBlock.classList.toggle('is-hidden', hideAdd);
     this.addBlock.setAttribute('aria-hidden', hideAdd ? 'true' : 'false');
     this.addBlock.tabIndex = hideAdd ? -1 : 0;
@@ -1081,7 +1197,7 @@ export class Editor {
     if (EXEC_MARKS[cmd]) {
       if (type === 'pre') return;
       // заголовок шага — это <strong>: «Жирный» снимал бы сам заголовок, поэтому в нём команда не действует (и в названии вкладки, заголовке выноски)
-      if (cmd === 'bold' && this.boldLocked(r.startContainer)) return;
+      if (cmd === 'bold' && (this.boldLocked(r.startContainer) || /^h[2-6]$/.test(type))) return;   // и в заголовке h2–h6 — он уже жирный (1.0.4)
       this.history.commit();
       document.execCommand(EXEC_MARKS[cmd], false, null);
       this.afterChange({ immediate: true });
@@ -1101,6 +1217,8 @@ export class Editor {
       this.afterChange({ immediate: true });
       return;
     }
+    if (cmd === 'color:reset') return this.resetColor();
+    if (cmd.startsWith('tc:')) return this.applyTc(cmd.slice(3));
     if (cmd.startsWith('bg:')) return blockAllowed(this.allowedBlocks, 'background') ? this.applyBg(cmd.slice(3)) : undefined;
     if (cmd.startsWith('align:')) {
       this.history.commit();
@@ -1113,17 +1231,230 @@ export class Editor {
    * Цветной фон. Выделен фрагмент внутри одного блока — подложка только под ним (<mark class="ted-bg-…">, как у кода);
    * курсор, весь блок или несколько блоков — подложка у блока. name '' — убрать фон.
    */
+  /**
+   * Цвет текста (1.0.4): часть текста в одном блоке — <mark class="ted-tc-…">, иначе — класс ted-tc-… у блоков.
+   * 'gray' (Стандартный) снимает цвет; внутри цветного блока выделенная часть становится стандартной (mark ted-tc-gray).
+   */
+  applyTc(name) {
+    // выбран блок без курсора (баннер, товар): красится он
+    const obj = this.pickedObject();
+    if (obj) {
+      if (!tcAllowed(obj)) return;
+      this.history.commit();
+      setTc([obj], name === 'gray' ? '' : name);
+      this.afterChange({ immediate: true });
+      return;
+    }
+    const r = this.ensureRange();
+    if (!r) return;
+    const ed = this.editable;
+    // выделение через несколько блоков (и «Выделить всё»): красятся те, где цвет текста есть; код, медиа, карточки пропускаются
+    const block = topBlockOf(ed, r.startContainer === ed ? ed.childNodes[r.startOffset] || ed.firstChild : r.startContainer);
+    const targets = selectedBlocks(ed).filter((b) => tcAllowed(b));
+    if (!targets.length && !(block && tcAllowed(block))) return;
+    const SEL = 'mark[class*="ted-tc-"]';
+    const unwrap = (marks) => { if (marks.length) withMarkers(ed, () => marks.forEach((m) => m.replaceWith(...m.childNodes))); };
+    const marksIn = (root) => Array.from(root.querySelectorAll(SEL));
+    // курсор без выделения в части блока, которая красится отдельно (вопрос, название вкладки, заголовок или описание шага):
+    // блок отдаёт её диапазон (block.json → tcPart, 1.0.4)
+    const bd = block && defOf(block);
+    const part = r.collapsed && block && tcAllowed(block) && bd && bd.tcPart ? bd.tcPart(block, r.startContainer) : null;
+    if (part && part.nodeType === 1) {   // часть-элемент (карточка плюсов или минусов): класс на ней
+      this.history.commit();
+      for (const n of TC_NAMES) part.classList.remove(`ted-tc-${n}`);
+      if (name && name !== 'gray') part.classList.add(`ted-tc-${name}`);
+      this.afterChange({ immediate: true });
+      return;
+    }
+    const rr = part || r;
+    const sameBlock = block === topBlockOf(ed, r.endContainer);
+    const text = rr.toString();
+    const partial = !!part || (!!block && tcAllowed(block) && !r.collapsed && sameBlock && !!text.trim() && text.trim() !== block.textContent.trim());
+    const startEl = rr.startContainer.nodeType === 1 ? rr.startContainer : rr.startContainer.parentNode;
+    const inMark = part ? null : startEl.closest(SEL);
+    const plain = name === 'gray' || !name;
+    this.history.commit();
+    if (partial) {
+      if (part) unwrap(marksIn(block).filter((m) => rr.intersectsNode(m)));
+      if (plain && !tcOfBlock(block)) {
+        unwrap(marksIn(block).filter((m) => rr.intersectsNode(m)));
+      } else if (inMark && ed.contains(inMark) && inMark.contains(r.endContainer)) {
+        inMark.className = `ted-tc-${plain ? 'gray' : name}`;
+      } else {
+        const frag = rr.extractContents();
+        frag.querySelectorAll(SEL).forEach((m) => m.replaceWith(...m.childNodes));
+        const mark = document.createElement('mark');
+        mark.className = `ted-tc-${plain ? 'gray' : name}`;
+        mark.appendChild(frag);
+        rr.insertNode(mark);
+        block.normalize();
+        const sel = document.getSelection();
+        const nr = document.createRange();
+        nr.selectNodeContents(mark);
+        sel.removeAllRanges();
+        sel.addRange(nr);
+      }
+    } else {
+      const blocks = targets.length ? targets : [block];
+      setTc(blocks, plain ? '' : name);
+      blocks.forEach((b) => unwrap(marksIn(b)));   // весь блок одного цвета — прежние цвета частей снимаются
+    }
+    this.afterChange({ immediate: true });
+  }
+
+  /**
+   * Предпросмотр цвета (меню «Цвет», наведение на точку — заказчик 28.11): то, что поменяется, сразу примеряет цвет —
+   * блок или часть (карточка) — временным классом, кусок текста (выделение, заголовок шага, вопрос) — подсветкой
+   * CSS Highlight. В HTML и историю ничего не попадает; clearPreview() возвращает как было.
+   */
+  /** Плавная смена цвета (CSS .is-recoloring) на время примерки и применения. */
+  smoothRecolor() {
+    this.editable.classList.add('is-recoloring');
+    clearTimeout(this.recolorTimer);
+    this.recolorTimer = setTimeout(() => this.editable.classList.remove('is-recoloring'), 400);
+  }
+
+  previewColor(cmd) {
+    this.smoothRecolor();
+    this.clearPreview();
+    if (cmd === 'color:reset') {   // примерка «Сбросить цвет»: классы цвета снимаются, покрашенные слова — без цвета (data-tedui-pv)
+      const els = this.colorSection();
+      const saved = els.map((el) => [el, el.getAttribute('class')]);
+      for (const el of els) for (const c of Array.from(el.classList)) if (/^ted-(tc|bg)-/.test(c)) el.classList.remove(c);
+      const marks = els.flatMap((el) => Array.from(el.querySelectorAll('mark[class*="ted-tc-"], mark[class*="ted-bg-"]')));
+      marks.forEach((m) => m.setAttribute('data-tedui-pv', ''));
+      this.colorPreview = { saved, hl: null, marks };
+      return;
+    }
+    const [kind, name] = String(cmd).split(':');
+    const isTc = kind === 'tc';
+    const NAMES = isTc ? TC_NAMES : BG_NAMES;
+    const prefix = isTc ? 'ted-tc-' : 'ted-bg-';
+    const can = (b) => (isTc ? tcAllowed(b) : bgAllowed(b));
+    const els = [];
+    let range = null;
+    const obj = this.pickedObject();
+    if (obj) {
+      const od = defOf(obj) || {};
+      if (isTc ? od.canTc && od.canTc(obj) : od.canBg && od.canBg(obj)) els.push(obj);
+    } else {
+      const r = getRange(this.editable);
+      if (!r) return;
+      const ed = this.editable;
+      const block = topBlockOf(ed, r.startContainer === ed ? ed.childNodes[r.startOffset] || ed.firstChild : r.startContainer);
+      const d = block && defOf(block);
+      let part = null;
+      if (r.collapsed && block && d) {
+        if (isTc && d.tcPart && tcAllowed(block)) part = d.tcPart(block, r.startContainer);
+        if (!isTc && d.bgPart) part = d.bgPart(block, r.startContainer);
+      }
+      const sameBlock = !!block && block === topBlockOf(ed, r.endContainer);
+      const text = r.toString().trim();
+      if (part && part.nodeType === 1) els.push(part);
+      else if (part) range = part;
+      else if (!r.collapsed && sameBlock && text && text !== block.textContent.trim() && can(block)) range = r.cloneRange();
+      else els.push(...selectedBlocks(ed).filter(can));
+      if (!els.length && !range && block && can(block)) els.push(block);
+    }
+    const saved = els.map((el) => [el, el.getAttribute('class')]);
+    for (const el of els) {
+      for (const n of NAMES) el.classList.remove(prefix + n);
+      if (NAMES.includes(name) && !(isTc && name === 'gray')) el.classList.add(prefix + name);
+    }
+    let hl = null;
+    if (range && typeof Highlight !== 'undefined' && window.CSS && CSS.highlights) {
+      hl = `ted-pv-${kind}-${name}`;
+      CSS.highlights.set(hl, new Highlight(range));
+    }
+    this.colorPreview = { saved, hl };
+  }
+
+  clearPreview() {
+    const p = this.colorPreview;
+    if (!p) return;
+    this.smoothRecolor();
+    this.colorPreview = null;
+    for (const [el, cls] of p.saved) {
+      if (cls == null) el.removeAttribute('class');
+      else el.setAttribute('class', cls);
+    }
+    if (p.hl && window.CSS && CSS.highlights) CSS.highlights.delete(p.hl);
+    if (p.marks) p.marks.forEach((m) => m.removeAttribute('data-tedui-pv'));
+  }
+
+  /**
+   * Секция для «Сбросить цвет» (заказчик 28.11): выбранный блок без курсора, карточка (часть, bgPart) вместе с её блоком,
+   * иначе блоки под выделением или блок с курсором.
+   */
+  colorSection() {
+    const obj = this.pickedObject();
+    if (obj) return [obj];
+    const r = getRange(this.editable);
+    if (!r) return [];
+    const ed = this.editable;
+    const block = topBlockOf(ed, r.startContainer === ed ? ed.childNodes[r.startOffset] || ed.firstChild : r.startContainer);
+    const d = block && defOf(block);
+    const part = r.collapsed && d && d.bgPart ? d.bgPart(block, r.startContainer) : null;
+    if (part) return [part, block];
+    const list = selectedBlocks(ed);
+    return list.length ? list : (block ? [block] : []);
+  }
+
+  /** «Сбросить цвет»: у секции снимаются цвет текста и фон — и у блока, и у покрашенных слов внутри (Ctrl+Z вернёт). */
+  resetColor() {
+    const els = this.colorSection();
+    if (!els.length) return;
+    this.history.commit();
+    const ed = this.editable;
+    const marks = els.flatMap((el) => Array.from(el.querySelectorAll('mark[class*="ted-tc-"], mark[class*="ted-bg-"]')));
+    if (marks.length) withMarkers(ed, () => marks.forEach((m) => { if (m.isConnected) m.replaceWith(...m.childNodes); }));
+    for (const el of els) {
+      for (const c of Array.from(el.classList)) if (/^ted-(tc|bg)-/.test(c)) el.classList.remove(c);
+      if (!el.className) el.removeAttribute('class');
+    }
+    this.afterChange({ immediate: true });
+  }
+
+  /** Выбранный ручкой блок без курсора внутри (разделитель, кнопка, товар, медиа) — его красит меню «Цвет», 1.0.4. */
+  pickedObject() {
+    const b = this.handle && this.handle.focused;
+    if (!b || !this.editable.contains(b)) return null;
+    const r = getRange(this.editable);
+    if (r && b.contains(r.startContainer) && b.isContentEditable !== false && b.getAttribute('contenteditable') !== 'false' && !isObjectBlock(b)) return null;
+    return isObjectBlock(b) || b.getAttribute('contenteditable') === 'false' ? b : null;
+  }
+
   applyBg(name) {
+    const obj = this.pickedObject();
+    if (obj) {
+      const od = defOf(obj) || {};
+      if (!(od.canBg && od.canBg(obj)) || !bgAllowed(obj)) return;   // фон у блока без курсора — только если он его разрешил
+      this.history.commit();
+      setBg([obj], name);
+      this.afterChange({ immediate: true });
+      return;
+    }
     const r = this.ensureRange();
     if (!r) return;
     const ed = this.editable;
     const block = topBlockOf(ed, r.startContainer);
     if (!block || !bgAllowed(block)) return;
+    const bpd = defOf(block);
+    const bpart = r.collapsed && bpd && bpd.bgPart ? bpd.bgPart(block, r.startContainer) : null;
+    if (bpart) {   // фон части блока (карточка плюсов или минусов), 1.0.4
+      this.history.commit();
+      for (const n of BG_NAMES) bpart.classList.remove(`ted-bg-${n}`);
+      if (BG_NAMES.includes(name)) bpart.classList.add(`ted-bg-${name}`);
+      this.afterChange({ immediate: true });
+      return;
+    }
+    // блок без строчного оформления (block.json → toolbar.marks: []) красится только целиком
+    const wholeOnly = Array.isArray(((defOf(block) || {}).toolbar || {}).marks) && !defOf(block).toolbar.marks.length;
     const unwrap = (marks) => { if (marks.length) withMarkers(ed, () => marks.forEach((m) => m.replaceWith(...m.childNodes))); };
     const marksIn = (root) => Array.from(root.querySelectorAll('mark[class*="ted-bg-"]'));
     const sameBlock = block === topBlockOf(ed, r.endContainer);
     const text = r.toString();
-    const partial = !r.collapsed && sameBlock && !!text.trim() && text.trim() !== block.textContent.trim();
+    const partial = !wholeOnly && !r.collapsed && sameBlock && !!text.trim() && text.trim() !== block.textContent.trim();
     const startEl = r.startContainer.nodeType === 1 ? r.startContainer : r.startContainer.parentNode;
     const inMark = startEl.closest('mark[class*="ted-bg-"]');
 
@@ -1164,7 +1495,9 @@ export class Editor {
     const ed = this.editable;
     const r = this.isFocused() ? getRange(ed) : null;
     const all = Array.from(ed.children);
-    const idx = (r ? selectedBlocks(ed) : all).map((b) => all.indexOf(b)).filter((i) => i >= 0);
+    // выделен текст — только эти блоки; просто курсор (ничего не выделено) — вся статья: раньше курсор в одном блоке ограничивал
+    // проверку им, и ✨ отвечал «Текст уже в порядке», хотя править было что (сайт texted 27.11, 1.0.4)
+    const idx = (r && !r.collapsed ? selectedBlocks(ed) : all).map((b) => all.indexOf(b)).filter((i) => i >= 0);
     const cfg = this.options.typograf || {};
     registerYo(cfg.yo);
     const protect = protectRegExp(cfg.protect);
@@ -2134,21 +2467,51 @@ export class Editor {
           this.updateState();
           return true;
         }
-        // хвост заголовка после курсора переходит в описание
+        // как в текстовом редакторе — всё после курсора уходит в новый шаг (сайт texted 27.11, 1.0.4; раньше хвост заголовка
+        // приклеивался к описанию: «блокТекст…»):
+        // курсор в конце заголовка — в описание; в начале непустого — пустой шаг перед этим; в середине — новый шаг после:
+        // заголовок — хвост, описание переезжает с ним, у этого шага остаётся начало заголовка и пустое описание
         const tail = doc.createRange();
         tail.setStart(r.startContainer, r.startOffset);
         tail.setEnd(title, title.childNodes.length);
-        const frag = tail.extractContents();
-        if (!title.firstChild) title.appendChild(doc.createElement('br'));
-        if (frag.textContent) {
-          const sep = title.nextSibling;
-          const d = sep && sep.nextSibling;
-          const moved = doc.createTextNode(frag.textContent);
-          if (d && d.nodeType === 3) d.data = frag.textContent + d.data.replace(/​/g, '');
-          else li.insertBefore(moved, d || null);
+        const tailText = tail.cloneContents().textContent.replace(/​/g, '');
+        if (!tailText.trim()) {
+          this.caretToStepDescription(li);
+          this.updateState();
+          return true;
         }
+        const head = doc.createRange();
+        head.setStart(title, 0);
+        head.setEnd(r.startContainer, r.startOffset);
+        if (!head.cloneContents().textContent.replace(/​/g, '').trim()) {
+          li.before(emptyStepItem(doc));
+          normalizeRoot(this.editable);
+          const rr = doc.createRange(); rr.setStart(title, 0); rr.collapse(true);
+          const s0 = doc.getSelection(); s0.removeAllRanges(); s0.addRange(rr);
+          this.afterChange({ immediate: true });
+          return true;
+        }
+        const next = emptyStepItem(doc);
+        const frag = tail.extractContents();
+        next.firstElementChild.replaceChildren(frag);
+        // описание (всё после <br>, кроме вложенного списка) — в новый шаг
+        const sep = title.nextSibling;
+        const nested = li.querySelector(':scope > ul, :scope > ol');
+        if (sep && sep.nodeType === 1 && sep.tagName === 'BR') {
+          const moveDesc = doc.createRange();
+          moveDesc.setStartAfter(sep);
+          if (nested) moveDesc.setEndBefore(nested); else moveDesc.setEnd(li, li.childNodes.length);
+          const desc = moveDesc.extractContents();
+          if (desc.textContent.replace(/​/g, '').trim()) {
+            const zw = next.firstElementChild.nextSibling.nextSibling;
+            next.insertBefore(desc, zw);
+            if (zw && zw.nodeType === 3 && zw.data === ZWSP) zw.remove();
+          }
+        }
+        li.after(next);
         normalizeRoot(this.editable);
-        this.caretToStepDescription(li);
+        const rr = doc.createRange(); rr.setStart(next.firstElementChild, 0); rr.collapse(true);
+        const s1 = doc.getSelection(); s1.removeAllRanges(); s1.addRange(rr);
         this.afterChange({ immediate: true });
         return true;
       }
@@ -2161,7 +2524,7 @@ export class Editor {
         // плитки цифр: текст подписи никогда не переезжает в заголовок другой плитки
         const list = li.parentNode;
         if (titleEmpty && descEmpty) {
-          // пустая последняя плитка + Enter — выход из блока (PRINCIPLES п.5); меньше двух плиток не бывает — тогда плитка остаётся
+          // пустая последняя плитка + Enter — выход из блока, как у списков; меньше двух плиток не бывает — тогда плитка остаётся
           if (li === list.lastElementChild) {
             if (list.children.length > 2) li.remove();
             let p = list.nextElementSibling;
@@ -2211,23 +2574,22 @@ export class Editor {
         return true;
       }
       const next = emptyStepItem(doc);
-      // текст описания после курсора переходит в заголовок нового шага
       const tail = doc.createRange();
       tail.setStart(r.startContainer, r.startOffset);
       tail.setEnd(li, li.childNodes.length);
       const hasNested = li.querySelector(':scope > ul, :scope > ol');
       if (hasNested) tail.setEndBefore(hasNested);
+      // текст описания после курсора переходит в ОПИСАНИЕ нового шага (с оформлением), курсор — в его пустой заголовок.
+      // Раньше хвост становился жирным заголовком, а у пустого описания не оставалось строки — шаги наезжали (сайт 27.11, 1.0.4)
       const frag = tail.extractContents();
-      const text = frag.textContent.replace(/​/g, '');
-      if (text) {
-        const nt = next.firstElementChild;
-        nt.replaceChildren(doc.createTextNode(text));
+      if (frag.textContent.replace(/​/g, '').trim()) {
+        const descStart = next.firstElementChild.nextSibling.nextSibling;   // нулевой пробел пустого описания
+        next.insertBefore(frag, descStart);
+        if (descStart && descStart.nodeType === 3 && descStart.data === ZWSP) descStart.remove();
       }
       li.after(next);
       normalizeRoot(this.editable);
       this.caretToStepTitleEnd(next);
-      const sel = document.getSelection();
-      if (text) { const t = next.firstElementChild.firstChild; const rr = doc.createRange(); rr.setStart(t, 0); rr.collapse(true); sel.removeAllRanges(); sel.addRange(rr); }
       this.afterChange({ immediate: true });
       return true;
     }
@@ -2440,6 +2802,10 @@ export class Editor {
         dropEmpty(block);
         if (frag.textContent || frag.querySelector('img')) p.replaceChildren(frag);
         if (!block.textContent && !block.querySelector('br, img')) block.appendChild(document.createElement('br'));
+        // хвост — тот же текст: цвет текста абзаца уходит с ним (1.0.4); новая пустая строка в конце — чистая (решение 23.11)
+        const tc = tcOfBlock(block);
+        if (tc && p.textContent) p.classList.add(`ted-tc-${tc}`);
+        // курсор в начале абзаца: цвет остаётся у текста, пустая строка выше — чистая (ветка выше)
       }
       block.after(p);
       this.afterChange({ immediate: true, focus: p });

@@ -47,7 +47,7 @@ group('Наборы: что доступно в редакторе', () => {
     ed.focus();
     select(ed, 0, 1);
     ed.updateState();
-    ok(ed.toolbar.colorBtn.hidden, 'нет «Цветного фона»');
+    ok(!ed.toolbar.colorParts().canBgMenu, 'нет «Фона» в меню «Цвет» (цвет текста — есть)');
     ok(!ed.toolbar.mediaBtn.hidden, 'есть «Медиа»');
     ed.toolbar.openMediaMenu();
     const items = [...document.querySelectorAll('.ted-ui-pop .ted-ui-item')].map((n) => n.textContent.trim());
@@ -225,5 +225,27 @@ group('Наборы: право на правку и набор задаёт с�
     eq(ed.mode, 'view');
     eq(menuTypes(ed), 'accordion,p');
     ed.destroy();
+  });
+});
+
+group('Наборы: таблицы из старых статей (28.11)', () => {
+  test('голая <table> и <figure> без класса: в полном наборе — блок «Таблица», в text и mini — строки абзацами, как на сервере', () => {
+    const bare = '<table><tr><th>Тариф</th><th>Цена</th></tr><tr><td>Базовый</td><td><b>990</b> ₽</td></tr></table>';
+    const fig = '<figure><table><tbody><tr><td>x</td><td>y</td></tr></tbody></table><figcaption>Подпись</figcaption></figure>';
+    const flat = (s) => s.replace(/>\s+</g, '><').trim();
+    ok(Ted.clean(fig).startsWith('<figure class="ted-table">') && Ted.clean(fig).includes('<figcaption>Подпись</figcaption>'), 'figure с таблицей — блок «Таблица» с подписью');
+    for (const p of ['text', 'mini']) {
+      eq(flat(Ted.clean(bare, { preset: p })), '<p>Тариф · Цена</p><p>Базовый · <strong>990</strong> ₽</p>', `${p}: голая таблица`);
+      eq(flat(Ted.clean(fig, { preset: p })), '<p>x · y</p><p>Подпись</p>', `${p}: таблица в figure`);
+    }
+    eq(Ted.clean('<figure><img src="/a.png" alt=""><figcaption>Фото</figcaption></figure>').includes('ted-table'), false, 'figure с картинкой таблицей не становится');
+  });
+  test('картинка в наборе без картинок: подпись остаётся абзацем (старая статья и своё изображение), как на сервере', () => {
+    const flat = (s) => s.replace(/>\s+</g, '><').trim();
+    const legacy = '<figure><img src="/uf/a.jpg" alt="Альт"><figcaption>Подпись к фото</figcaption></figure>';
+    const own = '<figure class="ted-media ted-media--image"><img src="/uf/a.jpg" alt="Альт"><figcaption>Своя подпись</figcaption></figure>';
+    eq(flat(Ted.clean(legacy, { preset: 'text' })), '<p>Подпись к фото</p>', 'text: старая картинка — подпись');
+    eq(flat(Ted.clean(own, { preset: 'text' })), '<p>Своя подпись</p>', 'text: своё изображение — подпись');
+    eq(flat(Ted.clean('<figure class="ted-media ted-media--image"><img src="/uf/a.jpg" alt=""></figure>', { preset: 'text' })), '', 'text: картинка без подписи исчезает');
   });
 });

@@ -50,6 +50,11 @@ final class Sanitizer
         'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'colgroup', 'col',
         'dl', 'dt', 'dd', 'details', 'summary', 'address', 'iframe', 'nav',
     ];
+    /** Старые теги оформления → стандартные (как INLINE_MAP в resources/js/core/sanitize.js). */
+    private const INLINE_RENAME = [
+        'b' => 'strong', 'i' => 'em', 'cite' => 'em', 'dfn' => 'em', 'ins' => 'u',
+        'strike' => 's', 'del' => 's', 'kbd' => 'code', 'samp' => 'code', 'tt' => 'code',
+    ];
     /** Теги, которые удаляются вместе с содержимым. */
     private const DROP_WITH_CONTENT = [
         'script', 'style', 'link', 'meta', 'base', 'template', 'noscript', 'object', 'embed', 'applet', 'frame', 'frameset',
@@ -155,6 +160,17 @@ final class Sanitizer
             $tag = strtolower($node->localName);
             if (in_array($tag, self::DROP_WITH_CONTENT, true)) {
                 $parent->removeChild($node);
+                continue;
+            }
+            if (isset(self::INLINE_RENAME[$tag])) {
+                // старое оформление (b, i, strike…) — стандартным тегом, как INLINE_MAP в resources/js/core/sanitize.js:
+                // жирный и курсив из старых статей не теряются (28.11); атрибуты у них не нужны
+                $new = $node->ownerDocument->createElement(self::INLINE_RENAME[$tag]);
+                while ($node->firstChild) {
+                    $new->appendChild($node->firstChild);
+                }
+                $parent->replaceChild($new, $node);
+                self::walk($new, $hosts);
                 continue;
             }
             if (!in_array($tag, self::allowedTags(), true)) {

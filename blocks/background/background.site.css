@@ -8,6 +8,10 @@
   --ted-bg-gray: var(--color-main-gray-lighter, #edf3fa);
   --ted-bg-color1: var(--color-main-color1-lighter, #d2e2f7);
   --ted-bg-color2: var(--color-main-color2-lighter, #e5e5ff);
+  /* состояния (1.0.4): ошибка, предупреждение, успех — светлые ступени states */
+  --ted-bg-error: var(--color-states-error-light, #ffcccc);
+  --ted-bg-alert: var(--color-states-alert-light, #f2f2aa);
+  --ted-bg-success: var(--color-states-success-light, #c3e5c3);
 }
 
 /* Тёмная тема: версии «dark» тех же палитр (на сайте задаются теми же переменными) */
@@ -16,11 +20,18 @@
   --ted-bg-gray: var(--color-main-gray-dark, #4d4d4d);
   --ted-bg-color1: var(--color-main-color1-darker, #104fa6);
   --ted-bg-color2: var(--color-main-color2-darker, #38388c);
+  --ted-bg-error: var(--color-states-error-dark, #cc2929);
+  --ted-bg-alert: var(--color-states-alert-dark, #737300);
+  --ted-bg-success: var(--color-states-success-dark, #0e8c0e);
 }
 
-.ted-content .ted-bg-gray { background: var(--ted-bg-gray); }
-.ted-content .ted-bg-color1 { background: var(--ted-bg-color1); }
-.ted-content .ted-bg-color2 { background: var(--ted-bg-color2); }
+/* --ted-bg — цвет фона этого блока: им же красят свою часть блоки со своим видом (выноска, цифры, содержание, таблица…) */
+.ted-content .ted-bg-gray { --ted-bg: var(--ted-bg-gray); background: var(--ted-bg); }
+.ted-content .ted-bg-color1 { --ted-bg: var(--ted-bg-color1); background: var(--ted-bg); }
+.ted-content .ted-bg-color2 { --ted-bg: var(--ted-bg-color2); background: var(--ted-bg); }
+.ted-content .ted-bg-error { --ted-bg: var(--ted-bg-error); background: var(--ted-bg); }
+.ted-content .ted-bg-alert { --ted-bg: var(--ted-bg-alert); background: var(--ted-bg); }
+.ted-content .ted-bg-success { --ted-bg: var(--ted-bg-success); background: var(--ted-bg); }
 
 /* Блок с подложкой (макет block-background): r24, внутренние отступы 20, расстояние до соседей — снаружи, чтобы подложка его не захватывала */
 :is(.ted-content, .ted-accordion__body, .ted-tabs__panel, .ted-columns__col) > [class*="ted-bg-"] {

@@ -30,3 +30,8 @@
 
 /* английский интерфейс (1.0.2) */
 .ted-ui[lang="en"] .ted-ui-editable div.ted-product[data-tedui-empty] .ted-product__name::before { content: "Choose a product"; }
+/* цвет текста товара (меню «Цвет», 1.0.4) в полях правки: название — ступенью заголовков, цена — цветом; старая цена
+   и её линия остаются серыми (заказчик 28.11: красилась линия, а не цена) */
+.ted-ui-editable div.ted-product[class*="ted-tc-"] .ted-ui-prodfield--name { color: var(--ted-tc-h); }
+.ted-ui-editable div.ted-product[class*="ted-tc-"] .ted-ui-prodfield--now { color: var(--ted-tc); }
+.ted-ui-editable div.ted-product[class*="ted-tc-"] .ted-ui-prodfield--old { color: var(--ui-color-text-icon-gray-medium); text-decoration-color: currentColor; }

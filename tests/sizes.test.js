@@ -353,11 +353,15 @@ group('Плавность', () => {
     const ed = make('<p>Текст</p>');
     ed.updatePlaceholders();
     ok(!ed.addBlock.classList.contains('is-hidden'), 'есть текст — строка видна');
-    ok(getComputedStyle(ed.addBlock).transitionProperty.includes('max-height'));
+    ok(getComputedStyle(ed.addBlock).transitionProperty.includes('opacity'));
+    const h0 = ed.addBlock.getBoundingClientRect().height;
     ed.setHTML('', { silent: true });
     ed.updatePlaceholders();
-    ok(ed.addBlock.classList.contains('is-hidden'), 'пусто — строка свёрнута');
+    ok(ed.addBlock.classList.contains('is-hidden'), 'пусто — строка скрыта');
     eq(ed.addBlock.getAttribute('aria-hidden'), 'true');
+    // высота та же: при наборе в пустом последнем абзаце страница не прыгает (заказчик 27.11 — «внизу трясётся»)
+    ed.addBlock.getAnimations().forEach((a) => a.finish());
+    eq(Math.round(ed.addBlock.getBoundingClientRect().height), Math.round(h0), 'место под строкой остаётся');
   });
   test('всплывающие окна и меню блоков появляются с анимацией', () => {
     const ed = make('<p>а</p>');

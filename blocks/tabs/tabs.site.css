@@ -31,3 +31,7 @@
 .ted-content .ted-tabs__bar[data-ted-glide] > .ted-tabs__ink { transition: transform 560ms var(--ted-ease-spring, var(--ted-ease-out, ease)); }
 .ted-content .ted-tabs__bar:has(> .ted-tabs__ink) > .ted-tabs__tab[aria-selected="true"] { border-bottom-color: transparent; }
 @media (prefers-reduced-motion: reduce) { .ted-content .ted-tabs__panel:not([hidden]) { animation: none; } .ted-content .ted-tabs__bar[data-ted-glide] > .ted-tabs__ink { transition: none; } }
+/* Цвет текста (1.0.4): весь блок — все названия ступенью заголовков; одна вкладка (курсор в её названии) — <mark> */
+.ted-content .ted-tabs[class*="ted-tc-"] :is(.ted-tabs__tab, .ted-tabs__title),
+.ted-content :is(.ted-tabs__tab, .ted-tabs__title) mark[class*="ted-tc-"][class*="ted-tc-"] { color: var(--ted-tc-h); }
+.ted-content .ted-tabs[class*="ted-tc-"] .ted-tabs__body { color: var(--ted-c-text); }

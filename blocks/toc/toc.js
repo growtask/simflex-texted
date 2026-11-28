@@ -56,7 +56,14 @@ export function cleanToc(node, doc, idOk) {
   }).filter((it) => it.title && tocAnchorOk(it.href));
   const toc = makeToc(doc, title ? title.textContent.replace(/\s+/g, ' ').trim() : '', items);
   if (idOk && idOk(node.id)) toc.id = node.id;
+  const bg = tocBg(node);   // цветной фон панели (меню «Цвет» → «Фон», 27.11)
+  if (bg) toc.classList.add(bg);
   return toc;
+}
+
+/** Класс цветного фона содержания: ted-bg-gray / color1 / color2 или ''. */
+function tocBg(node) {
+  return [...(node.classList || [])].find((c) => /^ted-bg-(gray|color1|color2)$/.test(c)) || '';
 }
 
 /** Правка: полоса, панель, заголовок одной строкой, главы — нередактируемые ссылки. */
@@ -66,7 +73,7 @@ export function normalizeToc(toc, doc) {
   let panel = toc.querySelector(':scope > .ted-toc__panel');
   if (!progress || !panel) {
     const fresh = cleanToc(toc, doc);
-    if (toc.id) fresh.id = toc.id;
+    if (toc.id) fresh.id = toc.id;   // фон cleanToc переносит сам
     toc.replaceWith(fresh);
     return true;
   }
@@ -93,7 +100,8 @@ export function serializeToc(toc) {
     if (!tocAnchorOk(href)) return '';
     return `<li><a href="${esc(href)}">${esc(a.textContent.trim())}</a></li>`;
   }).filter(Boolean);
-  return `<nav class="ted-toc"${id}><div class="ted-toc__progress"><div class="ted-toc__bar"></div></div><div class="ted-toc__panel"><p class="ted-toc__title">${esc(title ? title.textContent.trim() : '')}</p><ul class="ted-toc__list">${items.join('')}</ul></div></nav>`;
+  const bg = tocBg(toc);
+  return `<nav class="ted-toc${bg ? ` ${bg}` : ''}"${id}><div class="ted-toc__progress"><div class="ted-toc__bar"></div></div><div class="ted-toc__panel"><p class="ted-toc__title">${esc(title ? title.textContent.trim() : '')}</p><ul class="ted-toc__list">${items.join('')}</ul></div></nav>`;
 }
 
 /** Якоря документа для выбора в окне главы: [{ id, text }]. */
@@ -105,6 +113,7 @@ export function documentAnchors(root) {
 
 
 registerBlock({
+  defaultBg: 'gray',   // своя серая плашка — в меню «Цвет» → «Фон» по умолчанию отмечен «Стандартный» (заказчик 28.11)
   toMarkdown: () => '',   // Ted.toMarkdown (22.11): содержание собирается заново по заголовкам
   ...TOC_BLOCK,
   match: (el) => el.classList.contains('ted-toc'),   // <nav> на сайте, <div> в правке
@@ -115,7 +124,6 @@ registerBlock({
   serialize: serializeToc,
   normalize: normalizeToc,   // полоса, панель, заголовок одной строкой, главы — ссылки
   canAlign: () => false,
-  canBg: () => false,
   editorUi: (editor) => new TocUI(editor),
   editorUiName: 'toc',
   /** «Заголовок» в пустом заголовке (макет block-navigation). */
