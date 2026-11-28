@@ -1,4 +1,4 @@
-/*! Ted 1.0.4 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-28 06:36 */
+/*! Ted 1.0.4 — блочный редактор SimflexCMS, лицензия MIT. Собрано 2026-11-28 06:49 */
 (function () {
 'use strict';
 
@@ -8464,6 +8464,13 @@ function keepCellInline(el) {
  * тогда она остаётся «сырым» блоком, как раньше.
  * cleanInline(src, dst) — строчная очистка из sanitize.js (передаётся, чтобы не было круговой зависимости модулей).
  */
+/** <figure> без класса, в которой только таблица и подпись (старые статьи, вставка со страниц). */
+function isPlainTableFigure(el) {
+  if (!el || el.tagName !== 'FIGURE' || el.className) return false;
+  const kids = [...el.children];
+  return kids.filter((k) => k.tagName === 'TABLE').length === 1 && kids.every((k) => k.tagName === 'TABLE' || k.tagName === 'FIGCAPTION');
+}
+
 function cleanTableNode(node, doc, cleanInline, idOk) {
   const ours = node.tagName === 'FIGURE' && node.classList.contains('ted-table');
   const table = node.tagName === 'TABLE' ? node : node.querySelector('table');
@@ -8508,7 +8515,7 @@ function cleanTableNode(node, doc, cleanInline, idOk) {
   out.appendChild(tbody);
   wrap.appendChild(out);
   fig.appendChild(wrap);
-  const capSrc = (ours ? node.querySelector(':scope > figcaption') : null) || table.querySelector(':scope > caption');
+  const capSrc = (node.tagName === 'FIGURE' ? node.querySelector(':scope > figcaption') : null) || table.querySelector(':scope > caption');
   if (capSrc) {
     const cap = doc.createElement('figcaption');
     cleanInline(capSrc, cap);
@@ -8748,7 +8755,8 @@ registerBlock({
   ...TABLE_BLOCK,
   match: (el) => isTableBlock(el),
   /** Простая таблица со страницы или из Word (без объединённых ячеек, до 10 столбцов и 100 строк) — тоже блок «Таблица». */
-  adopt: (el) => el.tagName === 'TABLE',
+  // …и таблица в <figure> без класса (со своей подписью figcaption) — из старых статей; иначе в наборе без таблиц пропадала (28.11)
+  adopt: (el) => el.tagName === 'TABLE' || isPlainTableFigure(el),
   /** Макет block-table: новая таблица 3 × 3, шапка включена; курсор — в первой ячейке. */
   create: (doc) => { const fig = createTable(doc, 3, 3, true); normalizeTableBlock(fig, doc); return { el: fig, focus: fig.querySelector('th, td') }; },
   /** Наш блок или простая таблица → блок; сложная — false: остаётся «сырым» HTML (очистка ядра). */

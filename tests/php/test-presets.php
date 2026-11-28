@@ -100,6 +100,18 @@ foreach ([
     $ok(!preg_match('/<(iframe|table|video|details|figure)\b|ted-bg-/', $got), 'text: вложенный запрещённый блок не сохраняется: ' . $forgedInner, $got);
     $ok($c->clean($got, 'text') === $got, 'text: повторная очистка вложенного — то же', $got);
 }
+// таблицы из старых статей (28.11): голая <table> и <figure> без класса в наборе без таблиц — строки абзацами
+// (как в браузере), а не пропажа; старые b, i, strike — стандартными тегами
+foreach ([
+    '<table><tr><th>Тариф</th><th>Цена</th></tr><tr><td>Базовый</td><td><b>990</b> ₽</td></tr></table>' => '<p>Тариф · Цена</p><p>Базовый · <strong>990</strong> ₽</p>',
+    '<table><caption>Цены</caption><thead><tr><th>A</th><th>B</th></tr></thead><tfoot><tr><td>Итог</td><td>3</td></tr></tfoot><tbody><tr><td>1</td><td>2</td></tr></tbody></table>' => '<p>A · B</p><p>1 · 2</p><p>Итог · 3</p><p>Цены</p>',
+    '<figure><table><tbody><tr><td>x</td><td>y</td></tr></tbody></table><figcaption>Подпись</figcaption></figure>' => '<p>x · y</p><p>Подпись</p>',
+] as $legacy => $want) {
+    foreach (['text', 'mini'] as $p) {
+        $ok($c->clean($legacy, $p) === $want, "{$p}: старая таблица — строки абзацами: " . $legacy, $c->clean($legacy, $p));
+    }
+}
+$ok($c->clean('<p><b>a</b> <i>b</i> <strike>c</strike> <del>d</del> <kbd>e</kbd> <b onclick="x()">f</b></p>', 'full') === '<p><strong>a</strong> <em>b</em> <s>c</s> <s>d</s> <code>e</code> <strong>f</strong></p>', 'старое оформление b, i, strike, del, kbd — стандартными тегами, без атрибутов');
 $keep = '<figure class="ted-iframe"><iframe src="https://example.com/"></iframe></figure>';
 $ok(str_contains($c->clean($keep, 'full'), '<iframe'), 'full: iFrame остаётся');
 $ok(str_contains(Config::fromArray(['presets' => ['acc' => ['blocks' => ['accordion']]]])->clean('<div class="ted-accordion"><details class="ted-accordion__item"><summary class="ted-accordion__q">q</summary><div class="ted-accordion__body"><p>a</p></div></details></div>', 'acc'), '<details'), 'набор с аккордеоном: свой details остаётся');

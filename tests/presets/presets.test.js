@@ -227,3 +227,17 @@ group('Наборы: право на правку и набор задаёт с�
     ed.destroy();
   });
 });
+
+group('Наборы: таблицы из старых статей (28.11)', () => {
+  test('голая <table> и <figure> без класса: в полном наборе — блок «Таблица», в text и mini — строки абзацами, как на сервере', () => {
+    const bare = '<table><tr><th>Тариф</th><th>Цена</th></tr><tr><td>Базовый</td><td><b>990</b> ₽</td></tr></table>';
+    const fig = '<figure><table><tbody><tr><td>x</td><td>y</td></tr></tbody></table><figcaption>Подпись</figcaption></figure>';
+    const flat = (s) => s.replace(/>\s+</g, '><').trim();
+    ok(Ted.clean(fig).startsWith('<figure class="ted-table">') && Ted.clean(fig).includes('<figcaption>Подпись</figcaption>'), 'figure с таблицей — блок «Таблица» с подписью');
+    for (const p of ['text', 'mini']) {
+      eq(flat(Ted.clean(bare, { preset: p })), '<p>Тариф · Цена</p><p>Базовый · <strong>990</strong> ₽</p>', `${p}: голая таблица`);
+      eq(flat(Ted.clean(fig, { preset: p })), '<p>x · y</p><p>Подпись</p>', `${p}: таблица в figure`);
+    }
+    eq(Ted.clean('<figure><img src="/a.png" alt=""><figcaption>Фото</figcaption></figure>').includes('ted-table'), false, 'figure с картинкой таблицей не становится');
+  });
+});
